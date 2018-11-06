@@ -1,0 +1,28 @@
+/**
+size
+ */
+@totalHeight: 745px;
+@bannerHeight: 225px;
+@overviewHeight: @totalHeight - @bannerHeight;
+@toolboxHeight: 60px;
+@blackboardHeight: @totalHeight - @toolboxHeight;
+
+/**
+border
+ */
+@borderShadow: 0 2px 4px 0 rgba(0, 0, 0, 0.12), 0 0 6px 0 rgba(0, 0, 0, 0.04);
+@border: 1px solid #dcdfe6;
+@borderRadius: 5px;
+
+/**
+color
+ */
+@hoverColor: #FFCAAA;
+
+.area-wrapper() {
+  border: @border;
+  box-shadow: @borderShadow;
+  margin: 10px;
+  background-color: #FFF;
+  border-radius: @borderRadius;
+}

@@ -1,0 +1,49 @@
+@import '../../base/base.less';
+@toolboxSize: @toolboxHeight;
+@borderSize: 2px;
+@marginSize: 3px;
+@buttonSize: @toolboxSize - 2 * @marginSize;
+
+.toolbox-wrapper {
+  .area-wrapper();
+  width: 840px;
+  height: @toolboxSize;
+  text-align: left;
+}
+
+.tool-wrapper {
+  position: relative;
+  display: inline-block;
+  height: @buttonSize;
+  width: @buttonSize;
+  margin: @marginSize;
+  //border: 1px solid #dcdfe6;
+
+  button {
+    height: inherit;
+    width: inherit;
+    background-color: transparent;
+    border: 2px solid #eee;
+    //box-shadow: @borderShadow;
+    cursor: pointer;
+    outline: none;
+
+    &:hover {
+      border-color: @hoverColor;
+    }
+    &:focus {
+      border-color: @hoverColor;
+      background-color: #FFCAAA20;
+    }
+  }
+
+  .button {
+
+    &-truncate {
+      //background-color: aquamarine;
+      background-size: cover;
+      background-image: url("../../assets/buttons/truncate.png");
+    }
+  }
+
+}
