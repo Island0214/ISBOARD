@@ -3,12 +3,16 @@
 @borderSize: 2px;
 @marginSize: 3px;
 @buttonSize: @toolboxSize - 2 * @marginSize;
+@marginLeft: 12px;
 
 .toolbox-wrapper {
   .area-wrapper();
   width: 840px;
   height: @toolboxSize;
-  text-align: left;
+  //text-align: left;
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .tool-wrapper {
@@ -16,7 +20,7 @@
   display: inline-block;
   height: @buttonSize;
   width: @buttonSize;
-  margin: @marginSize;
+  margin: @marginSize @marginLeft;
   //border: 1px solid #dcdfe6;
 
   button {
@@ -24,6 +28,7 @@
     width: inherit;
     background-color: transparent;
     border: 2px solid #eee;
+    border-radius: 5px;
     //box-shadow: @borderShadow;
     cursor: pointer;
     outline: none;
@@ -31,19 +36,125 @@
     &:hover {
       border-color: @hoverColor;
     }
-    &:focus {
-      border-color: @hoverColor;
-      background-color: #FFCAAA20;
+  }
+
+  /deep/ .el-color-picker__trigger {
+    height: @buttonSize;
+    width: @buttonSize;
+    border: 2px solid #eee;
+    border-radius: 5px;
+    //margin: @marginSize @marginLeft;
+    position: absolute;
+    margin-top: -10px;
+    margin-left: -26px;
+    //margin: @marginSize;
+  }
+
+  /deep/ .el-color-picker__trigger:hover {
+    border-color: @hoverColor;
+  }
+
+  .switch-button {
+    width:0;
+    height:0;
+    border-width: 0 0 20px 20px;
+    border-style:solid;
+    border-color:transparent transparent #759FD2 transparent;
+    position:absolute;
+    right: 0;
+    bottom: 0;
+    cursor: pointer;
+    //margin-left: 25px;
+    //margin-top: 31px;
+    img {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      left: -12px;
+      top: 8px;
     }
   }
 
   .button {
-
     &-truncate {
-      //background-color: aquamarine;
       background-size: cover;
       background-image: url("../../assets/buttons/truncate.png");
     }
-  }
 
+    &-undo {
+      background-size: cover;
+      background-image: url("../../assets/buttons/undo.png");
+    }
+
+    &-redo {
+      background-size: cover;
+      background-image: url("../../assets/buttons/redo.png");
+    }
+
+    &-pen {
+      background-size: cover;
+      background-image: url("../../assets/buttons/pen.png");
+    }
+
+    &-eraser {
+      background-size: cover;
+      background-image: url("../../assets/buttons/eraser.png");
+    }
+
+    &-line {
+      background-size: cover;
+      background-image: url("../../assets/buttons/line.png");
+    }
+
+    &-line-solid {
+      background-size: cover;
+      background-image: url("../../assets/buttons/dotted.png");
+    }
+
+    &-rectangle {
+      background-size: cover;
+      background-image: url("../../assets/buttons/rectangle.png");
+    }
+
+    &-rectangle-solid {
+      background-size: cover;
+      background-image: url("../../assets/buttons/rectangle-solid.png");
+    }
+
+    &-circle {
+      background-size: cover;
+      background-image: url("../../assets/buttons/circle.png");
+    }
+
+    &-circle-solid {
+      background-size: cover;
+      background-image: url("../../assets/buttons/circle-solid.png");
+    }
+
+    &-triangle {
+      background-size: cover;
+      background-image: url("../../assets/buttons/triangle.png");
+    }
+
+    &-triangle-solid {
+      background-size: cover;
+      background-image: url("../../assets/buttons/triangle-solid.png");
+    }
+  }
+}
+
+.button-selected {
+  button {
+    border-color: @hoverColor;
+    background-color: #FFCAAA20;
+  }
+}
+
+.tool-split {
+  position: relative;
+  display: inline-block;
+  height: 44px;
+  width: 5px;
+  margin: 0 5px;
+  background-color: #dcdfe6;
 }
