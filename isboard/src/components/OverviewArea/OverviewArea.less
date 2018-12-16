@@ -5,4 +5,73 @@
   width: 300px;
   height: @overviewHeight;
   margin-top: 18px;
+  text-align: center;
+
+  .split-line {
+    position: relative;
+    display: inline-block;
+    border: 1px solid #eee;
+    height: 0;
+    width: 90%;
+    margin-top: 10px;
+
+    p {
+      position: relative;
+      //width: 100%;
+      display: inline-block;
+      text-align: center;
+      width: auto;
+      margin: 0;
+      background: #FFFFFF;
+      color: #999;
+      padding: 0 5px;
+      font-size: 12px;
+      top: -12px;
+      font-weight: 600;
+    }
+  }
+
+  .notification-area {
+    position: relative;
+    display: inline-block;
+    height: 0;
+    margin-top: 10px;
+    text-align: right;
+    width: 100%;
+
+    p {
+      position: relative;
+      //width: 100%;
+      display: inline-block;
+      text-align: center;
+      width: auto;
+      margin: 0;
+      background: #FFFFFF;
+      color: #d7d7d7;
+      padding: 0 5px;
+      font-size: 10px;
+      top: -12px;
+      font-weight: 600;
+    }
+  }
+
+  .overviews-area {
+    position: relative;
+    display: inline-block;
+    width: 290px;
+    //background: #dcdfe6;
+    height: 400px;
+    overflow-y: scroll;
+    //border: @border;
+    //box-shadow: @borderShadow;
+    //border-radius: 10px;
+    .overview-area {
+      border: 2px solid #eeeeee;
+      width: 280px;
+      height: 210px;
+      border-radius: 10px;
+      margin: 3px;
+      margin-bottom: 10px;
+    }
+  }
 }

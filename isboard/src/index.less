@@ -1,3 +1,5 @@
+@import './base/base.less';
+
 body {
   margin: 0;
   background-color: #eee;
@@ -6,6 +8,19 @@ body {
 }
 
 
-div {
+.el-button {
+  border-radius: 50px !important;
+  width: 220px;
+  border: 2px solid @hoverColor !important;
+  color: @themeColor !important;
+  font-weight: 700 !important;
+}
 
+.el-button:hover {
+  background-color: #FFCAAA20 !important;
+  color: @themeColor !important;
+}
+
+.el-button:focus {
+  background-color: #FFCAAA20 !important;
 }

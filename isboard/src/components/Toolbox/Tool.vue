@@ -39,9 +39,9 @@
 
         private switchType() {
             if (this.curType.includes('solid')) {
-                this.curType = this.curType.split('-')[0]
+                this.curType = this.curType.split('-')[0];
             } else {
-                this.curType += '-solid'
+                this.curType += '-solid';
             }
         }
 
