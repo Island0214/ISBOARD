@@ -5,6 +5,7 @@ import store from './store';
 import './index.less';
 import Element from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import './element-variables.scss';
 
 Vue.config.productionTip = false;
 Vue.use(Element);
