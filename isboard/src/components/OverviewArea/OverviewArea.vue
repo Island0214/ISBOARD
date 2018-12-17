@@ -20,7 +20,7 @@
 
 <script lang="ts">
     import {Component, Vue} from 'vue-property-decorator';
-    import Overviews from './Overviews.vue'
+    import Overviews from './Overviews.vue';
 
     @Component({
         components: {

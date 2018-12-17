@@ -1,5 +1,11 @@
 <template>
     <div class="blackboard-wrapper">
+        <div class="canvas-wrapper">
+            <canvas id="blackboard-canvas"></canvas>
+        </div>
+        <div class="save-button-wrapper">
+            <el-button disabled>保&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+        </div>
     </div>
 </template>
 

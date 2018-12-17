@@ -1,4 +1,5 @@
 @import '../../base/base.less';
+@loginHeight: 60px;
 
 .banner-wrapper {
   .area-wrapper();
@@ -6,8 +7,33 @@
   height: @bannerHeight;
   border-radius: 10px;
   margin: 10px;
+  position: relative;
+
   img {
     width: 100%;
     border-radius: 10px;
+  }
+
+  .login-area {
+    position: absolute;
+    width: 100%;
+    height: @loginHeight;
+    //background-color: #dcdfe6;
+    bottom: 0;
+    text-align: center;
+
+    a {
+      line-height: @loginHeight;
+      color: #FFFFFF;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    a:hover {
+      text-decoration: none;
+      color: @hoverColor;
+      border-bottom: 2px solid #F3A576;
+    }
   }
 }
