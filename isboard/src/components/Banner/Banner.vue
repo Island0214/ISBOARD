@@ -6,33 +6,41 @@
             &nbsp;&nbsp;|&nbsp;&nbsp;
             <a @click="openLogInDialog('log')">Log In</a>
             &nbsp;&nbsp;|&nbsp;&nbsp;
-            <a>Help</a>
+            <a @click="showHelp = true">Help</a>
         </div>
         <log-dialog v-model="logInStatus"></log-dialog>
+        <help-dialog v-model="showHelp"></help-dialog>
     </div>
 </template>
 
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
     import LogDialog from '../LogDialog/LogDialog.vue';
+    import HelpDialog from '../HelpDialog/HelpDialog.vue';
 
     @Component({
-        components: {LogDialog},
+        components: {
+            LogDialog,
+            HelpDialog,
+        },
     })
     export default class Banner extends Vue {
         private logInStatus: object = {
-            status: false,
             type: 'sign',
+            status: false,
         };
+
+        private showHelp: boolean = true;
 
         @Watch('logInStatus', {deep: true})
         private changeLogIn(newVal: boolean) {
-            console.log(newVal)
         }
 
         private openLogInDialog(type: string) {
-            this.logInStatus.type = type;
-            this.logInStatus.status = true;
+            this.logInStatus = {
+                type: {type},
+                status: true,
+            };
         }
 
 

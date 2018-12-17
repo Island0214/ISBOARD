@@ -35,7 +35,8 @@
     @Component({})
     export default class LogDialog extends Vue {
         @Prop()
-        @Model('change') dialogVisible: object;
+        @Model('change')
+        private dialogVisible!: {type: string, statue: boolean};
 
         private username: string = '';
         private password: string = '';
@@ -49,8 +50,9 @@
         }
 
         private changeType(type: string) {
+            const tar = type;
             this.$emit('change', {
-                type: type,
+                type: tar,
                 status: true,
             });
         }
