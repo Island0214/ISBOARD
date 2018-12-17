@@ -30,7 +30,7 @@
             status: false,
         };
 
-        private showHelp: boolean = true;
+        private showHelp: boolean = false;
 
         @Watch('logInStatus', {deep: true})
         private changeLogIn(newVal: boolean) {

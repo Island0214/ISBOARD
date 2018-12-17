@@ -1,10 +1,10 @@
 <template>
     <div class="blackboard-wrapper">
-        <div class="canvas-wrapper">
-            <canvas id="blackboard-canvas"></canvas>
+        <div class="canvas-wrapper" >
+            <canvas id="blackboard-canvas" width="800" height="600"></canvas>
         </div>
         <div class="save-button-wrapper">
-            <el-button disabled>保&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            <el-button disabled class="my-button">保&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
         </div>
     </div>
 </template>

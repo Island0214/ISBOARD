@@ -1,6 +1,6 @@
 <template>
     <div class="overview-area-wrapper">
-        <el-button style="margin: 10px 0;">新建黑板</el-button>
+        <el-button style="margin: 10px 0;" class="my-button">新建黑板</el-button>
 
         <div class="split-line">
             <p>已保存黑板</p>
