@@ -38,7 +38,7 @@
 
         private openLogInDialog(type: string) {
             this.logInStatus = {
-                type: {type},
+                type,
                 status: true,
             };
         }

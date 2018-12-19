@@ -15,11 +15,11 @@
             <span @mouseenter="pasVisible = true" @mouseleave="pasVisible = false"></span>
         </div>
 
-        <el-checkbox v-if="dialogVisible.type === 'log'">Remember me</el-checkbox>
+        <el-checkbox v-if="dialogVisible.type === 'log'" v-model="remember">Remember me</el-checkbox>
         <div v-else style="height: 49px;"></div>
 
         <span slot="footer" class="dialog-footer" v-if="dialogVisible.type === 'log'">
-            <el-button type="primary" @click="closeDialog" class="my-button">Log In</el-button>
+            <el-button type="primary" @click="logIn" class="my-button">Log In</el-button>
             <p>Don't have an account? <span @click="changeType('sign')">Sign Up</span></p>
         </span>
         <span slot="footer" class="dialog-footer" v-else>
@@ -30,7 +30,9 @@
 </template>
 
 <script lang="ts">
-    import {Component, Model, Prop, Vue} from 'vue-property-decorator';
+    import {Component, Emit, Model, Prop, Vue} from 'vue-property-decorator';
+    import {UserLoginPayload} from '../../store';
+    import {Action, Getter, State} from 'vuex-class';
 
     @Component({})
     export default class LogDialog extends Vue {
@@ -40,21 +42,40 @@
 
         private username: string = '';
         private password: string = '';
+        private remember: boolean = false;
         private pasVisible: boolean = false;
 
+        @Getter('logUser') logUser!: string;
+        @Action('logInAction') logInAction!: any;
+
+        @Emit('change')
         private closeDialog() {
-            this.$emit('change', {
-                type: 'log',
+            return {
+                type: this.dialogVisible.type,
                 status: false,
-            });
+            };
         }
 
+        @Emit('change')
         private changeType(type: string) {
-            const tar = type;
-            this.$emit('change', {
-                type: tar,
+            return {
+                type,
                 status: true,
-            });
+            };
+        }
+
+        private logIn() {
+            console.log(this.logUser)
+            const userLoginPayload: UserLoginPayload = {
+                username: this.username,
+                password: this.password,
+                remember: this.remember,
+            };
+            this.logInAction(userLoginPayload);
+        }
+
+        private mounted() {
+            console.log(this.logUser)
         }
     }
 </script>

@@ -1,25 +1,25 @@
 import { Commit } from 'vuex';
 import * as types from '../mutation-types';
-
-interface User {
-    username: string;
-    password: string;
-}
+import { UserLoginPayload } from '../index';
 
 export interface State {
-    user: User;
+    logUser: string;
 }
 
 const initState: State = {
-    user: {username: '', password: ''},
+    logUser: '',
 };
 
 // getters
 const getters = {
+    logUser: (state: State) => state.logUser,
 };
 
 // actions
 const actions = {
+    logInAction(context: { commit: Commit; state: State }, user: UserLoginPayload) {
+        console.log(user);
+    },
 };
 
 // mutations
