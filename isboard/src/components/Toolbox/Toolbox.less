@@ -2,8 +2,9 @@
 @toolboxSize: @toolboxHeight;
 @borderSize: 2px;
 @marginSize: 3px;
-@buttonSize: @toolboxSize - 2 * @marginSize;
-@marginLeft: 12px;
+@buttonSize: @toolboxSize - 2 * @marginSize - 10px;
+@marginLeft: 8px;
+@thicknessSize: @buttonSize - 10px;
 
 .toolbox-wrapper {
   .area-wrapper();
@@ -23,6 +24,14 @@
   margin: @marginSize @marginLeft;
   //border: 1px solid #dcdfe6;
 
+  p {
+    margin: 0;
+    font-size: 8px;
+    color: #666;
+    padding: 0;
+    margin-top: -4px;
+  }
+
   button {
     height: inherit;
     width: inherit;
@@ -35,6 +44,33 @@
 
     &:hover {
       border-color: @hoverColor;
+    }
+  }
+
+  a span {
+    position: relative;
+    display: inline-block;
+    height: @buttonSize - 4px;
+    width: @buttonSize - 4px;
+    background-color: transparent;
+    border: 2px solid #eee;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    top: 2px;
+    margin: -2px;
+
+    &:hover {
+      border-color: @hoverColor;
+    }
+
+    a {
+      height: 5px;
+      background-color: #759FD2;
+      position: absolute;
+      width: @buttonSize - 14px;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
   }
 
@@ -153,8 +189,12 @@
 .tool-split {
   position: relative;
   display: inline-block;
-  height: 44px;
+  height: 60px;
   width: 5px;
-  margin: 0 5px;
+  margin: 0px 5px;
   background-color: #dcdfe6;
+}
+
+.thickness-slider-wrapper {
+  position: absolute;
 }

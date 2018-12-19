@@ -1,10 +1,13 @@
 <template>
-    <div class="toolbox-wrapper">
-        <div  v-for="tool in toolList" style="position: relative; display: inline-block;" @click="clickTool(tool.index)">
-            <tool-split v-if="tool.type === 'split'"></tool-split>
-            <tool v-else :type="tool.type" :name="tool.name" :class="{'button-selected':currentSelect === tool.index}"></tool>
+    <div>
+        <div class="toolbox-wrapper">
+            <div  v-for="tool in toolList" style="position: relative; display: inline-block;" @click="clickTool(tool.index)">
+                <tool-split v-if="tool.type === 'split'"></tool-split>
+                <tool v-else :type="tool.type" :name="tool.name" :class="{'button-selected':currentSelect === tool.index}"></tool>
+            </div>
         </div>
     </div>
+
 </template>
 
 <script lang="ts">
@@ -51,6 +54,10 @@
             type: 'split',
         }, {
             type: 'color',
+            name: 'color',
+        }, {
+            type: 'thickness',
+            name: 'thickness',
         }, {
             type: 'split',
         }, {

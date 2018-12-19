@@ -45,8 +45,8 @@
         private remember: boolean = false;
         private pasVisible: boolean = false;
 
-        @Getter('logUser') logUser!: string;
-        @Action('logInAction') logInAction!: any;
+        @Getter('logUser') private logUser!: string;
+        @Action('logInAction') private logInAction!: any;
 
         @Emit('change')
         private closeDialog() {
@@ -65,7 +65,6 @@
         }
 
         private logIn() {
-            console.log(this.logUser)
             const userLoginPayload: UserLoginPayload = {
                 username: this.username,
                 password: this.password,
@@ -75,7 +74,6 @@
         }
 
         private mounted() {
-            console.log(this.logUser)
         }
     }
 </script>

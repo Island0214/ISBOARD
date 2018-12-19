@@ -1,15 +1,34 @@
 <template>
-    <div class="tool-wrapper">
-        <div class="switch-button" v-if="type === 'tool-selector'" @click="switchType">
-            <img src="../../assets/buttons/switch.png"/>
-        </div>
-        <button @click="clickButton" :class="'button-' + curType" v-if="type.startsWith('tool')">
-            <div class="img-wrapper"></div>
-        </button>
+    <div>
+        <div class="tool-wrapper">
+            <div class="switch-button" v-if="type === 'tool-selector'" @click="switchType">
+                <img src="../../assets/buttons/switch.png"/>
+            </div>
+            <button @click="clickButton" :class="'button-' + curType" v-if="type.startsWith('tool')">
+                <div class="img-wrapper"></div>
+            </button>
 
-        <!--<div v-if="type === 'color'">-->
-        <el-color-picker v-model="color" v-if="type === 'color'" :predefine="predefineColors"></el-color-picker>
-        <!--</div>-->
+            <!-- color -->
+            <el-color-picker v-model="color" v-if="type === 'color'" :predefine="predefineColors"></el-color-picker>
+
+            <!--thickness-->
+            <el-popover
+                    placement="bottom"
+                    width="200"
+                    trigger="click"
+                    v-if="type === 'thickness'" >
+                <!--<a slot="reference"></a>-->
+                <!--<a slot="reference">click 激活</a>-->
+                <div class="block">
+                    <el-slider v-model="thickness" :min="1" :max="20"></el-slider>
+                </div>
+                <a slot="reference"><span><a :style="thicknessHeight"></a></span></a>
+
+            </el-popover>
+
+
+            <p v-if="type !== 'split'">{{ name }}</p>
+        </div>
     </div>
 </template>
 
@@ -22,6 +41,7 @@
 
         private color: string = '#759FD2';
         private curType: string = this.name;
+        private thickness: number = 5;
 
         private predefineColors: string[] = [
             '#ff4500',
@@ -32,6 +52,12 @@
             '#759FD2',
             '#1e90ff',
             '#c71585'];
+
+        get thicknessHeight () {
+            return {
+                height: this.thickness + 'px',
+            };
+        }
 
         @Watch('color', {deep: true})
         private watchCount(newVal: string) {
