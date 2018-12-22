@@ -4,6 +4,7 @@ import actions from './actions';
 import getters from './getters';
 import mutations from './mutations';
 import user, { State as UserState } from './modules/user';
+import canvas, { State as CanvasState } from './modules/canvas';
 
 Vue.use(Vuex);
 
@@ -13,6 +14,7 @@ export default new Vuex.Store({
     mutations,
     modules: {
         user,
+        canvas,
     },
 });
 
@@ -23,6 +25,7 @@ export interface ActionContextBasic {
 
 export interface State {
     user: UserState;
+    canvas: CanvasState;
 }
 
 export interface UserLoginPayload {

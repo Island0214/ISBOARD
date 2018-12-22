@@ -72,9 +72,6 @@
             };
             this.logInAction(userLoginPayload);
         }
-
-        private mounted() {
-        }
     }
 </script>
 

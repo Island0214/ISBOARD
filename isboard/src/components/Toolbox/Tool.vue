@@ -4,7 +4,7 @@
             <div class="switch-button" v-if="type === 'tool-selector'" @click="switchType">
                 <img src="../../assets/buttons/switch.png"/>
             </div>
-            <button @click="clickButton" :class="'button-' + curType" v-if="type.startsWith('tool')">
+            <button :class="'button-' + curType" v-if="type.startsWith('tool')">
                 <div class="img-wrapper"></div>
             </button>
 
@@ -17,8 +17,6 @@
                     width="200"
                     trigger="click"
                     v-if="type === 'thickness'" >
-                <!--<a slot="reference"></a>-->
-                <!--<a slot="reference">click 激活</a>-->
                 <div class="block">
                     <el-slider v-model="thickness" :min="1" :max="20"></el-slider>
                 </div>
@@ -34,10 +32,16 @@
 
 <script lang="ts">
     import {Component, Model, Prop, Vue, Watch} from 'vue-property-decorator';
+    import * as types from '../../store/mutation-types';
+    import {Mutation} from 'vuex-class';
+
     @Component({})
     export default class Tool extends Vue {
         @Prop(String) private type!: string;
         @Prop(String) private name!: string;
+        @Mutation(types.SET_COLOR) private setColor!: any;
+        @Mutation(types.SET_THICKNESS) private setThickness!: any;
+        @Mutation(types.SET_TOOL) private setTool!: any;
 
         private color: string = '#759FD2';
         private curType: string = this.name;
@@ -53,14 +57,21 @@
             '#1e90ff',
             '#c71585'];
 
-        get thicknessHeight () {
+        get thicknessHeight() {
+            this.setThickness(this.thickness);
             return {
                 height: this.thickness + 'px',
             };
         }
 
         @Watch('color', {deep: true})
-        private watchCount(newVal: string) {
+        private watchColor(newVal: string) {
+            this.setColor(newVal);
+        }
+
+        @Watch('curType')
+        private typeChanged(newVal: string) {
+            this.setTool(newVal);
         }
 
         private switchType() {
@@ -71,12 +82,7 @@
             }
         }
 
-        private clickButton() {
-            // alert(this.type)
-        }
-        private mounted() {
-            // alert(this.type)
-        }
+
     }
 </script>
 

@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="toolbox-wrapper">
-            <div  v-for="tool in toolList" style="position: relative; display: inline-block;" @click="clickTool(tool.index)">
+            <div  v-for="tool in toolList" style="position: relative; display: inline-block;" @click="clickTool(tool)">
                 <tool-split v-if="tool.type === 'split'"></tool-split>
                 <tool v-else :type="tool.type" :name="tool.name" :class="{'button-selected':currentSelect === tool.index}"></tool>
             </div>
@@ -11,9 +11,11 @@
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from 'vue-property-decorator';
+    import {Component, Vue, Watch} from 'vue-property-decorator';
     import Tool from './Tool.vue';
     import ToolSplit from './ToolSplit.vue';
+    import {Mutation} from 'vuex-class';
+    import * as types from '../../store/mutation-types';
 
     @Component({
         components: {
@@ -22,11 +24,13 @@
         },
     })
     export default class Toolbox extends Vue {
+        @Mutation(types.SET_TOOL) private setTool!: any;
+
         private toolList = [{
-            type: 'tool',
+            type: 'tool-click',
             name: 'undo',
         }, {
-            type: 'tool',
+            type: 'tool-click',
             name: 'redo',
         }, {
             type: 'split',
@@ -65,15 +69,22 @@
             name: 'eraser',
             index: 5,
         }, {
-            type: 'tool',
+            type: 'tool-click',
             name: 'truncate',
         }];
 
         private currentSelect: number = 0;
+        private currentTool: string = 'pen';
 
-        private clickTool(index: number) {
-            if (index !== undefined) {
-                this.currentSelect = index;
+        @Watch('currentTool')
+        private toolChanged(newVal: string) {
+            this.setTool(newVal);
+        }
+
+        private clickTool(tool: any) {
+            if (tool.index !== undefined) {
+                this.currentSelect = tool.index;
+                this.currentTool = tool.name;
             }
         }
     }
