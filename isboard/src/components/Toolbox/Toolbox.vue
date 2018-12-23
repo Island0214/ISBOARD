@@ -11,11 +11,9 @@
 </template>
 
 <script lang="ts">
-    import {Component, Vue, Watch} from 'vue-property-decorator';
+    import {Component, Vue} from 'vue-property-decorator';
     import Tool from './Tool.vue';
     import ToolSplit from './ToolSplit.vue';
-    import {Mutation} from 'vuex-class';
-    import * as types from '../../store/mutation-types';
 
     @Component({
         components: {
@@ -24,8 +22,6 @@
         },
     })
     export default class Toolbox extends Vue {
-        @Mutation(types.SET_TOOL) private setTool!: any;
-
         private toolList = [{
             type: 'tool-click',
             name: 'undo',
@@ -75,11 +71,6 @@
 
         private currentSelect: number = 0;
         private currentTool: string = 'pen';
-
-        @Watch('currentTool')
-        private toolChanged(newVal: string) {
-            this.setTool(newVal);
-        }
 
         private clickTool(tool: any) {
             if (tool.index !== undefined) {

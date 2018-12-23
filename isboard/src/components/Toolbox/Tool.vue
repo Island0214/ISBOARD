@@ -4,7 +4,7 @@
             <div class="switch-button" v-if="type === 'tool-selector'" @click="switchType">
                 <img src="../../assets/buttons/switch.png"/>
             </div>
-            <button :class="'button-' + curType" v-if="type.startsWith('tool')">
+            <button @click="selectTool" :class="'button-' + curType" v-if="type.startsWith('tool')">
                 <div class="img-wrapper"></div>
             </button>
 
@@ -72,6 +72,12 @@
         @Watch('curType')
         private typeChanged(newVal: string) {
             this.setTool(newVal);
+        }
+
+        private selectTool() {
+            if (this.type === 'tool' || this.type === 'tool-selector') {
+                this.setTool(this.curType);
+            }
         }
 
         private switchType() {
