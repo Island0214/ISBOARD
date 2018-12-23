@@ -1,22 +1,22 @@
 <template>
     <div>
         <div class="tool-wrapper">
-            <div class="switch-button" v-if="type === 'tool-selector'" @click="switchType">
+            <div class="switch-button" v-if="type === 'TOOL_SELECTOR'" @click="switchType">
                 <img src="../../assets/buttons/switch.png"/>
             </div>
-            <button @click="selectTool" :class="'button-' + curType" v-if="type.startsWith('tool')">
+            <button @click="selectTool" :class="'button-' + curType" v-if="type.startsWith('TOOL')">
                 <div class="img-wrapper"></div>
             </button>
 
             <!-- color -->
-            <el-color-picker v-model="color" v-if="type === 'color'" :predefine="predefineColors"></el-color-picker>
+            <el-color-picker v-model="color" v-if="type === 'COLOR'" :predefine="predefineColors"></el-color-picker>
 
             <!--thickness-->
             <el-popover
                     placement="bottom"
                     width="200"
                     trigger="click"
-                    v-if="type === 'thickness'" >
+                    v-if="type === 'THICKNESS'" >
                 <div class="block">
                     <el-slider v-model="thickness" :min="1" :max="20"></el-slider>
                 </div>
@@ -25,23 +25,26 @@
             </el-popover>
 
 
-            <p v-if="type !== 'split'">{{ name }}</p>
+            <p v-if="type !== 'split'">{{ name.toLowerCase() }}</p>
         </div>
     </div>
 </template>
 
 <script lang="ts">
     import {Component, Model, Prop, Vue, Watch} from 'vue-property-decorator';
-    import * as types from '../../store/mutation-types';
+    import * as mutations from '../../store/mutation-types';
     import {Mutation} from 'vuex-class';
+    import * as types from '../../base/tool-type'
+    import * as tools from '../../base/tools'
 
     @Component({})
     export default class Tool extends Vue {
         @Prop(String) private type!: string;
         @Prop(String) private name!: string;
-        @Mutation(types.SET_COLOR) private setColor!: any;
-        @Mutation(types.SET_THICKNESS) private setThickness!: any;
-        @Mutation(types.SET_TOOL) private setTool!: any;
+        @Mutation(mutations.SET_COLOR) private setColor!: any;
+        @Mutation(mutations.SET_THICKNESS) private setThickness!: any;
+        @Mutation(mutations.SET_TOOL) private setTool!: any;
+        @Mutation(mutations.SET_CLEAR) private setClear!: any;
 
         private color: string = '#759FD2';
         private curType: string = this.name;
@@ -75,16 +78,29 @@
         }
 
         private selectTool() {
-            if (this.type === 'tool' || this.type === 'tool-selector') {
+            if (this.type === types.TOOL || this.type === types.TOOL_SELECTOR) {
                 this.setTool(this.curType);
+            }
+
+            if (this.name === tools.TRUNCATE) {
+                this.$alert('确定要清空当前黑板吗？', '清空黑板', {
+                    confirmButtonText: '确定',
+                    callback: action => {
+                        this.setClear(true);
+                        this.$message({
+                            type: 'info',
+                            message: '成功清除当前黑板！'
+                        });
+                    }
+                });
             }
         }
 
         private switchType() {
-            if (this.curType.includes('solid')) {
-                this.curType = this.curType.split('-')[0];
+            if (this.curType.toUpperCase().includes('SOLID')) {
+                this.curType = this.curType.split('_')[0];
             } else {
-                this.curType += '-solid';
+                this.curType += '_SOLID';
             }
         }
 

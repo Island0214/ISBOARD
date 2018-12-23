@@ -2,7 +2,7 @@
     <div>
         <div class="toolbox-wrapper">
             <div  v-for="tool in toolList" style="position: relative; display: inline-block;" @click="clickTool(tool)">
-                <tool-split v-if="tool.type === 'split'"></tool-split>
+                <tool-split v-if="tool.type.toLowerCase() === 'split'"></tool-split>
                 <tool v-else :type="tool.type" :name="tool.name" :class="{'button-selected':currentSelect === tool.index}"></tool>
             </div>
         </div>
@@ -14,6 +14,8 @@
     import {Component, Vue} from 'vue-property-decorator';
     import Tool from './Tool.vue';
     import ToolSplit from './ToolSplit.vue';
+    import * as types from '../../base/tool-type'
+    import * as tools from '../../base/tools'
 
     @Component({
         components: {
@@ -23,50 +25,50 @@
     })
     export default class Toolbox extends Vue {
         private toolList = [{
-            type: 'tool-click',
-            name: 'undo',
+            type: types.TOOL_CLICK,
+            name: tools.UNDO,
         }, {
-            type: 'tool-click',
-            name: 'redo',
+            type: types.TOOL_CLICK,
+            name: tools.REDO,
         }, {
-            type: 'split',
+            type: types.SPLIT,
         }, {
-            type: 'tool',
-            name: 'pen',
+            type: types.TOOL,
+            name: tools.PEN,
             index: 0,
         }, {
-            type: 'tool-selector',
-            name: 'line',
+            type: types.TOOL_SELECTOR,
+            name: tools.LINE,
             index: 1,
         }, {
-            type: 'tool-selector',
-            name: 'rectangle',
+            type: types.TOOL_SELECTOR,
+            name: tools.RECTANGLE,
             index: 2,
         }, {
-            type: 'tool-selector',
-            name: 'circle',
+            type: types.TOOL_SELECTOR,
+            name: tools.CIRCLE,
             index: 3,
         }, {
-            type: 'tool-selector',
-            name: 'triangle',
+            type: types.TOOL_SELECTOR,
+            name: tools.TRIANGLE,
             index: 4,
         }, {
-            type: 'split',
+            type: types.SPLIT,
         }, {
-            type: 'color',
-            name: 'color',
+            type: types.COLOR,
+            name: tools.COLOR,
         }, {
-            type: 'thickness',
-            name: 'thickness',
+            type: types.THICKNESS,
+            name: tools.THICKNESS,
         }, {
-            type: 'split',
+            type: types.SPLIT,
         }, {
-            type: 'tool',
-            name: 'eraser',
+            type: types.TOOL,
+            name: tools.ERASER,
             index: 5,
         }, {
-            type: 'tool-click',
-            name: 'truncate',
+            type: types.TOOL_CLICK,
+            name: tools.TRUNCATE,
         }];
 
         private currentSelect: number = 0;

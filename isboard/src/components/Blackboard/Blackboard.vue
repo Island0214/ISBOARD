@@ -1,6 +1,6 @@
 <template>
     <div class="blackboard-wrapper">
-        <div class="canvas-wrapper" >
+        <div :class="['canvas-wrapper', {'eraser-cursor': tool === 'ERASER'}]" >
             <canvas id="blackboard-canvas" width="800" height="600"></canvas>
             <canvas id="drawing-canvas" width="800" height="600" v-show="showDrawingCanvas"></canvas>
         </div>
@@ -12,7 +12,9 @@
 
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
-    import {Getter} from 'vuex-class';
+    import {Getter, Mutation} from 'vuex-class';
+    import * as mutations from '../../store/mutation-types';
+
     interface Point {
         x: number;
         y: number;
@@ -23,6 +25,8 @@
         private drawing: boolean = false;
         private solid: boolean = true;
         private dash: number[] = [10, 10];
+        private eraserColor: string = '#FFFFFF';
+        private eraserWidth: number = 30;
 
         private canvas!: HTMLCanvasElement;
         private ctx!: CanvasRenderingContext2D;
@@ -33,6 +37,8 @@
         @Getter('color') private color!: string;
         @Getter('thick') private thickness!: number;
         @Getter('tool') private tool!: string;
+        @Getter('clear') private clear!: boolean;
+        @Mutation(mutations.SET_CLEAR) private setClear!: any;
 
         private getMousePosition = (canvas: HTMLCanvasElement, x: number, y: number) => {
             const boundingClientRect = canvas.getBoundingClientRect();
@@ -44,29 +50,42 @@
 
         @Watch('tool')
         private toolChanged(newVal: string) {
-            this.clear();
-            const type = newVal.split('-');
+            this.clearCanvasStatus();
+            const type = newVal.split('_');
             if (type.length > 1) {
                 this.solid = true;
             } else {
                 this.solid = false;
             }
-            switch (type[0]) {
-                case 'pen':
+            switch (type[0].toUpperCase()) {
+                case 'PEN':
                     this.toolPen();
                     break;
-                case 'line':
+                case 'LINE':
                     this.toolLine();
                     break;
-                case 'rectangle':
+                case 'RECTANGLE':
                     this.toolRect();
                     break;
-                case 'circle':
-                    this.toolCircle();
+                case 'CIRCLE':
+                    this.toolOval();
                     break;
-                case 'triangle':
+                case 'TRIANGLE':
                     this.toolTriangle();
                     break;
+                case 'ERASER':
+                    this.toolEraser();
+                    break;
+            }
+        }
+
+        @Watch('clear')
+        private clearBlackboard(newVal: boolean) {
+            if (newVal) {
+                const canvas = this.canvas;
+                canvas.height = canvas.height;
+                this.setClear(false);
+
             }
         }
 
@@ -207,7 +226,7 @@
             };
         }
 
-        private drawCircle(context: CanvasRenderingContext2D, from: Point, to: Point) {
+        private drawOval(context: CanvasRenderingContext2D, from: Point, to: Point) {
             const start = {x: (from.x + to.x) / 2, y: (from.y + to.y) / 2};
             const a = Math.abs((from.x - to.x) / 2);
             const b = Math.abs((from.y - to.y) / 2);
@@ -233,7 +252,7 @@
             }
         }
 
-        private toolCircle() {
+        private toolOval() {
             this.showDrawingCanvas = true;
             const that = this;
             const ctx = this.ctx;
@@ -254,7 +273,7 @@
                     if (that.drawing) {
                         to = this.getMousePosition(drawingCanvas, event.clientX, event.clientY);
                         drawingCanvas.height = drawingCanvas.height;
-                        this.drawCircle(drawingCtx, from, to);
+                        this.drawOval(drawingCtx, from, to);
                         drawingCtx.restore();
                         drawingCtx.closePath();
 
@@ -266,7 +285,7 @@
                 drawingCanvas.height = drawingCanvas.height;
                 that.drawing = false;
                 ctx.beginPath();
-                this.drawCircle(ctx, from, to);
+                this.drawOval(ctx, from, to);
                 ctx.restore();
                 ctx.closePath();
             };
@@ -314,7 +333,7 @@
                       }
                       ctx.closePath();
                       ctx.restore();
-                      this.clear();
+                      this.clearBlackboard();
                       this.toolTriangle();
                       break;
               }
@@ -357,7 +376,44 @@
             };
         }
 
-        private clear() {
+        private drawCircle(x: number, y: number, radius: number) {
+            const ctx = this.ctx;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.save();
+        }
+
+        private toolEraser() {
+            const that = this;
+            const canvas = this.canvas;
+            const ctx = this.ctx;
+            ctx.restore();
+            canvas.onmousedown = (e) => {
+                that.drawing = true;
+                ctx.fillStyle = this.eraserColor;
+                canvas.onmousemove = (event) => {
+                    if (that.drawing) {
+                        const { x, y } = this.getMousePosition(canvas, event.clientX, event.clientY);
+                        const radius = this.eraserWidth / 2;
+                        this.drawCircle(x + radius, y + radius, radius);
+                    }
+                };
+            };
+
+            canvas.onclick = (e) => {
+                const { x, y } = this.getMousePosition(canvas, e.clientX, e.clientY);
+                const radius = this.eraserWidth / 2;
+                this.drawCircle(x + radius, y + radius, radius);
+            };
+
+            canvas.onmouseup = () => {
+                that.drawing = false;
+                ctx.closePath();
+            };
+        }
+
+        private clearCanvasStatus() {
             const canvas = this.canvas;
             const drawingCanvas = this.drawingCanvas;
             this.showDrawingCanvas = false;
@@ -374,7 +430,6 @@
             const drawingCtx = this.drawingCtx;
             ctx.setLineDash([]);
             drawingCtx.setLineDash([]);
-
         }
 
         private mounted() {
