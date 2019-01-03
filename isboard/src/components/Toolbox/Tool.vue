@@ -34,8 +34,8 @@
     import {Component, Model, Prop, Vue, Watch} from 'vue-property-decorator';
     import * as mutations from '../../store/mutation-types';
     import {Mutation} from 'vuex-class';
-    import * as types from '../../base/tool-type'
-    import * as tools from '../../base/tools'
+    import * as types from '../../base/tool-type';
+    import * as tools from '../../base/tools';
 
     @Component({})
     export default class Tool extends Vue {
@@ -85,13 +85,13 @@
             if (this.name === tools.TRUNCATE) {
                 this.$alert('确定要清空当前黑板吗？', '清空黑板', {
                     confirmButtonText: '确定',
-                    callback: action => {
+                    callback: (action) => {
                         this.setClear(true);
                         this.$message({
                             type: 'info',
-                            message: '成功清除当前黑板！'
+                            message: '成功清除当前黑板！',
                         });
-                    }
+                    },
                 });
             }
         }

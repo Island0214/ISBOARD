@@ -14,8 +14,8 @@
     import {Component, Vue} from 'vue-property-decorator';
     import Tool from './Tool.vue';
     import ToolSplit from './ToolSplit.vue';
-    import * as types from '../../base/tool-type'
-    import * as tools from '../../base/tools'
+    import * as types from '../../base/tool-type';
+    import * as tools from '../../base/tools';
 
     @Component({
         components: {

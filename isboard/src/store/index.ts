@@ -33,3 +33,18 @@ export interface UserLoginPayload {
     password: string;
     remember: boolean;
 }
+
+export interface Point {
+    x: number;
+    y: number;
+}
+
+export interface Stroke {
+    type: string;
+    points: Point[];
+}
+
+export interface Blackboard {
+    processId: string;
+    strokes: Stroke[];
+}

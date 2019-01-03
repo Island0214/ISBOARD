@@ -7,6 +7,7 @@ export interface State {
     thick: number;
     tool: string;
     clear: boolean;
+    // proccesses:
 }
 
 const initState: State = {

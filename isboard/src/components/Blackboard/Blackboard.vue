@@ -14,11 +14,8 @@
     import {Component, Vue, Watch} from 'vue-property-decorator';
     import {Getter, Mutation} from 'vuex-class';
     import * as mutations from '../../store/mutation-types';
+    import {Point} from '../../store';
 
-    interface Point {
-        x: number;
-        y: number;
-    }
     @Component({
     })
     export default class Blackboard extends Vue {
@@ -333,7 +330,7 @@
                       }
                       ctx.closePath();
                       ctx.restore();
-                      this.clearBlackboard();
+                      this.clearBlackboard(true);
                       this.toolTriangle();
                       break;
               }
