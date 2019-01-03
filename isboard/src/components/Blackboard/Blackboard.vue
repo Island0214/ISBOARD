@@ -1,6 +1,6 @@
 <template>
     <div class="blackboard-wrapper">
-        <div :class="['canvas-wrapper', {'eraser-cursor': tool === 'ERASER'}]" >
+        <div :class="['canvas-wrapper', {'eraser-cursor': tool === 'ERASER'}]">
             <canvas id="blackboard-canvas" width="800" height="600"></canvas>
             <canvas id="drawing-canvas" width="800" height="600" v-show="showDrawingCanvas"></canvas>
         </div>
@@ -16,8 +16,7 @@
     import * as mutations from '../../store/mutation-types';
     import {Point} from '../../store';
 
-    @Component({
-    })
+    @Component({})
     export default class Blackboard extends Vue {
         private drawing: boolean = false;
         private solid: boolean = true;
@@ -94,14 +93,14 @@
             canvas.onmousedown = (e) => {
                 that.drawing = true;
 
-                const { x, y } = that.getMousePosition(canvas, e.clientX, e.clientY);
+                const {x, y} = that.getMousePosition(canvas, e.clientX, e.clientY);
                 ctx.beginPath();
                 ctx.strokeStyle = this.color;
                 ctx.lineWidth = this.thickness;
                 ctx.moveTo(x, y);
                 canvas.onmousemove = (event) => {
                     if (that.drawing) {
-                        const { x, y } = this.getMousePosition(canvas, event.clientX, event.clientY);
+                        const {x, y} = this.getMousePosition(canvas, event.clientX, event.clientY);
                         ctx.lineTo(x, y);
                         ctx.stroke();
                         ctx.save();
@@ -304,73 +303,95 @@
             const drawingCanvas = this.drawingCanvas;
             const drawingCtx = this.drawingCtx;
             drawingCanvas.onclick = (e) => {
-              count += 1;
-              ctx.strokeStyle = this.color;
-              ctx.lineWidth = this.thickness;
-              ctx.fillStyle = this.color;
-              switch (count % 3) {
-                  case 1:
-                      from = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
-                  case 2:
-                      to = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
-                      ctx.beginPath();
-                      ctx.moveTo(from.x, from.y);
-                      ctx.lineTo(to.x, to.y);
-                      ctx.stroke();
-                      break;
-                  case 0:
-                      top = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
-                      ctx.lineTo(top.x, top.y);
-                      if (this.solid) {
-                          ctx.fill();
-                      } else {
-                          ctx.stroke();
-                          ctx.lineTo(from.x, from.y);
-                          ctx.stroke();
-                      }
-                      ctx.closePath();
-                      ctx.restore();
-                      this.clearBlackboard(true);
-                      this.toolTriangle();
-                      break;
-              }
+                count += 1;
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = this.thickness;
+                ctx.fillStyle = this.color;
+                switch (count % 3) {
+                    case 1:
+                        from = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
+                        drawingCtx.beginPath();
+                        drawingCtx.moveTo(from.x, from.y);
+                        this.drawing = true;
+
+                        drawingCanvas.onmousemove = (event) => {
+
+                            if (that.drawing) {
+                                const tar = this.getMousePosition(drawingCanvas, event.clientX, event.clientY);
+                                drawingCanvas.height = drawingCanvas.height;
+                                drawingCtx.strokeStyle = this.color;
+                                drawingCtx.lineWidth = this.thickness;
+                                drawingCtx.moveTo(from.x, from.y);
+                                drawingCtx.lineTo(tar.x, tar.y);
+
+                                drawingCtx.stroke();
+                            }
+                        };
+                        break;
+                    case 2:
+                        to = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
+                        ctx.beginPath();
+                        ctx.moveTo(from.x, from.y);
+                        ctx.lineTo(to.x, to.y);
+                        ctx.stroke();
+                        drawingCanvas.onmousemove = (event) => {
+
+                            if (that.drawing) {
+                                const tar = this.getMousePosition(drawingCanvas, event.clientX, event.clientY);
+                                drawingCanvas.height = drawingCanvas.height;
+                                drawingCtx.strokeStyle = this.color;
+                                drawingCtx.lineWidth = this.thickness;
+                                drawingCtx.moveTo(from.x, from.y);
+                                drawingCtx.lineTo(tar.x, tar.y);
+
+                                drawingCtx.stroke();
+                                drawingCtx.moveTo(to.x, to.y);
+                                drawingCtx.lineTo(tar.x, tar.y);
+                                drawingCtx.stroke();
+                            }
+                        };
+                        break;
+                    case 0:
+                        top = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
+                        ctx.lineTo(top.x, top.y);
+                        if (this.solid) {
+                            ctx.fill();
+                        } else {
+                            ctx.stroke();
+                            ctx.lineTo(from.x, from.y);
+                            ctx.stroke();
+                        }
+                        ctx.closePath();
+                        ctx.restore();
+                        that.drawing = false;
+
+                        // this.clearBlackboard(true);
+                        // drawingCanvas.height = drawingCanvas.height;
+                        this.toolTriangle();
+                        break;
+                }
             };
-            drawingCanvas.onmousedown = (e) => {
-                that.drawing = true;
-
-                const source = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
-                drawingCtx.beginPath();
-                drawingCtx.moveTo(source.x, source.y);
-
-                drawingCanvas.onmousemove = (event) => {
-
-                    if (that.drawing) {
-                        const tar = this.getMousePosition(drawingCanvas, event.clientX, event.clientY);
-                        drawingCanvas.height = drawingCanvas.height;
-                        drawingCtx.strokeStyle = this.color;
-                        drawingCtx.lineWidth = this.thickness;
-                        drawingCtx.moveTo(source.x, source.y);
-                        drawingCtx.lineTo(tar.x, tar.y);
-
-                        drawingCtx.stroke();
-                    }
-                };
-            };
-
-            drawingCanvas.onmouseup = () => {
-                // drawingCanvas.height = drawingCanvas.height;
-                // that.drawing = false;
-                // ctx.beginPath();
-                // if (this.solid) {
-                //     ctx.setLineDash(this.dash);
-                // }
-                // ctx.strokeStyle = this.color;
-                // ctx.lineWidth = this.thickness;
-                // ctx.moveTo(from.x, from.y);
-                // ctx.lineTo(to.x, to.y);
-                // ctx.stroke();
-                // ctx.closePath();
-            };
+            // drawingCanvas.onmousedown = (e) => {
+            //     that.drawing = true;
+            //
+            //     const source = that.getMousePosition(drawingCanvas, e.clientX, e.clientY);
+            //     drawingCtx.beginPath();
+            //     drawingCtx.moveTo(source.x, source.y);
+            //
+            //     drawingCanvas.onmousemove = (event) => {
+            //
+            //         if (that.drawing) {
+            //             const tar = this.getMousePosition(drawingCanvas, event.clientX, event.clientY);
+            //             drawingCanvas.height = drawingCanvas.height;
+            //             drawingCtx.strokeStyle = this.color;
+            //             drawingCtx.lineWidth = this.thickness;
+            //             drawingCtx.moveTo(source.x, source.y);
+            //             drawingCtx.lineTo(tar.x, tar.y);
+            //
+            //             drawingCtx.stroke();
+            //         }
+            //     };
+            // };
         }
 
         private drawCircle(x: number, y: number, radius: number) {
@@ -391,7 +412,7 @@
                 ctx.fillStyle = this.eraserColor;
                 canvas.onmousemove = (event) => {
                     if (that.drawing) {
-                        const { x, y } = this.getMousePosition(canvas, event.clientX, event.clientY);
+                        const {x, y} = this.getMousePosition(canvas, event.clientX, event.clientY);
                         const radius = this.eraserWidth / 2;
                         this.drawCircle(x + radius, y + radius, radius);
                     }
@@ -399,7 +420,7 @@
             };
 
             canvas.onclick = (e) => {
-                const { x, y } = this.getMousePosition(canvas, e.clientX, e.clientY);
+                const {x, y} = this.getMousePosition(canvas, e.clientX, e.clientY);
                 const radius = this.eraserWidth / 2;
                 this.drawCircle(x + radius, y + radius, radius);
             };
@@ -414,14 +435,30 @@
             const canvas = this.canvas;
             const drawingCanvas = this.drawingCanvas;
             this.showDrawingCanvas = false;
-            canvas.onmouseup = () => {return; };
-            canvas.onclick = () => {return; };
-            canvas.onmousedown = () => {return; };
-            canvas.onmousemove = () => {return; };
-            drawingCanvas.onmouseup = () => {return; };
-            drawingCanvas.onclick = () => {return; };
-            drawingCanvas.onmousedown = () => {return; };
-            drawingCanvas.onmousemove = () => {return; };
+            canvas.onmouseup = () => {
+                return;
+            };
+            canvas.onclick = () => {
+                return;
+            };
+            canvas.onmousedown = () => {
+                return;
+            };
+            canvas.onmousemove = () => {
+                return;
+            };
+            drawingCanvas.onmouseup = () => {
+                return;
+            };
+            drawingCanvas.onclick = () => {
+                return;
+            };
+            drawingCanvas.onmousedown = () => {
+                return;
+            };
+            drawingCanvas.onmousemove = () => {
+                return;
+            };
 
             const ctx = this.ctx;
             const drawingCtx = this.drawingCtx;
