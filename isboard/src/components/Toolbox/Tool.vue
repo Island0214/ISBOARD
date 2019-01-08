@@ -1,6 +1,7 @@
 <template>
     <div>
         <div class="tool-wrapper">
+            <div class="disable-mask" v-if="disable"></div>
             <div class="switch-button" v-if="type === 'TOOL_SELECTOR'" @click="switchType">
                 <img src="../../assets/buttons/switch.png"/>
             </div>
@@ -33,18 +34,23 @@
 <script lang="ts">
     import {Component, Model, Prop, Vue, Watch} from 'vue-property-decorator';
     import * as mutations from '../../store/mutation-types';
-    import {Mutation} from 'vuex-class';
+    import {Getter, Mutation} from 'vuex-class';
     import * as types from '../../base/tool-type';
     import * as tools from '../../base/tools';
+    import {Stroke} from '../../store';
 
     @Component({})
     export default class Tool extends Vue {
         @Prop(String) private type!: string;
         @Prop(String) private name!: string;
+        @Getter('currentStrokes') private currentStrokes!: Stroke[];
+        @Getter('undoStrokes') private undoStrokes!: Stroke[];
         @Mutation(mutations.SET_COLOR) private setColor!: any;
         @Mutation(mutations.SET_THICKNESS) private setThickness!: any;
         @Mutation(mutations.SET_TOOL) private setTool!: any;
         @Mutation(mutations.SET_CLEAR) private setClear!: any;
+        @Mutation((mutations.UNDO_STROKE)) private undoStroke!: any;
+        @Mutation((mutations.REDO_STROKE)) private redoStroke!: any;
 
         private color: string = '#759FD2';
         private curType: string = this.name;
@@ -65,6 +71,16 @@
             return {
                 height: this.thickness + 'px',
             };
+        }
+
+        get disable() {
+            if (this.curType === tools.REDO && this.undoStrokes.length === 0) {
+                return true;
+            }
+            if (this.curType === tools.UNDO && this.currentStrokes.length === 0) {
+                return true;
+            }
+            return false;
         }
 
         @Watch('color', {deep: true})
@@ -89,10 +105,19 @@
                         this.setClear(true);
                         this.$message({
                             type: 'info',
-                            message: '成功清除当前黑板！',
+                             message: '成功清除当前黑板！',
                         });
                     },
                 });
+            }
+
+            if (this.name === tools.UNDO) {
+                alert(tools.UNDO);
+                this.undoStroke();
+            }
+
+            if (this.name === tools.REDO) {
+                alert(tools.REDO);
             }
         }
 
@@ -103,7 +128,6 @@
                 this.curType += '_SOLID';
             }
         }
-
 
     }
 </script>

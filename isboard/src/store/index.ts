@@ -5,6 +5,7 @@ import getters from './getters';
 import mutations from './mutations';
 import user, { State as UserState } from './modules/user';
 import canvas, { State as CanvasState } from './modules/canvas';
+import blackboard, { State as BlackboardState } from './modules/blackboard';
 
 Vue.use(Vuex);
 
@@ -15,6 +16,7 @@ export default new Vuex.Store({
     modules: {
         user,
         canvas,
+        blackboard,
     },
 });
 
@@ -26,6 +28,7 @@ export interface ActionContextBasic {
 export interface State {
     user: UserState;
     canvas: CanvasState;
+    blackboard: BlackboardState;
 }
 
 export interface UserLoginPayload {
@@ -39,9 +42,29 @@ export interface Point {
     y: number;
 }
 
+export class Point implements Point {
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 export interface Stroke {
     type: string;
     points: Point[];
+    solid: boolean;
+    color: string;
+    thickness: number;
+}
+
+export class Stroke implements Stroke {
+    constructor(type: string, points: Point[], color: string, thickness: number, solid: boolean = false) {
+        this.type = type;
+        this.points = points;
+        this.color = color;
+        this.thickness = thickness;
+        this.solid = solid;
+    }
 }
 
 export interface Blackboard {

@@ -1,13 +1,10 @@
-import { Commit } from 'vuex';
 import * as types from '../mutation-types';
-import { UserLoginPayload } from '../index';
 
 export interface State {
     color: string;
     thick: number;
     tool: string;
     clear: boolean;
-    // proccesses:
 }
 
 const initState: State = {

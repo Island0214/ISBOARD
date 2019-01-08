@@ -23,6 +23,7 @@
   width: @buttonSize;
   margin: @marginSize @marginLeft;
   //border: 1px solid #dcdfe6;
+  border-radius: 5px;
 
   p {
     margin: 0;
@@ -88,6 +89,17 @@
 
   /deep/ .el-color-picker__trigger:hover {
     border-color: @hoverColor;
+  }
+
+  .disable-mask {
+    height: @buttonSize;
+    width: @buttonSize;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(235, 235, 235, 0.5);
+    border-radius: 5px;
+    cursor: not-allowed;
   }
 
   .switch-button {
