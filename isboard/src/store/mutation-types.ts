@@ -8,3 +8,5 @@ export const SET_CLEAR = 'SET_CLEAR';
 export const DRAW_STROKE = 'DRAW_STROKE';
 export const UNDO_STROKE = 'UNDO_STROKE';
 export const REDO_STROKE = 'REDO_STROKE';
+
+export const TRUNCATE = 'TRUNCATE';

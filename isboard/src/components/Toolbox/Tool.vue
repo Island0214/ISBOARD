@@ -45,12 +45,13 @@
         @Prop(String) private name!: string;
         @Getter('currentStrokes') private currentStrokes!: Stroke[];
         @Getter('undoStrokes') private undoStrokes!: Stroke[];
+        @Getter('truncateStrokes') private truncateStrokes!: Stroke[];
         @Mutation(mutations.SET_COLOR) private setColor!: any;
         @Mutation(mutations.SET_THICKNESS) private setThickness!: any;
         @Mutation(mutations.SET_TOOL) private setTool!: any;
-        @Mutation(mutations.SET_CLEAR) private setClear!: any;
         @Mutation((mutations.UNDO_STROKE)) private undoStroke!: any;
         @Mutation((mutations.REDO_STROKE)) private redoStroke!: any;
+        @Mutation((mutations.TRUNCATE)) private truncate!: any;
 
         private color: string = '#759FD2';
         private curType: string = this.name;
@@ -78,7 +79,9 @@
                 return true;
             }
             if (this.curType === tools.UNDO && this.currentStrokes.length === 0) {
-                return true;
+                if (this.truncateStrokes.length === 0) {
+                    return true;
+                }
             }
             return false;
         }
@@ -102,7 +105,7 @@
                 this.$alert('确定要清空当前黑板吗？', '清空黑板', {
                     confirmButtonText: '确定',
                     callback: (action) => {
-                        this.setClear(true);
+                        this.truncate();
                         this.$message({
                             type: 'info',
                              message: '成功清除当前黑板！',
@@ -112,12 +115,11 @@
             }
 
             if (this.name === tools.UNDO) {
-                alert(tools.UNDO);
                 this.undoStroke();
             }
 
             if (this.name === tools.REDO) {
-                alert(tools.REDO);
+                this.redoStroke();
             }
         }
 

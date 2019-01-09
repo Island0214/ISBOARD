@@ -35,6 +35,8 @@
         @Getter('thick') private thickness!: number;
         @Getter('tool') private tool!: string;
         @Getter('clear') private clear!: boolean;
+        @Getter('currentStrokes') private currentStrokes!: Stroke[];
+        @Getter('undoStrokes') private undoStrokes!: Stroke[];
         @Mutation(mutations.SET_CLEAR) private setClear!: any;
         @Mutation(mutations.DRAW_STROKE) private drawStroke!: any;
 
@@ -94,14 +96,17 @@
                 return;
             }
             const start = points[0];
-            console.log(start);
             ctx.beginPath();
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.thickness;
+            if (stroke.solid) {
+                ctx.setLineDash(this.dash);
+            } else {
+                ctx.setLineDash([]);
+            }
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.thickness;
             ctx.moveTo(start.x, start.y);
             for (let i = 0; i < points.length; i++) {
                 let point = points[i];
-                console.log(point);
                 ctx.lineTo(point.x, point.y);
                 ctx.stroke();
             }
@@ -152,17 +157,18 @@
             const from = stroke.points[0];
             const to = stroke.points[1];
             ctx.beginPath();
-            if (this.solid) {
+            if (stroke.solid) {
                 ctx.setLineDash(this.dash);
             } else {
                 ctx.setLineDash([]);
             }
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.thickness;
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.thickness;
             ctx.moveTo(from.x, from.y);
             ctx.lineTo(to.x, to.y);
             ctx.stroke();
             ctx.closePath();
+            ctx.save();
         }
 
         private toolLine() {
@@ -208,6 +214,7 @@
                     const stroke = new Stroke(tools.LINE, [from, to], this.color, this.thickness, this.solid);
                     this.redoLine(stroke);
                     this.drawStroke(stroke);
+                    this.drawing = false;
                 }
             };
         }
@@ -220,12 +227,13 @@
             const from = stroke.points[0];
             const to = stroke.points[1];
             ctx.beginPath();
-            if (this.solid) {
-                ctx.fillStyle = this.color;
+            ctx.setLineDash([]);
+            if (stroke.solid) {
+                ctx.fillStyle = stroke.color;
                 ctx.fillRect(from.x, from.y, to.x - from.x, to.y - from.y);
             } else {
-                ctx.lineWidth = this.thickness;
-                ctx.strokeStyle = this.color;
+                ctx.lineWidth = stroke.thickness;
+                ctx.strokeStyle = stroke.color;
                 ctx.strokeRect(from.x, from.y, to.x - from.x, to.y - from.y);
             }
             ctx.closePath();
@@ -280,14 +288,14 @@
             const oy = 0.6 * b;
 
             context.save();
-            context.translate(start.x, start.y);
             context.beginPath();
+            context.moveTo(from.x, from.y);
+            context.translate(start.x, start.y);
             context.moveTo(0, b);
             context.bezierCurveTo(ox, b, a, oy, a, 0);
             context.bezierCurveTo(a, -oy, ox, -b, 0, -b);
             context.bezierCurveTo(-ox, -b, -a, -oy, -a, 0);
             context.bezierCurveTo(-a, oy, -ox, b, 0, b);
-            context.closePath();
             if (solid) {
                 context.fillStyle = color;
                 context.fill();
@@ -296,6 +304,8 @@
                 context.strokeStyle = color;
                 context.stroke();
             }
+            context.restore();
+            context.closePath();
         }
 
         private toolOval() {
@@ -346,8 +356,9 @@
             }
             let [from, to, top] = stroke.points;
             ctx.beginPath();
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.thickness;
+            ctx.setLineDash([]);
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.thickness;
             ctx.moveTo(from.x, from.y);
             ctx.lineTo(top.x, top.y);
             ctx.stroke();
@@ -359,7 +370,8 @@
             ctx.stroke();
             ctx.closePath();
 
-            if (this.solid) {
+            if (stroke.solid) {
+                ctx.fillStyle = stroke.color;
                 ctx.fill();
             }
         }
@@ -436,6 +448,25 @@
             ctx.save();
         }
 
+        private redoEraser(stroke: Stroke) {
+            const ctx = this.ctx;
+            const points: Point[] = stroke.points;
+            if (points.length === 0) {
+                return;
+            }
+            const start = points[0];
+            ctx.beginPath();
+            ctx.fillStyle = this.eraserColor;
+            ctx.moveTo(start.x, start.y);
+            for (let i = 0; i < points.length; i++) {
+                let point = points[i];
+                const radius = this.eraserWidth / 2;
+                this.drawCircle(point.x + radius, point.y + radius, radius);
+            }
+            ctx.save();
+            ctx.closePath();
+        }
+
         private toolEraser() {
             const that = this;
             const canvas = this.canvas;
@@ -465,7 +496,10 @@
             canvas.onmouseup = () => {
                 that.drawing = false;
                 ctx.closePath();
+                canvas.height = canvas.height;
+                this.redoEraser(new Stroke(tools.ERASER, points, this.color, this.thickness));
                 this.drawStroke(new Stroke(tools.ERASER, points, this.color, this.thickness));
+                points = [];
             };
         }
 
@@ -502,6 +536,41 @@
             const drawingCtx = this.drawingCtx;
             ctx.setLineDash([]);
             drawingCtx.setLineDash([]);
+        }
+
+        @Watch('currentStrokes')
+        private strokeChanged() {
+            const canvas = this.canvas;
+            canvas.height = canvas.height;
+            this.redrawCanvas(this.currentStrokes);
+        }
+
+        private redrawCanvas(strokes: Stroke[]) {
+            const ctx = this.ctx;
+            for(let i = 0; i < strokes.length; i++) {
+                let stroke = strokes[i];
+                switch (stroke.type) {
+                    case tools.PEN:
+                        this.redoPen(stroke);
+                        break;
+                    case tools.LINE:
+                        this.redoLine(stroke);
+                        break;
+                    case tools.RECTANGLE:
+                        this.redoRect(stroke);
+                        break;
+                    case tools.CIRCLE:
+                        this.drawOval(ctx, stroke.points[0], stroke.points[1], stroke.color, stroke.thickness, stroke.solid);
+                        break;
+                    case tools.TRIANGLE:
+                        this.redoTriangle(ctx, stroke);
+                        break;
+                    case tools.ERASER:
+                        this.redoEraser(stroke);
+                        break;
+
+                }
+            }
         }
 
         private mounted() {
