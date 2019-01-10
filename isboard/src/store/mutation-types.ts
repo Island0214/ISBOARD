@@ -10,3 +10,5 @@ export const UNDO_STROKE = 'UNDO_STROKE';
 export const REDO_STROKE = 'REDO_STROKE';
 
 export const TRUNCATE = 'TRUNCATE';
+
+export const SAVE_CANVAS = 'SAVE_CANVAS';

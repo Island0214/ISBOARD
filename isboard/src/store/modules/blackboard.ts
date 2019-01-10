@@ -3,6 +3,7 @@ import * as types from '../mutation-types';
 import { Point, Stroke, Blackboard } from '../index';
 
 export interface State {
+    blackboards: Blackboard[];
     blackboard: Blackboard;
     currentStrokes: Stroke[];
     undoStrokes: Stroke[];
@@ -10,7 +11,8 @@ export interface State {
 }
 
 const initState: State = {
-    blackboard: {processId: '', strokes: []},
+    blackboards: [{id: '123', thumbnail: '', strokes: []}],
+    blackboard: {id: '123', thumbnail: '', strokes: []},
     currentStrokes: [],
     undoStrokes: [],
     truncateStrokes: [],
@@ -18,6 +20,7 @@ const initState: State = {
 
 // getters
 const getters = {
+    blackboards: (state: State) => state.blackboards,
     blackboard: (state: State) => state.blackboard,
     currentStrokes: (state: State) => state.currentStrokes,
     undoStrokes: (state: State) => state.undoStrokes,
@@ -37,7 +40,7 @@ const mutations = {
     },
     [types.REDO_STROKE](state: State) {
         if (state.undoStrokes.length > 0) {
-            let stroke: Stroke = state.undoStrokes.pop() as Stroke;
+            const stroke: Stroke = state.undoStrokes.pop() as Stroke;
             state.currentStrokes.push(stroke);
         }
     },
@@ -48,7 +51,7 @@ const mutations = {
             return;
         }
         if (state.currentStrokes.length > 0) {
-            let stroke: Stroke = state.currentStrokes.pop() as Stroke;
+            const stroke: Stroke = state.currentStrokes.pop() as Stroke;
             state.undoStrokes.push(stroke);
         }
     },
@@ -56,7 +59,23 @@ const mutations = {
         state.truncateStrokes = state.currentStrokes;
         state.currentStrokes = [];
         state.undoStrokes = [];
-    }
+    },
+    [types.SAVE_CANVAS](state: State, canavs: string) {
+        state.blackboard.strokes = [];
+        for (const stroke of state.currentStrokes) {
+            state.blackboard.strokes.push(stroke);
+        }
+        state.blackboard.thumbnail = canavs;
+        for (const blackboard of state.blackboards) {
+            if (blackboard.id === state.blackboard.id) {
+                blackboard.strokes = [];
+                for (const stroke of blackboard.strokes) {
+                    blackboard.strokes.push(stroke);
+                }
+                blackboard.thumbnail = canavs;
+            }
+        }
+    },
 };
 
 export default {

@@ -5,7 +5,7 @@
             <canvas id="drawing-canvas" width="800" height="600" v-show="showDrawingCanvas"></canvas>
         </div>
         <div class="save-button-wrapper">
-            <el-button disabled class="my-button">保&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存</el-button>
+            <el-button :disabled="disableSave" class="my-button" @click="saveCanvas">S A V E</el-button>
         </div>
     </div>
 </template>
@@ -14,11 +14,11 @@
     import {Component, Vue, Watch} from 'vue-property-decorator';
     import {Getter, Mutation} from 'vuex-class';
     import * as mutations from '../../store/mutation-types';
-    import {Point, Stroke} from '../../store';
+    import {Blackboard, Point, Stroke} from '../../store';
     import * as tools from '../../base/tools';
 
     @Component({})
-    export default class Blackboard extends Vue {
+    export default class SingleBlackboard extends Vue {
         private drawing: boolean = false;
         private solid: boolean = true;
         private dash: number[] = [10, 10];
@@ -37,8 +37,10 @@
         @Getter('clear') private clear!: boolean;
         @Getter('currentStrokes') private currentStrokes!: Stroke[];
         @Getter('undoStrokes') private undoStrokes!: Stroke[];
+        @Getter('blackboard') private curBlackboard!: Blackboard;
         @Mutation(mutations.SET_CLEAR) private setClear!: any;
         @Mutation(mutations.DRAW_STROKE) private drawStroke!: any;
+        @Mutation(mutations.SAVE_CANVAS) private saveCanvasMutation!: any;
 
         private getMousePosition = (canvas: HTMLCanvasElement, x: number, y: number) => {
             const boundingClientRect = canvas.getBoundingClientRect();
@@ -571,6 +573,16 @@
 
                 }
             }
+        }
+
+        get disableSave() {
+            return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
+            // return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
+        }
+
+        private saveCanvas() {
+            var data = this.canvas.toDataURL('image/png', 1 );
+            this.saveCanvasMutation(data);
         }
 
         private mounted() {

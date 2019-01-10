@@ -49,6 +49,13 @@ export class Point implements Point {
     }
 }
 
+Point.prototype.toString = function () {
+    return '{' +
+        'x: ' + this.x + '; ' +
+        'y: ' + this.y + '; ' +
+        '}';
+};
+
 export interface Stroke {
     type: string;
     points: Point[];
@@ -67,7 +74,18 @@ export class Stroke implements Stroke {
     }
 }
 
+Stroke.prototype.toString = function() {
+    return '{' +
+        'type: ' + this.type + '; ' +
+        'points: ' + this.points.toString() + '; ' +
+        'solid: ' + this.solid + '; ' +
+        'color: ' + this.color + '; ' +
+        'thickness: ' + this.thickness + '; ' +
+        '}';
+};
+
 export interface Blackboard {
-    processId: string;
+    id: string;
+    thumbnail: string;
     strokes: Stroke[];
 }
