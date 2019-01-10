@@ -102,16 +102,19 @@
             }
 
             if (this.name === tools.TRUNCATE) {
-                this.$alert('确定要清空当前黑板吗？', '清空黑板', {
-                    confirmButtonText: '确定',
+                this.$confirm('Confirm to truncate blackboard？', 'TRUNCATE', {
+                    confirmButtonText: 'CONFIRM',
+                    cancelButtonText: 'CANCEL',
                     callback: (action) => {
                         this.truncate();
-                        this.$message({
-                            type: 'info',
-                             message: '成功清除当前黑板！',
-                        });
+                        if (action === 'confirm') {
+                            this.$message({
+                                type: 'success',
+                                message: 'Truncate successfully！',
+                            });
+                        }
                     },
-                });
+                })
             }
 
             if (this.name === tools.UNDO) {
