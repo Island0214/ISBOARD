@@ -2,7 +2,7 @@
     <div class="tool-split"></div>
 </template>
 
-<script>
+<script lang="ts">
     import {Component, Vue} from 'vue-property-decorator';
     @Component({})
     export default class ToolSplit extends Vue {

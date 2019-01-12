@@ -4,6 +4,23 @@
     </div>
 </template>
 
+<script lang="ts">
+    import {Component, Vue} from 'vue-property-decorator';
+    import {Action} from 'vuex-class';
+
+    @Component({})
+    export default class App extends Vue {
+        @Action('autoLoginAction') private autoLoginAction!: any;
+
+        private mounted() {
+            const id = sessionStorage.id;
+            if (id !== undefined) {
+                this.autoLoginAction(id);
+            }
+        }
+    }
+</script>
+
 <style lang="less">
     #app {
         font-family: 'Avenir', Helvetica, Arial, sans-serif;

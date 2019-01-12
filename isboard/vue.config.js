@@ -14,6 +14,6 @@ module.exports = {
     integrity: false,
     devServer: {//代理
         port: 8086,
-        proxy: 'http://192.168.255.201:8082'
-    }
+        proxy: 'http://localhost:3000'
+    },
 }

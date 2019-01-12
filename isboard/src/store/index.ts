@@ -37,6 +37,11 @@ export interface UserLoginPayload {
     remember: boolean;
 }
 
+export interface User {
+    id: string;
+    username: string;
+}
+
 export interface Point {
     x: number;
     y: number;

@@ -1,10 +1,13 @@
 @import '../../base/base.less';
+
 @toolboxSize: @toolboxHeight;
 @borderSize: 2px;
 @marginSize: 3px;
 @buttonSize: @toolboxSize - 2 * @marginSize - 10px;
 @marginLeft: 8px;
 @thicknessSize: @buttonSize - 10px;
+@switchSize: 14px;
+@imgSize: 10px;
 
 .toolbox-wrapper {
   .area-wrapper();
@@ -122,20 +125,20 @@
   //}
 
   .switch-button {
-    width:14px;
-    height:14px;
+    width: @switchSize;
+    height: @switchSize;
     border-radius: 50px;
     background-color: @themeColor;
-    position:absolute;
+    position: absolute;
     right: -5px;
     bottom: -2px;
     cursor: pointer;
     img {
       position: absolute;
-      width: 12px;
-      height: 12px;
-      left: 1px;
-      top: 1px;
+      width: @imgSize;
+      height: @imgSize;
+      left: (@switchSize - @imgSize) / 2;
+      top: (@switchSize - @imgSize) / 2;
     }
   }
 
