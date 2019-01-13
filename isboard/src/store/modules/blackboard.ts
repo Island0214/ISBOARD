@@ -67,6 +67,7 @@ const actions = {
                     context.state.blackboards = response.data;
                     if (response.data.length > 0) {
                         context.state.blackboard = response.data[0];
+                        context.state.currentStrokes = response.data[0].strokes;
                     }
                 } else {
                     payload.onError(response.msg)
@@ -76,24 +77,27 @@ const actions = {
             });
     },
     saveBlackboardAction(context: { commit: Commit; state: State }, payload: { user: string, canvas: string, onError: Function }) {
-        context.state.blackboard.strokes = [];
-        for (const stroke of context.state.currentStrokes) {
-            context.state.blackboard.strokes.push(stroke);
-        }
-        context.state.blackboard.thumbnail = payload.canvas;
-        // blackboardApi.findBlackboardByUser(
-        //     (response: any) => {
-        //         if (response.status === 1) {
+        blackboardApi.saveBlackboard(
+            (response: any) => {
+                if (response.status === 1) {
         //             context.state.blackboards = response.data;
         //             if (response.data.length > 0) {
         //                 context.state.blackboard = response.data[0];
         //             }
-        //         } else {
-        //             payload.onError(response.msg)
-        //         }
-        //     }, {
-        //         user: payload.user,
-        //     });
+                    context.state.blackboard.strokes = [];
+                    for (const stroke of context.state.currentStrokes) {
+                        context.state.blackboard.strokes.push(stroke);
+                    }
+                    context.state.blackboard.thumbnail = payload.canvas;
+                } else {
+                    payload.onError(response.msg)
+                }
+            }, {
+                user: payload.user,
+                id: context.state.blackboard.id,
+                thumbnail: payload.canvas,
+                strokes: context.state.currentStrokes,
+            });
     },
     removeBlackboardAction(context: { commit: Commit; state: State }, payload: { user: string, blackboardID: string, onSuccess:Function, onError: Function }) {
         // context.state.blackboards.splice();

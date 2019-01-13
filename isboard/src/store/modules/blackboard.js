@@ -51,6 +51,7 @@ const actions = {
                 context.state.blackboards = response.data;
                 if (response.data.length > 0) {
                     context.state.blackboard = response.data[0];
+                    context.state.currentStrokes = response.data[0].strokes;
                 }
             }
             else {
@@ -61,24 +62,27 @@ const actions = {
         });
     },
     saveBlackboardAction(context, payload) {
-        context.state.blackboard.strokes = [];
-        for (const stroke of context.state.currentStrokes) {
-            context.state.blackboard.strokes.push(stroke);
-        }
-        context.state.blackboard.thumbnail = payload.canvas;
-        // blackboardApi.findBlackboardByUser(
-        //     (response: any) => {
-        //         if (response.status === 1) {
-        //             context.state.blackboards = response.data;
-        //             if (response.data.length > 0) {
-        //                 context.state.blackboard = response.data[0];
-        //             }
-        //         } else {
-        //             payload.onError(response.msg)
-        //         }
-        //     }, {
-        //         user: payload.user,
-        //     });
+        blackboardApi.saveBlackboard((response) => {
+            if (response.status === 1) {
+                //             context.state.blackboards = response.data;
+                //             if (response.data.length > 0) {
+                //                 context.state.blackboard = response.data[0];
+                //             }
+                context.state.blackboard.strokes = [];
+                for (const stroke of context.state.currentStrokes) {
+                    context.state.blackboard.strokes.push(stroke);
+                }
+                context.state.blackboard.thumbnail = payload.canvas;
+            }
+            else {
+                payload.onError(response.msg);
+            }
+        }, {
+            user: payload.user,
+            id: context.state.blackboard.id,
+            thumbnail: payload.canvas,
+            strokes: context.state.currentStrokes,
+        });
     },
     removeBlackboardAction(context, payload) {
         // context.state.blackboards.splice();

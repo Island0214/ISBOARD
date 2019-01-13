@@ -72,3 +72,27 @@ module.exports.removeBlackboard = function (req, res) {
         }
     })
 };
+
+module.exports.saveBlackboard = function (req, res) {
+    let id = req.body.id;
+    let user = req.body.user;
+    let thumbnail = req.body.thumbnail;
+    let strokes = req.body.strokes;
+    Blackboard.findById(id, function (err, content) {
+        if (err) {
+            return res.send({status: 0, msg: err || 'Unknown Blackboard'});
+        } else {
+            if (user === content.user.toString()) {
+                Blackboard.updateOne({_id: id}, {'$set': {thumbnail: thumbnail, strokes: strokes}}, function (err) {
+                    if (err) {
+                        return res.send({status: 0, msg: err || 'Fail'});
+                    } else {
+                        return res.send({status: 1, msg: "Succeed"});
+                    }
+                })
+            } else {
+                return res.send({status: 0, msg: 'Invalid User'});
+            }
+        }
+    })
+};

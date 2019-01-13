@@ -465,6 +465,7 @@
                         this.redoTriangle(ctx, stroke);
                         this.drawStroke(stroke);
                         that.drawing = false;
+                        drawingCanvas.height = drawingCanvas.height;
                         this.toolTriangle();
                         break;
                 }
