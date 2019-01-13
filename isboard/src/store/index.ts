@@ -93,4 +93,14 @@ export interface Blackboard {
     id: string;
     thumbnail: string;
     strokes: Stroke[];
+    createdAt: number;
+}
+
+export class Blackboard implements Blackboard {
+    constructor() {
+        this.id = '';
+        this.thumbnail = '';
+        this.strokes = [];
+        this.createdAt = 0;
+    }
 }

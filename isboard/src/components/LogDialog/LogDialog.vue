@@ -31,9 +31,9 @@
 
 <script lang="ts">
     import {Component, Emit, Model, Prop, Vue, Watch} from 'vue-property-decorator';
-    import {Stroke, UserLoginPayload} from '../../store';
+    import {Stroke, User, UserLoginPayload} from '../../store';
     import {Action, Getter, Mutation, State} from 'vuex-class';
-    import * as types from '../../store/mutation-types'
+    import * as mutations from '../../store/mutation-types'
 
     @Component({})
     export default class LogDialog extends Vue {
@@ -46,11 +46,15 @@
         private remember: boolean = false;
         private pasVisible: boolean = false;
 
-        @Getter('logUser') private logUser!: string;
+        @Getter('logUser') private logUser!: User;
         @Getter('currentStrokes') private currentStrokes!: Stroke[];
-        @Mutation(types.CLEAR_CANVAS) private clearCanvas!: any;
+        @Getter('blackboard') private curBlackboard!: Stroke[];
+        @Mutation(mutations.CLEAR_CANVAS) private clearCanvas!: any;
+        @Mutation(mutations.SET_STROKES) private setStrokes!: any;
+        @Mutation(mutations.SET_SAVE_CURRENT_CANVAS) private setSaveCurrentCanvas!: any;
         @Action('logInAction') private logInAction!: any;
         @Action('registerAction') private registerAction!: any;
+        @Action('createBlackboardAction') private createBlackboardAction!: any;
 
         @Emit('change')
         private closeDialog() {
@@ -87,7 +91,7 @@
                     this.closeDialog();
                     this.saveStrokesBeforeLogin();
                 },
-                onError: (message) => {
+                onError: (message: string) => {
                     this.password = '';
                     this.$message({
                         type: 'error',
@@ -109,7 +113,7 @@
                 onSuccess: () => {
                     this.closeDialog();
                 },
-                onError: (message) => {
+                onError: (message: string) => {
                     this.$message({
                         type: 'error',
                         message: message,
@@ -121,13 +125,32 @@
 
         private saveStrokesBeforeLogin() {
             if (this.currentStrokes.length > 0) {
-                // this.$confirm('Do you want to save your current strokes as a new blackboard?\nIf not, you current strokes will be discarded.', 'SAVE STROKES', {
                 this.$confirm('Do you want to save your current strokes as a new blackboard?\nIf not, you current strokes will be discarded.', 'SAVE STROKES', {
                     confirmButtonText: 'SAVE',
                     cancelButtonText: 'CANCEL',
                     callback: (action) => {
                         if (action === 'confirm') {
-
+                            const strokes = [];
+                            for (const stroke of this.currentStrokes) {
+                                strokes.push(stroke);
+                            }
+                            this.createBlackboardAction({
+                                user: this.logUser.id,
+                                onSuccess: () => {
+                                    console.log(this.curBlackboard);
+                                    console.log(strokes);
+                                    this.setStrokes(strokes);
+                                    this.setSaveCurrentCanvas({status: true, tarBlackboard: this.curBlackboard});
+                                    console.log(this.curBlackboard);
+                                },
+                                onError: (message: string) => {
+                                    this.$message({
+                                        showClose: true,
+                                        type: 'error',
+                                        message: message,
+                                    })
+                                }
+                            });
                         }
                         if (action === 'cancel') {
                             this.clearCanvas()

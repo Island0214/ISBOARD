@@ -63,6 +63,7 @@
     height: 400px;
     overflow-y: scroll;
     text-align: center;
+    //margin-top: -7px;
     //border: @border;
     //box-shadow: @borderShadow;
     //border-radius: 10px;
@@ -75,14 +76,22 @@
       margin-top: 160px;
     }
     .overview-area {
+      position: relative;
+      display: inline-block;
       border: 2px solid #eeeeee;
       width: 280px;
       height: 210px;
       border-radius: 10px;
       margin: 3px;
       margin-bottom: 10px;
+      cursor: pointer;
 
       img {
+        position: absolute;
+        transform: translateY(-12px);
+        left: 0;
+        top: 0;
+        margin-top: 12px;
         width: 100%;
         height: 100%;
         background-size: cover;
@@ -94,23 +103,29 @@
         border-radius: 50px;
         background-color: @themeColor;
         position: absolute;
-        right: 0;
-        top: 0;
+        right: -5px;
+        top: -5px;
         cursor: pointer;
         color: #FFFFFF;
         font-weight: 600;
         img {
+          margin: 0;
           position: absolute;
           width: 14px;
           height: 14px;
           left: 0;
           top: 0;
+          transform: translateY(0);
         }
       }
     }
 
-    .selected-blackboard {
+    .overview-area:hover {
       border-color: @themeColor;
+    }
+
+    .selected-blackboard {
+      border-color: lighten(@themeColor, 15%);
     }
   }
 }

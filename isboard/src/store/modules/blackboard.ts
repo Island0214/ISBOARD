@@ -1,34 +1,99 @@
 import { Commit } from 'vuex';
 import * as types from '../mutation-types';
 import { Point, Stroke, Blackboard } from '../index';
+import * as blackboardApi from '../../api/blackboard';
 
 export interface State {
     blackboards: Blackboard[];
     blackboard: Blackboard;
+    tarBlackboard: Blackboard;
     currentStrokes: Stroke[];
     undoStrokes: Stroke[];
     truncateStrokes: Stroke[];
+    saveCurrentCanvasStatus: boolean;
 }
 
 const initState: State = {
     blackboards: [],
-    blackboard: {id: '', thumbnail: '', strokes: []},
+    blackboard: {id: '', strokes: [], thumbnail: '', createdAt: 0},
+    tarBlackboard: {id: '', strokes: [], thumbnail: '', createdAt: 0},
     currentStrokes: [],
     undoStrokes: [],
     truncateStrokes: [],
+    saveCurrentCanvasStatus: false,
 };
 
 // getters
 const getters = {
     blackboards: (state: State) => state.blackboards,
     blackboard: (state: State) => state.blackboard,
+    tarBlackboard: (state: State) => state.tarBlackboard,
     currentStrokes: (state: State) => state.currentStrokes,
     undoStrokes: (state: State) => state.undoStrokes,
     truncateStrokes: (state: State) => state.truncateStrokes,
+    saveCurrentCanvasStatus: (state: State) => state.saveCurrentCanvasStatus,
 };
 
 // actions
 const actions = {
+    createBlackboardAction(context: { commit: Commit; state: State }, payload: { user: string, onSuccess: Function, onError: Function }) {
+        blackboardApi.createBlackboard(
+            (response: any) => {
+                if (response.status === 1) {
+                    const data = response.data;
+                    let newBlackboard: Blackboard = {
+                        id: data.id,
+                        thumbnail: '',
+                        strokes: [],
+                        createdAt: data.createdAt,
+                    };
+                    context.state.blackboards.splice(0, 0, newBlackboard);
+                    context.state.blackboard = newBlackboard;
+                    context.commit(types.CLEAR_CANVAS);
+                    payload.onSuccess();
+                } else {
+                    payload.onError(response.msg)
+                }
+        }, {
+                user: payload.user,
+            });
+    },
+    findBlackboardByUserAction(context: { commit: Commit; state: State }, payload: { user: string, onError: Function }) {
+        blackboardApi.findBlackboardByUser(
+            (response: any) => {
+                if (response.status === 1) {
+                    context.state.blackboards = response.data;
+                    if (response.data.length > 0) {
+                        context.state.blackboard = response.data[0];
+                    }
+                } else {
+                    payload.onError(response.msg)
+                }
+            }, {
+                user: payload.user,
+            });
+    },
+    saveBlackboardAction(context: { commit: Commit; state: State }, payload: { user: string, canvas: string, onError: Function }) {
+        context.state.blackboard.strokes = [];
+        for (const stroke of context.state.currentStrokes) {
+            context.state.blackboard.strokes.push(stroke);
+        }
+        context.state.blackboard.thumbnail = payload.canvas;
+        console.log(context.state.blackboards)
+        // blackboardApi.findBlackboardByUser(
+        //     (response: any) => {
+        //         if (response.status === 1) {
+        //             context.state.blackboards = response.data;
+        //             if (response.data.length > 0) {
+        //                 context.state.blackboard = response.data[0];
+        //             }
+        //         } else {
+        //             payload.onError(response.msg)
+        //         }
+        //     }, {
+        //         user: payload.user,
+        //     });
+    }
 };
 
 // mutations
@@ -60,38 +125,36 @@ const mutations = {
         state.currentStrokes = [];
         state.undoStrokes = [];
     },
-    [types.SAVE_CANVAS](state: State, canavs: string) {
-        state.blackboard.strokes = [];
-        for (const stroke of state.currentStrokes) {
-            state.blackboard.strokes.push(stroke);
-        }
-        state.blackboard.thumbnail = canavs;
-        for (const blackboard of state.blackboards) {
-            if (blackboard.id === state.blackboard.id) {
-                blackboard.strokes = [];
-                for (const stroke of blackboard.strokes) {
-                    blackboard.strokes.push(stroke);
-                }
-                blackboard.thumbnail = canavs;
-            }
-        }
-    },
     [types.CLEAR_CANVAS](state: State) {
         state.currentStrokes = [];
         state.undoStrokes = [];
         state.truncateStrokes = [];
     },
-    [types.CLEAR_CANVAS](state: State) {
+    [types.CHANGE_CANVAS](state: State, blackboard:Blackboard) {
+        state.blackboard = blackboard;
         state.currentStrokes = [];
+        for (const stroke of blackboard.strokes) {
+            state.currentStrokes.push(stroke);
+        }
         state.undoStrokes = [];
         state.truncateStrokes = [];
+    },
+    [types.SET_SAVE_CURRENT_CANVAS](state: State, payload: {status: boolean, tarBlackboard: Blackboard}) {
+        console.log(payload);
+        state.saveCurrentCanvasStatus = payload.status;
+        if (payload.status) {
+            state.tarBlackboard = payload.tarBlackboard;
+        }
     },
     [types.CLEAR_BLACKBOARDS](state: State) {
         state.currentStrokes = [];
         state.undoStrokes = [];
         state.truncateStrokes = [];
         state.blackboards = [];
-        state.blackboard = {id: '', thumbnail: '', strokes: []};
+        state.blackboard = {id: '', strokes: [], thumbnail: '', createdAt: 0};
+    },
+    [types.SET_STROKES](state: State, strokes: Stroke[]) {
+        state.currentStrokes = strokes;
     },
 };
 

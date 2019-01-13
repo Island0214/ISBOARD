@@ -47,4 +47,12 @@ Stroke.prototype.toString = function () {
         'thickness: ' + this.thickness + '; ' +
         '}';
 };
+export class Blackboard {
+    constructor() {
+        this.id = '';
+        this.thumbnail = '';
+        this.strokes = [];
+        this.createdAt = 0;
+    }
+}
 //# sourceMappingURL=index.js.map

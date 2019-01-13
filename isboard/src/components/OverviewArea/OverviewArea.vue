@@ -20,10 +20,11 @@
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from 'vue-property-decorator';
+    import {Component, Vue, Watch} from 'vue-property-decorator';
     import Overviews from './Overviews.vue';
-    import {Getter} from 'vuex-class';
-    import {Blackboard} from '../../store';
+    import {Action, Getter, Mutation} from 'vuex-class';
+    import {Blackboard, Stroke, User} from '../../store';
+    import * as mutations from '../../store/mutation-types'
 
     @Component({
         components: {
@@ -33,13 +34,67 @@
     export default class OverviewArea extends Vue {
         @Getter('blackboards') private blackboards!: Blackboard[];
         @Getter('logStatus') private logStatus!: boolean;
+        @Getter('logUser') private logUser!: User;
+        @Getter('blackboard') private curBlackboard!: Blackboard;
+        @Getter('currentStrokes') private currentStrokes!: Stroke[];
+        @Mutation(mutations.SET_SAVE_CURRENT_CANVAS) private setSaveCurrentCanvas!: any;
+        @Action('createBlackboardAction') private createBlackboardAction!: any;
+        @Action('findBlackboardByUserAction') private findBlackboardByUserAction!: any;
+
+        @Watch('logStatus')
+        private getBlackboards(newVal: boolean) {
+            if (newVal) {
+                this.findBlackboardByUserAction({
+                    user: this.logUser.id,
+                    onError: (message: string) => {
+                        this.$message({
+                            showClose: true,
+                            type: 'error',
+                            message: message,
+                        })
+                    }
+                });
+            }
+        }
 
         get disableCreate() {
             return !this.logStatus;
         }
 
-        private createBlackboard() {
+        private newOverview() {
+            this.createBlackboardAction({
+                user: this.logUser.id,
+                onSuccess: () => {
+                },
+                onError: (message: string) => {
+                    this.$message({
+                        showClose: true,
+                        type: 'error',
+                        message: message,
+                    })
+                }
+            });
+        }
 
+        private createBlackboard() {
+            if (this.currentStrokes.toString() !== this.curBlackboard.strokes.toString()) {
+                this.$confirm('Do you want to save your current strokes?\nIf not, you current strokes will be discarded.', 'SAVE STROKES', {
+                    confirmButtonText: 'SAVE',
+                    cancelButtonText: 'CANCEL',
+                    distinguishCancelAndClose: true,
+                    callback: (action) => {
+                        if (action === 'confirm') {
+                            this.setSaveCurrentCanvas({status: true, tarBlackboard: this.curBlackboard});
+                            this.newOverview()
+                        }
+                        if (action === 'cancel') {
+                            this.newOverview()
+                        }
+                    },
+                })
+            } else {
+                this.newOverview()
+            }
         }
     }
 </script>

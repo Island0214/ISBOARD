@@ -57,7 +57,7 @@
         }
 
         private logout() {
-            this.logOutAction((username) => {
+            this.logOutAction((username: string) => {
                 this.$message({
                     type: 'success',
                     message: 'User: ' + username + ' has logged out.'

@@ -12,9 +12,9 @@
 
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
-    import {Getter, Mutation} from 'vuex-class';
+    import {Action, Getter, Mutation} from 'vuex-class';
     import * as mutations from '../../store/mutation-types';
-    import {Blackboard, Point, Stroke} from '../../store';
+    import {Blackboard, Point, Stroke, User} from '../../store';
     import * as tools from '../../base/tools';
 
     @Component({})
@@ -30,7 +30,6 @@
         private drawingCanvas!: HTMLCanvasElement;
         private drawingCtx!: CanvasRenderingContext2D;
         private showDrawingCanvas: boolean = false;
-        // private canvasHistory: string[] = [];
         @Getter('color') private color!: string;
         @Getter('thick') private thickness!: number;
         @Getter('tool') private tool!: string;
@@ -38,17 +37,22 @@
         @Getter('currentStrokes') private currentStrokes!: Stroke[];
         @Getter('undoStrokes') private undoStrokes!: Stroke[];
         @Getter('blackboard') private curBlackboard!: Blackboard;
+        @Getter('blackboards') private blackboards!: Blackboard[];
+        @Getter('tarBlackboard') private tarBlackboard!: Blackboard;
         @Getter('logStatus') private logStatus!: boolean;
+        @Getter('logUser') private logUser!: User;
+        @Getter('saveCurrentCanvasStatus') private saveCurrentCanvasStatus!: boolean;
         @Mutation(mutations.SET_CLEAR) private setClear!: any;
         @Mutation(mutations.DRAW_STROKE) private drawStroke!: any;
-        @Mutation(mutations.SAVE_CANVAS) private saveCanvasMutation!: any;
+        @Mutation(mutations.SET_SAVE_CURRENT_CANVAS) private setSaveCurrentCanvas!: any;
+        @Mutation(mutations.CHANGE_CANVAS) private changeCanvas!: any;
+        @Action('saveBlackboardAction') private saveBlackboardAction!: any;
 
         get disableSave() {
-            if (!this.logStatus) {
+            if (!this.logStatus || this.blackboards.length === 0) {
                 return true;
             }
             return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
-            // return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
         }
 
         private getMousePosition = (canvas: HTMLCanvasElement, x: number, y: number) => {
@@ -57,6 +61,15 @@
                 x: x - boundingClientRect.left * (canvas.width / boundingClientRect.width),
                 y: y - boundingClientRect.top * (canvas.height / boundingClientRect.height),
             };
+        };
+
+        @Watch('saveCurrentCanvasStatus')
+        private saveCurrentCanvas(newVal: boolean) {
+            if (newVal) {
+                this.saveCanvas();
+                this.changeCanvas(this.tarBlackboard);
+                this.setSaveCurrentCanvas({status: false, tarBlackboard: {id: '', strokes: [], thumbnail: '', createdAt: 0}});
+            }
         }
 
         @Watch('tool')
@@ -586,7 +599,17 @@
 
         private saveCanvas() {
             var data = this.canvas.toDataURL('image/png', 1 );
-            this.saveCanvasMutation(data);
+            this.saveBlackboardAction({
+                user: this.logUser.id,
+                canvas: data,
+                onError: (message: string) => {
+                    this.$message({
+                        showClose: true,
+                        type: 'error',
+                        message: message,
+                    })
+                }
+            })
         }
 
         private mounted() {

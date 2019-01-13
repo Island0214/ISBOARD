@@ -11,6 +11,8 @@ export const REDO_STROKE = 'REDO_STROKE';
 
 export const TRUNCATE = 'TRUNCATE';
 
-export const SAVE_CANVAS = 'SAVE_CANVAS';
+export const SET_STROKES = 'SET_STROKES';
 export const CLEAR_CANVAS = 'CLEAR_CANVAS';
+export const CHANGE_CANVAS = 'CHANGE_CANVAS';
+export const SET_SAVE_CURRENT_CANVAS = 'SET_SAVE_CURRENT_CANVAS';
 export const CLEAR_BLACKBOARDS = 'CLEAR_BLACKBOARDS';
