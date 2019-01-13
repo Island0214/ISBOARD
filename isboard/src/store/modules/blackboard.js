@@ -33,7 +33,9 @@ const actions = {
                 };
                 context.state.blackboards.splice(0, 0, newBlackboard);
                 context.state.blackboard = newBlackboard;
-                context.commit(types.CLEAR_CANVAS);
+                if (context.state.blackboards.length > 1) {
+                    context.commit(types.CLEAR_CANVAS);
+                }
                 payload.onSuccess();
             }
             else {
@@ -64,7 +66,6 @@ const actions = {
             context.state.blackboard.strokes.push(stroke);
         }
         context.state.blackboard.thumbnail = payload.canvas;
-        console.log(context.state.blackboards);
         // blackboardApi.findBlackboardByUser(
         //     (response: any) => {
         //         if (response.status === 1) {
@@ -78,6 +79,43 @@ const actions = {
         //     }, {
         //         user: payload.user,
         //     });
+    },
+    removeBlackboardAction(context, payload) {
+        // context.state.blackboards.splice();
+        blackboardApi.removeBlackboard((response) => {
+            if (response.status === 1) {
+                for (let i = 0; i < context.state.blackboards.length; i++) {
+                    const blackboard = context.state.blackboards[i];
+                    if (blackboard.id === payload.blackboardID) {
+                        context.state.blackboards.splice(i, 1);
+                        if (payload.blackboardID === context.state.blackboard.id) {
+                            if (i === context.state.blackboards.length) {
+                                if (context.state.blackboards.length === 0) {
+                                    context.state.blackboard = { id: '', strokes: [], thumbnail: '', createdAt: 0 };
+                                }
+                                else {
+                                    context.state.blackboard = context.state.blackboards[i - 1];
+                                }
+                            }
+                            else {
+                                context.state.blackboard = context.state.blackboards[i];
+                            }
+                            context.state.currentStrokes = context.state.blackboard.strokes;
+                            context.state.undoStrokes = [];
+                            context.state.truncateStrokes = [];
+                        }
+                        break;
+                    }
+                }
+                payload.onSuccess();
+            }
+            else {
+                payload.onError(response.msg);
+            }
+        }, {
+            user: payload.user,
+            id: payload.blackboardID
+        });
     }
 };
 // mutations
@@ -124,7 +162,6 @@ const mutations = {
         state.truncateStrokes = [];
     },
     [types.SET_SAVE_CURRENT_CANVAS](state, payload) {
-        console.log(payload);
         state.saveCurrentCanvasStatus = payload.status;
         if (payload.status) {
             state.tarBlackboard = payload.tarBlackboard;

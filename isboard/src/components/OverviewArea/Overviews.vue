@@ -1,16 +1,18 @@
 <template>
-    <div :class="['overview-area', {'selected-blackboard': blackboard.id === curBlackboard.id}]" @click="changeBlackboard">
+    <div :class="['overview-area', {'selected-blackboard': blackboard.id === curBlackboard.id}]">
         <div class="delete-button" @click="deleteBlackboard">
             <img src="../../assets/buttons/delete.png"/>
         </div>
-        <img :src="blackboard.thumbnail" v-if="blackboard.thumbnail !== ''"/>
+        <div class="img-wrapper" @click="changeBlackboard">
+            <img :src="blackboard.thumbnail" v-if="blackboard.thumbnail !== ''"/>
+        </div>
         <!--<img v-else>-->
     </div>
 </template>
 
 <script lang="ts">
     import {Component, Model, Prop, Vue} from 'vue-property-decorator';
-    import {Blackboard, Stroke} from '../../store';
+    import {Blackboard, Stroke, User} from '../../store';
     import {Action, Getter, Mutation} from 'vuex-class';
     import * as mutations from '../../store/mutation-types'
 
@@ -18,20 +20,38 @@
     export default class Overviews extends Vue {
         @Prop() private blackboard!: Blackboard;
         @Getter('blackboard') private curBlackboard!: Blackboard;
+        @Getter('logUser') private logUser!: User;
         @Getter('currentStrokes') private currentStrokes!: Stroke[];
         @Mutation(mutations.CHANGE_CANVAS) private changeCanvas!: any;
         @Mutation(mutations.SET_SAVE_CURRENT_CANVAS) private setSaveCurrentCanvas!: any;
+        @Action('removeBlackboardAction') private removeBlackboardAction!: any;
 
         private deleteBlackboard() {
-            this.$confirm('Confirm to delete this blackboard？', 'DELETE BLACKBOARD', {
+            this.$confirm('Confirm to remove this blackboard？', 'REMOVE BLACKBOARD', {
                 confirmButtonText: 'CONFIRM',
                 cancelButtonText: 'CANCEL',
                 callback: (action) => {
                     if (action === 'confirm') {
-                        this.$message({
-                            type: 'success',
-                            message: 'Truncate successfully！',
-                        });
+                        this.removeBlackboardAction({
+                            user: this.logUser.id,
+                            blackboardID: this.blackboard.id,
+                            onSuccess: () => {
+                                this.$message({
+                                    type: 'success',
+                                    message: 'Remove blackboard successfully！',
+                                });
+                            },
+                            onError: (message: string) => {
+                                this.$message({
+                                    type: 'error',
+                                    message: message,
+                                });
+                            }
+                        })
+                        // this.$message({
+                        //     type: 'success',
+                        //     message: 'Truncate successfully！',
+                        // });
                     }
                 },
             });

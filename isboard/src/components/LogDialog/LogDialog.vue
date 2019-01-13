@@ -112,6 +112,7 @@
                 user: userLoginPayload,
                 onSuccess: () => {
                     this.closeDialog();
+                    this.saveStrokesBeforeLogin();
                 },
                 onError: (message: string) => {
                     this.$message({
@@ -137,11 +138,8 @@
                             this.createBlackboardAction({
                                 user: this.logUser.id,
                                 onSuccess: () => {
-                                    console.log(this.curBlackboard);
-                                    console.log(strokes);
                                     this.setStrokes(strokes);
                                     this.setSaveCurrentCanvas({status: true, tarBlackboard: this.curBlackboard});
-                                    console.log(this.curBlackboard);
                                 },
                                 onError: (message: string) => {
                                     this.$message({

@@ -31,3 +31,19 @@ export function findBlackboardByUser(callback: Function, body: object) {
         .catch(function (error) {
         })
 }
+
+export function removeBlackboard(callback: Function, body: object) {
+    axios.post('/blackboard/remove',
+        JSON.parse(JSON.stringify(body)),
+        {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+    )
+        .then(function (response) {
+            callback(response.data)
+        })
+        .catch(function (error) {
+        })
+}
