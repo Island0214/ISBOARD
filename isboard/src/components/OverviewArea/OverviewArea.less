@@ -62,9 +62,18 @@
     //background: #dcdfe6;
     height: 400px;
     overflow-y: scroll;
+    text-align: center;
     //border: @border;
     //box-shadow: @borderShadow;
     //border-radius: 10px;
+
+    p {
+      position: relative;
+      display: inline-block;
+      width: 85%;
+      color: #333;
+      margin-top: 160px;
+    }
     .overview-area {
       border: 2px solid #eeeeee;
       width: 280px;
@@ -80,11 +89,11 @@
       }
 
       .delete-button {
-        width:14px;
-        height:14px;
+        width: 14px;
+        height: 14px;
         border-radius: 50px;
         background-color: @themeColor;
-        position:absolute;
+        position: absolute;
         right: 0;
         top: 0;
         cursor: pointer;

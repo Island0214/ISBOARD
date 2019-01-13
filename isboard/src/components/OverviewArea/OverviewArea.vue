@@ -1,13 +1,16 @@
 <template>
     <div class="overview-area-wrapper">
-        <el-button style="margin: 10px 0;" class="my-button" @click="createBlackboard">C R E A T E +</el-button>
+        <el-button style="margin: 10px 0;" class="my-button" @click="createBlackboard" :disabled="disableCreate">C R E A T E +</el-button>
 
         <div class="split-line">
             <p>Saved Blackboard</p>
         </div>
 
-        <div class="overviews-area">
+        <div class="overviews-area" v-if="logStatus">
             <overviews v-for="(blackboard, index) in blackboards" :key="'blackboard-' + index" :blackboard="blackboard"></overviews>
+        </div>
+        <div class="overviews-area" v-else>
+            <p>You can create new blackboard and save strokes after you log in.</p>
         </div>
 
         <div class="notification-area">
@@ -29,6 +32,11 @@
     })
     export default class OverviewArea extends Vue {
         @Getter('blackboards') private blackboards!: Blackboard[];
+        @Getter('logStatus') private logStatus!: boolean;
+
+        get disableCreate() {
+            return !this.logStatus;
+        }
 
         private createBlackboard() {
 

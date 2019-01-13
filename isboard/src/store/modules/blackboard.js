@@ -1,7 +1,7 @@
 import * as types from '../mutation-types';
 const initState = {
-    blackboards: [{ id: '123', thumbnail: '', strokes: [] }],
-    blackboard: { id: '123', thumbnail: '', strokes: [] },
+    blackboards: [],
+    blackboard: { id: '', thumbnail: '', strokes: [] },
     currentStrokes: [],
     undoStrokes: [],
     truncateStrokes: [],
@@ -60,6 +60,23 @@ const mutations = {
                 blackboard.thumbnail = canavs;
             }
         }
+    },
+    [types.CLEAR_CANVAS](state) {
+        state.currentStrokes = [];
+        state.undoStrokes = [];
+        state.truncateStrokes = [];
+    },
+    [types.CLEAR_CANVAS](state) {
+        state.currentStrokes = [];
+        state.undoStrokes = [];
+        state.truncateStrokes = [];
+    },
+    [types.CLEAR_BLACKBOARDS](state) {
+        state.currentStrokes = [];
+        state.undoStrokes = [];
+        state.truncateStrokes = [];
+        state.blackboards = [];
+        state.blackboard = { id: '', thumbnail: '', strokes: [] };
     },
 };
 export default {

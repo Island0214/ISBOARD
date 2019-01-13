@@ -111,6 +111,7 @@
                             this.$message({
                                 type: 'success',
                                 message: 'Truncate successfully！',
+                                showClose: true,
                             });
                         }
                     },

@@ -38,9 +38,18 @@
         @Getter('currentStrokes') private currentStrokes!: Stroke[];
         @Getter('undoStrokes') private undoStrokes!: Stroke[];
         @Getter('blackboard') private curBlackboard!: Blackboard;
+        @Getter('logStatus') private logStatus!: boolean;
         @Mutation(mutations.SET_CLEAR) private setClear!: any;
         @Mutation(mutations.DRAW_STROKE) private drawStroke!: any;
         @Mutation(mutations.SAVE_CANVAS) private saveCanvasMutation!: any;
+
+        get disableSave() {
+            if (!this.logStatus) {
+                return true;
+            }
+            return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
+            // return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
+        }
 
         private getMousePosition = (canvas: HTMLCanvasElement, x: number, y: number) => {
             const boundingClientRect = canvas.getBoundingClientRect();
@@ -89,6 +98,13 @@
                 this.setClear(false);
 
             }
+        }
+
+        @Watch('currentStrokes')
+        private strokeChanged() {
+            const canvas = this.canvas;
+            canvas.height = canvas.height;
+            this.redrawCanvas(this.currentStrokes);
         }
 
         private redoPen(stroke: Stroke) {
@@ -540,13 +556,6 @@
             drawingCtx.setLineDash([]);
         }
 
-        @Watch('currentStrokes')
-        private strokeChanged() {
-            const canvas = this.canvas;
-            canvas.height = canvas.height;
-            this.redrawCanvas(this.currentStrokes);
-        }
-
         private redrawCanvas(strokes: Stroke[]) {
             const ctx = this.ctx;
             for(let i = 0; i < strokes.length; i++) {
@@ -573,11 +582,6 @@
 
                 }
             }
-        }
-
-        get disableSave() {
-            return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
-            // return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
         }
 
         private saveCanvas() {

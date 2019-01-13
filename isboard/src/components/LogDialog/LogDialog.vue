@@ -31,8 +31,9 @@
 
 <script lang="ts">
     import {Component, Emit, Model, Prop, Vue, Watch} from 'vue-property-decorator';
-    import {UserLoginPayload} from '../../store';
-    import {Action, Getter, State} from 'vuex-class';
+    import {Stroke, UserLoginPayload} from '../../store';
+    import {Action, Getter, Mutation, State} from 'vuex-class';
+    import * as types from '../../store/mutation-types'
 
     @Component({})
     export default class LogDialog extends Vue {
@@ -46,6 +47,8 @@
         private pasVisible: boolean = false;
 
         @Getter('logUser') private logUser!: string;
+        @Getter('currentStrokes') private currentStrokes!: Stroke[];
+        @Mutation(types.CLEAR_CANVAS) private clearCanvas!: any;
         @Action('logInAction') private logInAction!: any;
         @Action('registerAction') private registerAction!: any;
 
@@ -82,12 +85,14 @@
                 user: userLoginPayload,
                 onSuccess: () => {
                     this.closeDialog();
+                    this.saveStrokesBeforeLogin();
                 },
                 onError: (message) => {
                     this.password = '';
                     this.$message({
                         type: 'error',
                         message: message,
+                        showClose: true,
                     })
                 }
             });
@@ -108,9 +113,28 @@
                     this.$message({
                         type: 'error',
                         message: message,
+                        showClose: true,
                     })
                 }
             })
+        }
+
+        private saveStrokesBeforeLogin() {
+            if (this.currentStrokes.length > 0) {
+                // this.$confirm('Do you want to save your current strokes as a new blackboard?\nIf not, you current strokes will be discarded.', 'SAVE STROKES', {
+                this.$confirm('Do you want to save your current strokes as a new blackboard?\nIf not, you current strokes will be discarded.', 'SAVE STROKES', {
+                    confirmButtonText: 'SAVE',
+                    cancelButtonText: 'CANCEL',
+                    callback: (action) => {
+                        if (action === 'confirm') {
+
+                        }
+                        if (action === 'cancel') {
+                            this.clearCanvas()
+                        }
+                    },
+                })
+            }
         }
     }
 </script>

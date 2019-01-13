@@ -58,7 +58,6 @@
 
         private logout() {
             this.logOutAction((username) => {
-                console.log(username)
                 this.$message({
                     type: 'success',
                     message: 'User: ' + username + ' has logged out.'
