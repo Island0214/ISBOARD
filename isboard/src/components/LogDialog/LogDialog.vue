@@ -131,7 +131,7 @@
                     cancelButtonText: 'CANCEL',
                     callback: (action) => {
                         if (action === 'confirm') {
-                            const strokes = [];
+                            const strokes: Stroke[] = [];
                             for (const stroke of this.currentStrokes) {
                                 strokes.push(stroke);
                             }

@@ -46,6 +46,7 @@
         @Mutation(mutations.DRAW_STROKE) private drawStroke!: any;
         @Mutation(mutations.SET_SAVE_CURRENT_CANVAS) private setSaveCurrentCanvas!: any;
         @Mutation(mutations.CHANGE_CANVAS) private changeCanvas!: any;
+        @Mutation(mutations.CLEAR_BLACKBOARDS) private clearBlackboards!: any;
         @Action('saveBlackboardAction') private saveBlackboardAction!: any;
 
         get disableSave() {
@@ -118,6 +119,13 @@
             const canvas = this.canvas;
             canvas.height = canvas.height;
             this.redrawCanvas(this.currentStrokes);
+        }
+
+        @Watch('logStatus')
+        private logOutClearCanvas() {
+            if (this.logStatus === false) {
+                this.clearBlackboards();
+            }
         }
 
         private redoPen(stroke: Stroke) {
