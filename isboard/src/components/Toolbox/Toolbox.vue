@@ -26,13 +26,18 @@
     export default class Toolbox extends Vue {
         private toolList = [{
             type: types.TOOL_CLICK,
-            name: tools.UNDO,
-        }, {
-            type: types.TOOL_CLICK,
-            name: tools.REDO,
+            name: tools.TRUNCATE,
         }, {
             type: types.SPLIT,
         }, {
+        //     type: types.TOOL_CLICK,
+        //     name: tools.UNDO,
+        // }, {
+        //     type: types.TOOL_CLICK,
+        //     name: tools.REDO,
+        // }, {
+        //     type: types.SPLIT,
+        // }, {
             type: types.TOOL,
             name: tools.PEN,
             index: 0,
@@ -60,15 +65,15 @@
         }, {
             type: types.THICKNESS,
             name: tools.THICKNESS,
-        }, {
-            type: types.SPLIT,
-        }, {
-            type: types.TOOL,
-            name: tools.ERASER,
-            index: 5,
-        }, {
-            type: types.TOOL_CLICK,
-            name: tools.TRUNCATE,
+        // }, {
+        //     type: types.SPLIT,
+        // }, {
+        //     type: types.TOOL,
+        //     name: tools.ERASER,
+        //     index: 5,
+        // }, {
+        //     type: types.TOOL_CLICK,
+        //     name: tools.TRUNCATE,
         }];
 
         private currentSelect: number = 0;

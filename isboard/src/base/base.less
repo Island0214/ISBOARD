@@ -6,6 +6,9 @@ size
 @overviewHeight: @totalHeight - @bannerHeight;
 @toolboxHeight: 70px;
 @blackboardHeight: @totalHeight - @toolboxHeight;
+@editHeight: 350px;
+@layerHeight: @totalHeight - @editHeight;
+@titleHeight: 42px;
 
 /**
 border
@@ -19,11 +22,56 @@ color
  */
 @hoverColor: #FFCAAA;
 @themeColor: #759FD2;
+@areaColor: #fafafa;
 
 .area-wrapper() {
   border: @border;
   box-shadow: @borderShadow;
   margin: 10px;
-  background-color: #FFF;
+  background-color: @areaColor;
   border-radius: @borderRadius;
+}
+
+.split-line {
+  .line();
+  margin-top: 12px;
+
+  p {
+    font-size: 12px;
+    top: -12px;
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    width: auto;
+    margin: 0;
+    background: @areaColor;
+    color: #999;
+    font-weight: 600;
+    padding: 0 5px;
+  }
+}
+
+.line {
+  position: relative;
+  display: inline-block;
+  border: 1px solid #eee;
+  height: 0;
+  width: 90%;
+}
+
+.title {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  border-bottom: @border;
+  box-shadow: @borderShadow;
+  height: @titleHeight;
+
+  p {
+    margin: 10px 0;
+    border: none;
+    font-weight: 600;
+    color: #666;
+    letter-spacing: 1px;
+  }
 }

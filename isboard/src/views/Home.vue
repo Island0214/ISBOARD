@@ -4,9 +4,13 @@
             <banner></banner>
             <overview-area></overview-area>
         </div>
-        <div class="right-wrapper">
+        <div class="center-wrapper">
             <toolbox></toolbox>
             <blackboard></blackboard>
+        </div>
+        <div class="right-wrapper">
+            <edit-area></edit-area>
+            <layer-area></layer-area>
         </div>
     </div>
 </template>
@@ -17,6 +21,8 @@
     import Toolbox from '@/components/Toolbox/Toolbox.vue';
     import OverviewArea from '@/components/OverviewArea/OverviewArea.vue';
     import Blackboard from '@/components/Blackboard/Blackboard.vue';
+    import EditArea from '@/components/EditArea/EditArea.vue';
+    import LayerArea from '@/components/LayerArea/LayerArea.vue';
 
     @Component({
         components: {
@@ -24,6 +30,8 @@
             Toolbox,
             OverviewArea,
             Blackboard,
+            EditArea,
+            LayerArea,
         },
     })
     export default class Home extends Vue {
@@ -34,7 +42,7 @@
     #home-page {
         position: relative;
         display: inline-block;
-        width: 1180px;
+        width: 1400px;
         min-height: 200px;
         /*border: 1px solid #eee;*/
         margin: 0;
@@ -46,10 +54,18 @@
             margin: 0;
         }
 
-        .right-wrapper {
+        .center-wrapper {
             position: relative;
             display: inline-block;
             width: 860px;
+            /*float: right;*/
+            margin: 0;
+        }
+
+        .right-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 220px;
             float: right;
             margin: 0;
         }

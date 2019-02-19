@@ -4,24 +4,30 @@
 @borderSize: 2px;
 @marginSize: 3px;
 @buttonSize: @toolboxSize - 2 * @marginSize - 10px;
-@marginLeft: 8px;
+@marginLeft: 10px;
 @thicknessSize: @buttonSize - 10px;
 @switchSize: 14px;
 @imgSize: 10px;
+@toolboxWidth: 840px;
+@toolboxPadding: 20px - @marginLeft;
 
 .toolbox-wrapper {
   .area-wrapper();
-  width: 840px;
+  width: @toolboxWidth - 2 * @toolboxPadding;
   height: @toolboxSize;
   //text-align: left;
   white-space: nowrap;
   overflow-x: hidden;
   overflow-y: hidden;
+  text-align: left;
+  padding: 0 @toolboxPadding;
 }
 
 .tool-wrapper {
+  text-align: center;
   position: relative;
   display: inline-block;
+  background-color: #FFFFFF;
   height: @buttonSize;
   width: @buttonSize;
   margin: @marginSize @marginLeft;
@@ -42,6 +48,7 @@
     background-color: transparent;
     border: 2px solid #eee;
     border-radius: 5px;
+    background-color: #FFFFFF;
     //box-shadow: @borderShadow;
     cursor: pointer;
     outline: none;
@@ -87,6 +94,7 @@
     position: absolute;
     margin-top: -10px;
     margin-left: -26px;
+    background-color: #FFFFFF;
     //margin: @marginSize;
   }
 
@@ -218,11 +226,11 @@
 }
 
 .tool-split {
-  position: relative;
+  position: static;
   display: inline-block;
-  height: 60px;
+  height: 30px;
   width: 5px;
-  margin: 0px 5px;
+  margin: 17px 10px;
   background-color: #dcdfe6;
 }
 
