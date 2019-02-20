@@ -11,6 +11,7 @@ export interface State {
     undoStrokes: Stroke[];
     truncateStrokes: Stroke[];
     saveCurrentCanvasStatus: boolean;
+    selectedStroke: Stroke;
 }
 
 const initState: State = {
@@ -21,6 +22,7 @@ const initState: State = {
     undoStrokes: [],
     truncateStrokes: [],
     saveCurrentCanvasStatus: false,
+    selectedStroke: {type: '', points: [], solid: true, thickness: 0, color: ''},
 };
 
 // getters
@@ -32,6 +34,7 @@ const getters = {
     undoStrokes: (state: State) => state.undoStrokes,
     truncateStrokes: (state: State) => state.truncateStrokes,
     saveCurrentCanvasStatus: (state: State) => state.saveCurrentCanvasStatus,
+    selectedStroke: (state: State) => state.selectedStroke,
 };
 
 // actions
@@ -67,7 +70,10 @@ const actions = {
                     context.state.blackboards = response.data;
                     if (response.data.length > 0) {
                         context.state.blackboard = response.data[0];
-                        context.state.currentStrokes = response.data[0].strokes;
+                        context.state.currentStrokes = [];
+                        for (let i = 0; i < response.data[0].strokes.length; i++) {
+                            context.state.currentStrokes.push(response.data[0].strokes[i]);
+                        }
                     }
                 } else {
                     payload.onError(response.msg)
@@ -194,6 +200,21 @@ const mutations = {
     },
     [types.SET_STROKES](state: State, strokes: Stroke[]) {
         state.currentStrokes = strokes;
+    },
+    [types.SET_SELECTED_STROKE](state: State, stroke: Stroke) {
+        state.selectedStroke = stroke;
+    },
+    [types.DELETE_STROKES](state: State, stroke: Stroke) {
+        console.log(stroke);
+        for (let i = 0; i < state.currentStrokes.length; i++) {
+            if (state.currentStrokes[i] === stroke) {
+                state.currentStrokes.splice(i, 1);
+                if (state.selectedStroke === stroke) {
+                    state.selectedStroke = state.currentStrokes[i];
+                }
+                break;
+            }
+        }
     },
 };
 

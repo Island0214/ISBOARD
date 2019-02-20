@@ -8,6 +8,7 @@ const initState = {
     undoStrokes: [],
     truncateStrokes: [],
     saveCurrentCanvasStatus: false,
+    selectedStroke: { type: '', points: [], solid: true, thickness: 0, color: '' },
 };
 // getters
 const getters = {
@@ -18,6 +19,7 @@ const getters = {
     undoStrokes: (state) => state.undoStrokes,
     truncateStrokes: (state) => state.truncateStrokes,
     saveCurrentCanvasStatus: (state) => state.saveCurrentCanvasStatus,
+    selectedStroke: (state) => state.selectedStroke,
 };
 // actions
 const actions = {
@@ -51,7 +53,10 @@ const actions = {
                 context.state.blackboards = response.data;
                 if (response.data.length > 0) {
                     context.state.blackboard = response.data[0];
-                    context.state.currentStrokes = response.data[0].strokes;
+                    context.state.currentStrokes = [];
+                    for (let i = 0; i < response.data[0].strokes.length; i++) {
+                        context.state.currentStrokes.push(response.data[0].strokes[i]);
+                    }
                 }
             }
             else {
@@ -180,6 +185,21 @@ const mutations = {
     },
     [types.SET_STROKES](state, strokes) {
         state.currentStrokes = strokes;
+    },
+    [types.SET_SELECTED_STROKE](state, stroke) {
+        state.selectedStroke = stroke;
+    },
+    [types.DELETE_STROKES](state, stroke) {
+        console.log(stroke);
+        for (let i = 0; i < state.currentStrokes.length; i++) {
+            if (state.currentStrokes[i] === stroke) {
+                state.currentStrokes.splice(i, 1);
+                if (state.selectedStroke === stroke) {
+                    state.selectedStroke = state.currentStrokes[i];
+                }
+                break;
+            }
+        }
     },
 };
 export default {

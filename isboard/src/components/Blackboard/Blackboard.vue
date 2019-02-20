@@ -50,9 +50,12 @@
         @Action('saveBlackboardAction') private saveBlackboardAction!: any;
 
         get disableSave() {
+            console.log(this.blackboards.length)
             if (!this.logStatus || this.blackboards.length === 0) {
                 return true;
             }
+            console.log(this.curBlackboard.strokes.toString())
+            console.log(this.currentStrokes.toString())
             return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
         }
 
@@ -68,8 +71,10 @@
         private saveCurrentCanvas(newVal: boolean) {
             if (newVal) {
                 this.saveCanvas();
-                this.changeCanvas(this.tarBlackboard);
-                this.setSaveCurrentCanvas({status: false, tarBlackboard: {id: '', strokes: [], thumbnail: '', createdAt: 0}});
+                setTimeout(() => {
+                    this.changeCanvas(this.tarBlackboard);
+                    this.setSaveCurrentCanvas({status: false, tarBlackboard: {id: '', strokes: [], thumbnail: '', createdAt: 0}});
+                }, 100);
             }
         }
 

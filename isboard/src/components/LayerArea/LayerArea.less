@@ -6,4 +6,86 @@
   width: 200px;
   height: @layerHeight;
   text-align: center;
+
+  .layers-wrapper {
+    height: @layerHeight - @titleHeight;
+    position: relative;
+    display: inline-block;
+    overflow-y: scroll;
+    width: 100%;
+    background-color: #FFFFFF;
+    text-align: center;
+
+    .layer-wrapper {
+      border: @border;
+      border-width: 2px;
+      border-left: none;
+      border-right: none;
+      position: relative;
+      display: inline-block;
+      width: 90%;
+      cursor: pointer;
+      margin-bottom: -1px;
+      //padding: 5%;
+      text-align: left;
+
+      .layer-canvas {
+        margin: 10px;
+        background-color: #FFFFFF;
+        border: 1px solid @themeColor;
+      }
+
+      p {
+        position: absolute;
+        display: inline-block;
+        line-height: 60px;
+        font-size: 12px;
+        //margin-left: 100px;
+      }
+
+      .delete-button {
+        width: 14px;
+        height: 14px;
+        border-radius: 50px;
+        background-color: #FFFFFF;
+        border: 2px solid @themeColor;
+        position: absolute;
+        right: 4px;
+        top: 34px;
+        cursor: pointer;
+        color: #FFFFFF;
+        font-weight: 600;
+        div {
+          margin: 0;
+          position: absolute;
+          width: 14px;
+          height: 14px;
+          left: 0;
+          top: 0;
+          transform: translateY(0);
+          background-image: url("../../assets/buttons/delete-theme.png");
+          background-size: cover;
+          border: none;
+          border-color: #FFFFFF;
+        }
+      }
+
+      .delete-button:hover {
+        background-color: @themeColor;
+        div {
+          background-image: url("../../assets/buttons/delete.png");
+        }
+      }
+    }
+
+    .layer-wrapper:hover {
+      border-color: @hoverColor;
+      z-index: 2;
+    }
+
+    .selected-layer {
+      border-color: @hoverColor;
+      z-index: 2;
+    }
+  }
 }
