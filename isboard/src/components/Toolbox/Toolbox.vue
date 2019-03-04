@@ -65,9 +65,11 @@
         }, {
             type: types.THICKNESS,
             name: tools.THICKNESS,
-        // }, {
-        //     type: types.SPLIT,
-        // }, {
+        }, {
+            type: types.SPLIT,
+        }, {
+            type: types.TOOL_CLICK,
+            name: tools.SETTING,
         //     type: types.TOOL,
         //     name: tools.ERASER,
         //     index: 5,

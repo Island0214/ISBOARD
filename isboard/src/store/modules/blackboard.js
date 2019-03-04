@@ -200,7 +200,6 @@ const mutations = {
         }
     },
     [types.DELETE_STROKES](state, stroke) {
-        console.log(stroke);
         for (let i = 0; i < state.currentStrokes.length; i++) {
             if (state.currentStrokes[i] === stroke) {
                 state.currentStrokes.splice(i, 1);

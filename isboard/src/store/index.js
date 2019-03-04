@@ -6,6 +6,7 @@ import mutations from './mutations';
 import user from './modules/user';
 import canvas from './modules/canvas';
 import blackboard from './modules/blackboard';
+import animation from './modules/animation';
 Vue.use(Vuex);
 export default new Vuex.Store({
     actions,
@@ -15,6 +16,7 @@ export default new Vuex.Store({
         user,
         canvas,
         blackboard,
+        animation,
     },
 });
 export class Point {

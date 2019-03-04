@@ -6,6 +6,7 @@ import mutations from './mutations';
 import user, { State as UserState } from './modules/user';
 import canvas, { State as CanvasState } from './modules/canvas';
 import blackboard, { State as BlackboardState } from './modules/blackboard';
+import animation, { State as AnimationState } from './modules/animation';
 
 Vue.use(Vuex);
 
@@ -17,6 +18,7 @@ export default new Vuex.Store({
         user,
         canvas,
         blackboard,
+        animation,
     },
 });
 
@@ -29,6 +31,7 @@ export interface State {
     user: UserState;
     canvas: CanvasState;
     blackboard: BlackboardState;
+    animation: AnimationState;
 }
 
 export interface UserLoginPayload {

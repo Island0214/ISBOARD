@@ -1,13 +1,13 @@
 @import '../../base/base.less';
 
-.edit-area-wrapper {
+.edit-area(@height) {
   .area-wrapper();
   width: 200px;
-  height: @editHeight;
+  height: @height;
   text-align: center;
 
   .edit-wrapper {
-    height: @editHeight - @titleHeight;
+    height: @height - @titleHeight;
     position: relative;
     display: inline-block;
     overflow-y: scroll;
@@ -37,4 +37,16 @@
       line-height: 60px;
     }
   }
+}
+
+.edit-area-wrapper-large {
+  .edit-area(400px);
+}
+
+.edit-area-wrapper-medium {
+  .edit-area(250px);
+}
+
+.edit-area-wrapper-small {
+  .edit-area(170px);
 }

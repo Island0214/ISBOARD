@@ -9,4 +9,5 @@ export const COLOR = 'COLOR';
 export const THICKNESS = 'THICKNESS';
 export const ERASER = 'ERASER';
 export const TRUNCATE = 'TRUNCATE';
+export const SETTING = 'SETTING';
 //# sourceMappingURL=tools.js.map

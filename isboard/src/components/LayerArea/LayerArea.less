@@ -1,14 +1,14 @@
 @import '../../base/base.less';
 
-.layer-area-wrapper {
+.layer-area-wrapper(@height) {
   .area-wrapper();
   margin-top: 18px;
   width: 200px;
-  height: @layerHeight;
+  height: @height;
   text-align: center;
 
   .layers-wrapper {
-    height: @layerHeight - @titleHeight;
+    height: @height - @titleHeight;
     position: relative;
     display: inline-block;
     overflow-y: scroll;
@@ -88,4 +88,16 @@
       z-index: 2;
     }
   }
+}
+
+.layer-area-wrapper-small {
+  .layer-area-wrapper(@height: 345px);
+}
+
+.layer-area-wrapper-medium {
+  .layer-area-wrapper(@height: 495px);
+}
+
+.layer-area-wrapper-large {
+  .layer-area-wrapper(@height: 575px);
 }
