@@ -5,7 +5,8 @@
             <canvas id="drawing-canvas" width="800" height="600" v-show="showDrawingCanvas"></canvas>
         </div>
         <div class="save-button-wrapper">
-            <el-button :disabled="disableSave" class="my-button" @click="saveCanvas">S A V E</el-button>
+            <el-button class="my-button my-button-medium">R U N</el-button>
+            <el-button :disabled="disableSave" class="my-button my-button-medium" @click="saveCanvas">S A V E</el-button>
         </div>
     </div>
 </template>
@@ -50,12 +51,9 @@
         @Action('saveBlackboardAction') private saveBlackboardAction!: any;
 
         get disableSave() {
-            console.log(this.blackboards.length)
             if (!this.logStatus || this.blackboards.length === 0) {
                 return true;
             }
-            console.log(this.curBlackboard.strokes.toString())
-            console.log(this.currentStrokes.toString())
             return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
         }
 

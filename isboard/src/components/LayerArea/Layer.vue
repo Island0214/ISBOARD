@@ -13,7 +13,6 @@
 <script lang="ts">
     import {Component, Model, Prop, Vue} from 'vue-property-decorator';
     import {Point, Stroke} from '../../store';
-    import {Stroke} from '../../store';
     import * as tools from '../../base/tools';
     import {Getter, Mutation} from 'vuex-class';
     import * as mutations from '../../store/mutation-types'

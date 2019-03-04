@@ -30,7 +30,10 @@
             let layersWrapper = document.getElementsByClassName('layers-wrapper')[0];
             while(layersWrapper.hasChildNodes())
             {
-                layersWrapper.removeChild(layersWrapper.firstChild);
+                if (layersWrapper.firstChild) {
+                    let firstChild = layersWrapper.firstChild as Node;
+                    layersWrapper.removeChild(firstChild);
+                }
             }
 
             this.layers = [];

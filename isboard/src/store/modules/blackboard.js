@@ -1,5 +1,6 @@
 import * as types from '../mutation-types';
 import * as blackboardApi from '../../api/blackboard';
+import * as animations from '../../base/animation-type';
 const initState = {
     blackboards: [],
     blackboard: { id: '', strokes: [], thumbnail: '', createdAt: 0 },
@@ -9,6 +10,7 @@ const initState = {
     truncateStrokes: [],
     saveCurrentCanvasStatus: false,
     selectedStroke: { type: '', points: [], solid: true, thickness: 0, color: '' },
+    selectedAnimation: { type: '', x: 0, y: 0, count: 1 },
 };
 // getters
 const getters = {
@@ -20,6 +22,7 @@ const getters = {
     truncateStrokes: (state) => state.truncateStrokes,
     saveCurrentCanvasStatus: (state) => state.saveCurrentCanvasStatus,
     selectedStroke: (state) => state.selectedStroke,
+    selectedAnimation: (state) => state.selectedAnimation,
 };
 // actions
 const actions = {
@@ -188,6 +191,13 @@ const mutations = {
     },
     [types.SET_SELECTED_STROKE](state, stroke) {
         state.selectedStroke = stroke;
+        let animation = stroke.animation;
+        if (animation === undefined) {
+            state.selectedAnimation = { type: animations.NULL, x: 0, y: 0, count: 1 };
+        }
+        else {
+            state.selectedAnimation = animation;
+        }
     },
     [types.DELETE_STROKES](state, stroke) {
         console.log(stroke);

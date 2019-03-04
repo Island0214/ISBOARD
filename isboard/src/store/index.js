@@ -29,6 +29,22 @@ Point.prototype.toString = function () {
         'y: ' + this.y + '; ' +
         '}';
 };
+export class Animation {
+    constructor(type, x, y, count) {
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.count = count;
+    }
+}
+Animation.prototype.toString = function () {
+    return '{' +
+        'type: ' + this.type + '; ' +
+        'x: ' + this.x + '; ' +
+        'y: ' + this.y + '; ' +
+        'count: ' + this.count + '; ' +
+        '}';
+};
 export class Stroke {
     constructor(type, points, color, thickness, solid = false) {
         this.type = type;

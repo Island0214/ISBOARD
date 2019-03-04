@@ -1,7 +1,8 @@
 import { Commit } from 'vuex';
 import * as types from '../mutation-types';
-import { Point, Stroke, Blackboard } from '../index';
+import { Point, Stroke, Blackboard, Animation } from '../index';
 import * as blackboardApi from '../../api/blackboard';
+import * as animations from '../../base/animation-type'
 
 export interface State {
     blackboards: Blackboard[];
@@ -12,6 +13,7 @@ export interface State {
     truncateStrokes: Stroke[];
     saveCurrentCanvasStatus: boolean;
     selectedStroke: Stroke;
+    selectedAnimation: Animation;
 }
 
 const initState: State = {
@@ -23,6 +25,7 @@ const initState: State = {
     truncateStrokes: [],
     saveCurrentCanvasStatus: false,
     selectedStroke: {type: '', points: [], solid: true, thickness: 0, color: ''},
+    selectedAnimation: {type: '', x: 0, y: 0, count: 1},
 };
 
 // getters
@@ -35,6 +38,7 @@ const getters = {
     truncateStrokes: (state: State) => state.truncateStrokes,
     saveCurrentCanvasStatus: (state: State) => state.saveCurrentCanvasStatus,
     selectedStroke: (state: State) => state.selectedStroke,
+    selectedAnimation: (state: State) => state.selectedAnimation,
 };
 
 // actions
@@ -203,6 +207,13 @@ const mutations = {
     },
     [types.SET_SELECTED_STROKE](state: State, stroke: Stroke) {
         state.selectedStroke = stroke;
+        let animation = stroke.animation;
+        if (animation === undefined) {
+            state.selectedAnimation = {type: animations.NULL, x: 0, y: 0, count: 1};
+        } else {
+            state.selectedAnimation = animation;
+        }
+
     },
     [types.DELETE_STROKES](state: State, stroke: Stroke) {
         console.log(stroke);

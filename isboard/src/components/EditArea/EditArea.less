@@ -5,4 +5,36 @@
   width: 200px;
   height: @editHeight;
   text-align: center;
+
+  .edit-wrapper {
+    height: @editHeight - @titleHeight;
+    position: relative;
+    display: inline-block;
+    overflow-y: scroll;
+    width: 100%;
+    background-color: #FFFFFF;
+    text-align: center;
+
+    .input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 90%;
+      p {
+        text-align: left;
+        margin: 10px 15px 2px 15px;
+        letter-spacing: 1px;
+      }
+    }
+
+    .buttons-wrapper {
+      position: absolute;
+      text-align: right;
+      bottom: 0;
+      height: 60px;
+      width: 90%;
+      margin-left: 5%;
+      //background-color: #759FD2;
+      line-height: 60px;
+    }
+  }
 }

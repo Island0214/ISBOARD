@@ -61,12 +61,38 @@ Point.prototype.toString = function () {
         '}';
 };
 
+export interface Animation {
+    type: string;
+    x: number;
+    y: number;
+    count: number;
+}
+
+export class Animation implements Animation {
+    constructor(type: string, x: number, y: number, count: number) {
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.count = count;
+    }
+}
+
+Animation.prototype.toString = function () {
+    return '{' +
+        'type: ' + this.type + '; ' +
+        'x: ' + this.x + '; ' +
+        'y: ' + this.y + '; ' +
+        'count: ' + this.count + '; ' +
+        '}';
+};
+
 export interface Stroke {
     type: string;
     points: Point[];
     solid: boolean;
     color: string;
     thickness: number;
+    animation?: Animation;
 }
 
 export class Stroke implements Stroke {
