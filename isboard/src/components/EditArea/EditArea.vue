@@ -4,6 +4,7 @@
             <p>Animation Setting</p>
         </div>
         <div class="edit-wrapper">
+            <div class="disable-wrapper" v-if="disableSetting"></div>
             <div class="input-wrapper">
                 <p>Animation</p>
                 <el-select v-model="currentAnimation" placeholder="请选择">
@@ -53,6 +54,7 @@
         private count: number = 1;
         @Getter('selectedStroke') private selectedStroke!: Stroke;
         @Getter('selectedAnimation') private selectedAnimation!: Animation;
+        @Getter('tool') private tool!: string;
         @Mutation(mutations.SET_TEMP_ANIMATION) private setTempAnimation!: any;
 
         private options = [{
@@ -75,6 +77,10 @@
         private option: { tool: string, animations: string[] } = {tool: '', animations: []};
         private currentAnimation: string = '';
         private editWrapperType: string = 'edit-area-wrapper-small';
+
+        get disableSetting() {
+            return this.tool !== tools.SETTING;
+        }
 
         get showXY() {
             if (this.currentAnimation === animations.POINT_ROTATION || this.currentAnimation === animations.PANNING) {
@@ -134,6 +140,7 @@
 
         private mounted() {
             var editHeigt = '400px';
+            console.log(this.tool)
             // window.editHeigt = '400px'
         }
 

@@ -68,9 +68,10 @@
         }, {
             type: types.SPLIT,
         }, {
-            type: types.TOOL_CLICK,
+            type: types.TOOL,
             name: tools.SETTING,
-        //     type: types.TOOL,
+            index: 5,
+            //     type: types.TOOL,
         //     name: tools.ERASER,
         //     index: 5,
         // }, {

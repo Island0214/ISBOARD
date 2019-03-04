@@ -25,7 +25,7 @@
         private layerWrapperType: string = 'layer-area-wrapper-large';
 
         @Getter('currentStrokes') private currentStrokes!: Stroke[];
-        @Getter('tempAnimationType') private tempAnimationType!: Stroke[];
+        @Getter('tempAnimationType') private tempAnimationType!: string;
         @Mutation(mutations.SET_SELECTED_STROKE) private setSelectedStroke!: any;
 
         @Watch('currentStrokes')
