@@ -31,9 +31,21 @@
                 <!--<el-input></el-input>-->
                 <el-input-number v-model="count" :precision="0" :step="1" :max="10" :min="1"></el-input-number>
             </div>
+            <div class="input-wrapper">
+                <p>Speed</p>
+                <el-slider
+                        v-model="speed"
+                        :step="1"
+                        show-stops
+                        :min="1"
+                        :max="10"
+                >
+                </el-slider>
+                <!--<el-input-number v-model="speed" :precision="1" :step="0.1" :max="600" :min="0"></el-input-number>-->
+            </div>
             <div class="buttons-wrapper">
                 <el-button class="my-button my-button-small">RESET</el-button>
-                <el-button class="my-button my-button-small">SAVE</el-button>
+                <el-button class="my-button my-button-small" @click="saveCurrentAnimation">SAVE</el-button>
             </div>
         </div>
     </div>
@@ -43,19 +55,26 @@
     import {Component, Model, Prop, Vue, Watch} from 'vue-property-decorator';
     import * as animations from '../../base/animation-type';
     import * as tools from '../../base/tools';
-    import {Getter, Mutation} from 'vuex-class';
-    import {Animation, Stroke} from '../../store';
+    import {Action, Getter, Mutation} from 'vuex-class';
+    import {Animation, Blackboard, Stroke, User} from '../../store';
     import * as mutations from '../../store/mutation-types'
 
     @Component({})
     export default class EditArea extends Vue {
-        private x: number = 1;
-        private y: number = 1;
+        private x: number = 0;
+        private y: number = 0;
+        private speed: number = 5;
         private count: number = 1;
         @Getter('selectedStroke') private selectedStroke!: Stroke;
         @Getter('selectedAnimation') private selectedAnimation!: Animation;
         @Getter('tool') private tool!: string;
+        @Getter('logUser') private logUser!: User;
+        @Getter('blackboard') private blackboard!: Blackboard;
+
         @Mutation(mutations.SET_TEMP_ANIMATION) private setTempAnimation!: any;
+        @Mutation(mutations.SET_CURRENT_ANIMATION) private setCurrentAnimationMutation!: any;
+        @Mutation(mutations.SAVE_ANIMATION) private saveAnimation!: any;
+        @Action('saveBlackboardAction') private saveBlackboardAction!: any;
 
         private options = [{
             tool: tools.PEN,
@@ -98,20 +117,64 @@
             }
         }
 
+        private saveCurrentAnimation() {
+            this.saveAnimation();
+            this.saveBlackboardAction({
+                user: this.logUser.id,
+                canvas: this.blackboard.thumbnail,
+                onError: (message: string) => {
+                    this.$message({
+                        showClose: true,
+                        type: 'error',
+                        message: message,
+                    })
+                }
+            })
+        }
+
+        private setCurrentAnimation() {
+            this.setCurrentAnimationMutation({
+                type: this.currentAnimation,
+                x: this.x,
+                y: this.y,
+                speed: this.speed,
+                count: this.count,
+            })
+        }
+
+        @Watch('x')
+        private changeX() {
+            this.setCurrentAnimation();
+        }
+
+        @Watch('speed')
+        private changeSpeed() {
+            this.setCurrentAnimation();
+        }
+
+        @Watch('y')
+        private changeY() {
+            this.setCurrentAnimation();
+        }
+
         @Watch('selectedStroke', {deep: true})
         private changeStroke() {
             this.currentAnimation = this.selectedAnimation.type;
             for (let i = 0; i < this.options.length; i++) {
-                // console.log(this.options[i].tool)
                 if (this.options[i].tool === this.selectedStroke.type) {
                     this.option = this.options[i];
                     break;
                 }
             }
+            this.x = this.selectedAnimation.x;
+            this.y = this.selectedAnimation.y;
+            this.speed = this.selectedAnimation.speed;
+            this.count = this.selectedAnimation.count;
         }
 
         @Watch('currentAnimation')
         private changeAnimation() {
+            this.setCurrentAnimation();
             this.setTempAnimation(this.currentAnimation);
             switch (this.currentAnimation) {
                 case animations.NULL:
@@ -137,13 +200,6 @@
                     break;
             }
         }
-
-        private mounted() {
-            var editHeigt = '400px';
-            console.log(this.tool)
-            // window.editHeigt = '400px'
-        }
-
     }
 </script>
 

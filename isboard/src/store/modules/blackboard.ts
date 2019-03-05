@@ -14,6 +14,7 @@ export interface State {
     saveCurrentCanvasStatus: boolean;
     selectedStroke: Stroke;
     selectedAnimation: Animation;
+    currentAnimation: Animation;
 }
 
 const initState: State = {
@@ -25,7 +26,8 @@ const initState: State = {
     truncateStrokes: [],
     saveCurrentCanvasStatus: false,
     selectedStroke: {type: '', points: [], solid: true, thickness: 0, color: ''},
-    selectedAnimation: {type: '', x: 0, y: 0, count: 1},
+    selectedAnimation: {type: '', x: 0, y: 0, speed: 5, count: 1},
+    currentAnimation: {type: '', x: 0, y: 0, speed: 5, count: 1},
 };
 
 // getters
@@ -39,6 +41,7 @@ const getters = {
     saveCurrentCanvasStatus: (state: State) => state.saveCurrentCanvasStatus,
     selectedStroke: (state: State) => state.selectedStroke,
     selectedAnimation: (state: State) => state.selectedAnimation,
+    currentAnimation: (state: State) => state.currentAnimation,
 };
 
 // actions
@@ -86,7 +89,7 @@ const actions = {
                 user: payload.user,
             });
     },
-    saveBlackboardAction(context: { commit: Commit; state: State }, payload: { user: string, canvas: string, onError: Function }) {
+    saveBlackboardAction(context: { commit: Commit; state: State }, payload: { user: string, canvas: string, onError?: Function }) {
         blackboardApi.saveBlackboard(
             (response: any) => {
                 if (response.status === 1) {
@@ -100,7 +103,9 @@ const actions = {
                     }
                     context.state.blackboard.thumbnail = payload.canvas;
                 } else {
-                    payload.onError(response.msg)
+                    if (payload.onError) {
+                        payload.onError(response.msg)
+                    }
                 }
             }, {
                 user: payload.user,
@@ -209,9 +214,11 @@ const mutations = {
         state.selectedStroke = stroke;
         let animation = stroke.animation;
         if (animation === undefined) {
-            state.selectedAnimation = {type: animations.NULL, x: 0, y: 0, count: 1};
+            state.selectedAnimation = {type: animations.NULL, x: 0, y: 0, speed: 5, count: 1};
+            state.currentAnimation = {type: animations.NULL, x: 0, y: 0, speed: 5, count: 1};
         } else {
             state.selectedAnimation = animation;
+            state.currentAnimation = animation;
         }
 
     },
@@ -225,6 +232,19 @@ const mutations = {
                 break;
             }
         }
+    },
+    [types.SET_CURRENT_ANIMATION](state: State, animation: Animation) {
+        state.currentAnimation = animation;
+    },
+    [types.SAVE_ANIMATION](state: State) {
+        for (let i = 0; i < state.currentStrokes.length; i++ ) {
+            if (state.currentStrokes[i] === state.selectedStroke) {
+                state.currentStrokes[i].animation = state.currentAnimation;
+                state.selectedAnimation = state.currentAnimation;
+                state.selectedStroke = state.currentStrokes[i];
+            }
+        }
+        console.log(state.selectedStroke)
     },
 };
 

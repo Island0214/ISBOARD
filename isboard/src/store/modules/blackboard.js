@@ -10,7 +10,8 @@ const initState = {
     truncateStrokes: [],
     saveCurrentCanvasStatus: false,
     selectedStroke: { type: '', points: [], solid: true, thickness: 0, color: '' },
-    selectedAnimation: { type: '', x: 0, y: 0, count: 1 },
+    selectedAnimation: { type: '', x: 0, y: 0, speed: 5, count: 1 },
+    currentAnimation: { type: '', x: 0, y: 0, speed: 5, count: 1 },
 };
 // getters
 const getters = {
@@ -23,6 +24,7 @@ const getters = {
     saveCurrentCanvasStatus: (state) => state.saveCurrentCanvasStatus,
     selectedStroke: (state) => state.selectedStroke,
     selectedAnimation: (state) => state.selectedAnimation,
+    currentAnimation: (state) => state.currentAnimation,
 };
 // actions
 const actions = {
@@ -83,7 +85,9 @@ const actions = {
                 context.state.blackboard.thumbnail = payload.canvas;
             }
             else {
-                payload.onError(response.msg);
+                if (payload.onError) {
+                    payload.onError(response.msg);
+                }
             }
         }, {
             user: payload.user,
@@ -193,10 +197,12 @@ const mutations = {
         state.selectedStroke = stroke;
         let animation = stroke.animation;
         if (animation === undefined) {
-            state.selectedAnimation = { type: animations.NULL, x: 0, y: 0, count: 1 };
+            state.selectedAnimation = { type: animations.NULL, x: 0, y: 0, speed: 5, count: 1 };
+            state.currentAnimation = { type: animations.NULL, x: 0, y: 0, speed: 5, count: 1 };
         }
         else {
             state.selectedAnimation = animation;
+            state.currentAnimation = animation;
         }
     },
     [types.DELETE_STROKES](state, stroke) {
@@ -209,6 +215,19 @@ const mutations = {
                 break;
             }
         }
+    },
+    [types.SET_CURRENT_ANIMATION](state, animation) {
+        state.currentAnimation = animation;
+    },
+    [types.SAVE_ANIMATION](state) {
+        for (let i = 0; i < state.currentStrokes.length; i++) {
+            if (state.currentStrokes[i] === state.selectedStroke) {
+                state.currentStrokes[i].animation = state.currentAnimation;
+                state.selectedAnimation = state.currentAnimation;
+                state.selectedStroke = state.currentStrokes[i];
+            }
+        }
+        console.log(state.selectedStroke);
     },
 };
 export default {

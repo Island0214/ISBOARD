@@ -68,14 +68,16 @@ export interface Animation {
     type: string;
     x: number;
     y: number;
+    speed: number;
     count: number;
 }
 
 export class Animation implements Animation {
-    constructor(type: string, x: number, y: number, count: number) {
+    constructor(type: string, x: number, y: number, speed: number, count: number) {
         this.type = type;
         this.x = x;
         this.y = y;
+        this.speed = speed;
         this.count = count;
     }
 }
@@ -85,6 +87,7 @@ Animation.prototype.toString = function () {
         'type: ' + this.type + '; ' +
         'x: ' + this.x + '; ' +
         'y: ' + this.y + '; ' +
+        'speed: ' + this.speed + '; ' +
         'count: ' + this.count + '; ' +
         '}';
 };

@@ -1,6 +1,7 @@
 <template>
     <div class="blackboard-wrapper">
         <div :class="['canvas-wrapper', {'eraser-cursor': tool === 'ERASER'}]">
+            <canvas id="setting-canvas" width="800" height="600" v-show="showSettingCanvas"></canvas>
             <canvas id="blackboard-canvas" width="800" height="600"></canvas>
             <canvas id="drawing-canvas" width="800" height="600" v-show="showDrawingCanvas"></canvas>
         </div>
@@ -30,6 +31,8 @@
         private ctx!: CanvasRenderingContext2D;
         private drawingCanvas!: HTMLCanvasElement;
         private drawingCtx!: CanvasRenderingContext2D;
+        private settingCanvas!: HTMLCanvasElement;
+        private settingCtx!: CanvasRenderingContext2D;
         private showDrawingCanvas: boolean = false;
         @Getter('color') private color!: string;
         @Getter('thick') private thickness!: number;
@@ -49,12 +52,17 @@
         @Mutation(mutations.CHANGE_CANVAS) private changeCanvas!: any;
         @Mutation(mutations.CLEAR_BLACKBOARDS) private clearBlackboards!: any;
         @Action('saveBlackboardAction') private saveBlackboardAction!: any;
+        @Getter('selectedStroke') private selectedStroke!: Stroke;
 
         get disableSave() {
             if (!this.logStatus || this.blackboards.length === 0) {
                 return true;
             }
             return this.curBlackboard.strokes.toString() == this.currentStrokes.toString();
+        }
+
+        get showSettingCanvas() {
+            return this.tool === tools.SETTING;
         }
 
         private getMousePosition = (canvas: HTMLCanvasElement, x: number, y: number) => {
@@ -129,6 +137,11 @@
             if (this.logStatus === false) {
                 this.clearBlackboards();
             }
+        }
+
+        @Watch('selectedStroke', {deep: true})
+        private changeSelectedStroke() {
+            console.log(this.selectedStroke)
         }
 
         private redoPen(stroke: Stroke) {
@@ -642,6 +655,15 @@
                 const drawingCtx = drawingCanvas.getContext('2d') as CanvasRenderingContext2D;
                 this.drawingCanvas = drawingCanvas;
                 this.drawingCtx = drawingCtx;
+            }
+
+            const settingCanvas: HTMLCanvasElement = document.getElementById('setting-canvas') as HTMLCanvasElement;
+            if (!settingCanvas || !settingCanvas.getContext('2d')) {
+                return false;
+            } else {
+                const settingCtx = drawingCanvas.getContext('2d') as CanvasRenderingContext2D;
+                this.settingCanvas = drawingCanvas;
+                this.settingCtx = settingCtx;
             }
         }
     }

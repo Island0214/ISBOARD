@@ -32,10 +32,11 @@ Point.prototype.toString = function () {
         '}';
 };
 export class Animation {
-    constructor(type, x, y, count) {
+    constructor(type, x, y, speed, count) {
         this.type = type;
         this.x = x;
         this.y = y;
+        this.speed = speed;
         this.count = count;
     }
 }
@@ -44,6 +45,7 @@ Animation.prototype.toString = function () {
         'type: ' + this.type + '; ' +
         'x: ' + this.x + '; ' +
         'y: ' + this.y + '; ' +
+        'speed: ' + this.speed + '; ' +
         'count: ' + this.count + '; ' +
         '}';
 };
