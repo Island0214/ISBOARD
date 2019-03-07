@@ -2,7 +2,8 @@
     <div id="home-page">
         <div class="left-wrapper">
             <banner></banner>
-            <overview-area></overview-area>
+            <!--<overview-area></overview-area>-->
+            <identify-area></identify-area>
         </div>
         <div class="center-wrapper">
             <toolbox></toolbox>
@@ -23,6 +24,7 @@
     import Blackboard from '@/components/Blackboard/Blackboard.vue';
     import EditArea from '@/components/EditArea/EditArea.vue';
     import LayerArea from '@/components/LayerArea/LayerArea.vue';
+    import IdentifyArea from '@/components/IdentifyArea/IdentifyArea.vue';
 
     @Component({
         components: {
@@ -32,6 +34,7 @@
             Blackboard,
             EditArea,
             LayerArea,
+            IdentifyArea,
         },
     })
     export default class Home extends Vue {
