@@ -28,11 +28,9 @@ const actions = {
 // mutations
 const mutations = {
     [types.SET_FOLDING_TYPE](state: State, type: string) {
-        console.log(type)
         state.selectedFoldingType = type;
     },
     [types.SET_QUESTION_TYPE](state: State, type: string) {
-        // console.log(type)
         state.selectedQuestionType = type;
         if (type === questions.FOLDING) {
             state.selectedFoldingType = rectTypes.TYPE_A;
