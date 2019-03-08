@@ -10,6 +10,9 @@ size
 @layerHeight: @totalHeight - @editHeight;
 @titleHeight: 42px;
 
+@typeSelectHeight: 110px;
+@shapeDisplayHeight: @totalHeight - @typeSelectHeight;
+
 @editHeightLarge: 470px;
 @editHeightMedium: 320px;
 @editHeightSmall: 240px;
@@ -30,6 +33,17 @@ color
 @hoverColor: #FFCAAA;
 @themeColor: #759FD2;
 @areaColor: #fafafa;
+
+@toolboxSize: @toolboxHeight;
+@borderSize: 2px;
+@marginSize: 3px;
+@buttonSize: @toolboxSize - 2 * @marginSize - 10px;
+@marginLeft: 10px;
+@thicknessSize: @buttonSize - 10px;
+@switchSize: 14px;
+@imgSize: 10px;
+@toolboxWidth: 840px;
+@toolboxPadding: 20px - @marginLeft;
 
 .area-wrapper() {
   border: @border;

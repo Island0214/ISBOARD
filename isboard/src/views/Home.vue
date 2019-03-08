@@ -6,12 +6,15 @@
             <identify-area></identify-area>
         </div>
         <div class="center-wrapper">
-            <toolbox></toolbox>
-            <blackboard></blackboard>
+            <!--<toolbox></toolbox>-->
+            <!--<blackboard></blackboard>-->
+            <rectangle-setting-area></rectangle-setting-area>
+            <shape-display-area></shape-display-area>
         </div>
         <div class="right-wrapper">
-            <edit-area></edit-area>
-            <layer-area></layer-area>
+            <!--<edit-area></edit-area>-->
+            <!--<layer-area></layer-area>-->
+            <data-area></data-area>
         </div>
     </div>
 </template>
@@ -25,6 +28,9 @@
     import EditArea from '@/components/EditArea/EditArea.vue';
     import LayerArea from '@/components/LayerArea/LayerArea.vue';
     import IdentifyArea from '@/components/IdentifyArea/IdentifyArea.vue';
+    import RectangleSettingArea from '@/components/TypeSelectArea/TypeSelectArea.vue';
+    import ShapeDisplayArea from '@/components/ShapeDisplayArea/ShapeDisplayArea.vue';
+    import DataArea from '@/components/DataArea/DataArea.vue';
 
     @Component({
         components: {
@@ -35,6 +41,9 @@
             EditArea,
             LayerArea,
             IdentifyArea,
+            RectangleSettingArea,
+            ShapeDisplayArea,
+            DataArea,
         },
     })
     export default class Home extends Vue {

@@ -5,8 +5,8 @@ import getters from './getters';
 import mutations from './mutations';
 import user from './modules/user';
 import canvas from './modules/canvas';
-import blackboard from './modules/blackboard';
 import animation from './modules/animation';
+import folding from './modules/folding';
 Vue.use(Vuex);
 export default new Vuex.Store({
     actions,
@@ -15,8 +15,9 @@ export default new Vuex.Store({
     modules: {
         user,
         canvas,
-        blackboard,
+        // blackboard,
         animation,
+        folding,
     },
 });
 export class Point {

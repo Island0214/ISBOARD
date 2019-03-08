@@ -1,0 +1,42 @@
+@import '../../base/base.less';
+
+@typeCount: 6;
+@typeBorder: 2px;
+@typeMargin: 10px - @typeBorder;
+@typeWidth: @toolboxWidth / @typeCount - 2 * (@typeMargin + @typeBorder);
+.type-select-area-wrapper {
+  .area-wrapper();
+  width: @toolboxWidth;
+  height: @typeSelectHeight;
+  //text-align: left;
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  text-align: left;
+  //padding: 0 @toolboxPadding;
+
+  .single-type-wrapper {
+    position: relative;
+    display: inline-block;
+    width: @typeWidth;
+    margin: @typeMargin;
+    border: @typeBorder solid #dcdfe6;
+    height: @typeSelectHeight - 2 * (@typeMargin + @typeBorder);
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #FFFFFF;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .single-type-wrapper:hover {
+    border-color: @themeColor;
+  }
+
+  .selected-blackboard {
+    border-color: lighten(@themeColor, 15%);
+  }
+}

@@ -7,6 +7,7 @@ import user, { State as UserState } from './modules/user';
 import canvas, { State as CanvasState } from './modules/canvas';
 import blackboard, { State as BlackboardState } from './modules/blackboard';
 import animation, { State as AnimationState } from './modules/animation';
+import folding, { State as FoldingState } from './modules/folding';
 
 Vue.use(Vuex);
 
@@ -17,8 +18,9 @@ export default new Vuex.Store({
     modules: {
         user,
         canvas,
-        blackboard,
+        // blackboard,
         animation,
+        folding,
     },
 });
 
@@ -30,8 +32,9 @@ export interface ActionContextBasic {
 export interface State {
     user: UserState;
     canvas: CanvasState;
-    blackboard: BlackboardState;
+    // blackboard: BlackboardState;
     animation: AnimationState;
+    folding: FoldingState;
 }
 
 export interface UserLoginPayload {

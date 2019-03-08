@@ -17,17 +17,19 @@
                     type="textarea"
                     :rows="11"
                     placeholder="请输入需要识别的题干"
-                    v-model="textarea">
+                    v-model="textarea" :disabled="disableInput">
             </el-input>
         </div>
-        <el-button style="margin: 10px 0;" class="my-button">识 别 题 干</el-button>
+        <el-button style="margin: 10px 0;" class="my-button" :disabled="disableInput">识 别 题 干</el-button>
 
     </div>
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from 'vue-property-decorator';
+    import {Component, Vue, Watch} from 'vue-property-decorator';
     import * as questions from '../../base/question-type';
+    import {Mutation} from 'vuex-class';
+    import * as mutations from '../../store/mutation-types'
 
     @Component({
         components: {
@@ -37,6 +39,24 @@
         private textarea: string = '';
         private questionType: string = questions.FOLDING;
         private questionTypes: string[] = [questions.FOLDING, questions.UNFOLDING];
+        @Mutation(mutations.SET_QUESTION_TYPE) private setQuestionTypeMutation!: any;
+
+        get disableInput() {
+            return this.questionType === questions.UNFOLDING;
+        }
+
+        private setQuestionType(type: string) {
+            this.setQuestionTypeMutation(type);
+        }
+
+        @Watch('questionType')
+        private watchQuestionChange() {
+            this.setQuestionType(this.questionType);
+        }
+
+        private mounted() {
+            this.setQuestionType(questions.FOLDING);
+        }
     }
 </script>
 

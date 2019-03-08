@@ -118,18 +118,18 @@
         }
 
         private saveCurrentAnimation() {
-            this.saveAnimation();
-            this.saveBlackboardAction({
-                user: this.logUser.id,
-                canvas: this.blackboard.thumbnail,
-                onError: (message: string) => {
-                    this.$message({
-                        showClose: true,
-                        type: 'error',
-                        message: message,
-                    })
-                }
-            })
+            // this.saveAnimation();
+            // this.saveBlackboardAction({
+            //     user: this.logUser.id,
+            //     canvas: this.blackboard.thumbnail,
+            //     onError: (message: string) => {
+            //         this.$message({
+            //             showClose: true,
+            //             type: 'error',
+            //             message: message,
+            //         })
+            //     }
+            // })
         }
 
         private setCurrentAnimation() {
