@@ -1,7 +1,7 @@
 <template>
     <div class="shape-display-area-wrapper">
         <div :class="['canvas-wrapper']">
-            <div :class="['spot-wrapper']" :style="spot1Css" @click="moveSpot" id="move-spot-1" v-if="showSpot1"></div>
+            <div :class="['spot-wrapper']" :style="spot1Css" id="move-spot-1" v-if="showSpot1"></div>
             <canvas id="rectangle-canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
             <!--<canvas id="setting-canvas" width="800" height="600" v-show="showSettingCanvas"></canvas>-->
             <!--<canvas id="blackboard-canvas" width="800" height="600"></canvas>-->
@@ -13,8 +13,9 @@
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
     import {FoldingRectangle, Point} from '../../store';
-    import {Getter} from "vuex-class";
+    import {Getter, Mutation} from 'vuex-class';
     import * as rectTypes from '../../base/rectangle-folding'
+    import * as mutations from '../../store/mutation-types'
 
     @Component({})
     export default class ShapeDisplayArea extends Vue {
@@ -36,7 +37,7 @@
         @Getter('thick') private thickness!: number;
         @Getter('foldingRectangles') private foldingRectangles!: FoldingRectangle[];
         @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: FoldingRectangle;
-
+        @Mutation(mutations.SET_FOLDING_RECT_THUMBNAILS) private setFoldingRectThumbnailsMutation!: any;
         get spot1Css() {
             return {
                 marginLeft: this.spot1.x - this.thickness * 1.25 + 'px',
@@ -207,6 +208,10 @@
             this.canvas.height = this.canvasHeight;
         }
 
+        private drawRectFoldingTypeC(width: number, height: number, point: Point) {
+            this.canvas.height = this.canvasHeight;
+        }
+
         private getMousePosition = (canvas: HTMLCanvasElement, x: number, y: number) => {
             const boundingClientRect = canvas.getBoundingClientRect();
             return {
@@ -215,25 +220,41 @@
             };
         };
 
-        private setRectangleBasicInfo() {
-            this.minX = (this.canvasWidth - this.selectedFoldingRectangle.width) / 2;
+        private setRectangleBasicInfo(rect: FoldingRectangle) {
+            this.minX = (this.canvasWidth - rect.width) / 2;
             this.maxX = this.canvasWidth - this.minX;
-            this.minY = (this.canvasHeight - this.selectedFoldingRectangle.height) / 2;
+            this.minY = (this.canvasHeight - rect.height) / 2;
             this.maxY = this.canvasHeight - this.minY;
-            switch (this.selectedFoldingRectangle.type) {
+            switch (rect.type) {
                 case rectTypes.TYPE_A:
-                    this.drawRectFoldingTypeA(this.selectedFoldingRectangle.width, this.selectedFoldingRectangle.height, this.selectedFoldingRectangle.points[0]);
-                    this.moveSpot();
+                    this.drawRectFoldingTypeA(rect.width, rect.height, rect.points[0]);
+                    setTimeout(() => {
+                        this.moveSpot();
+                    }, 100);
                     break;
                 case rectTypes.TYPE_B:
-                    this.drawRectFoldingTypeB(this.selectedFoldingRectangle.width, this.selectedFoldingRectangle.height, this.selectedFoldingRectangle.points[0]);
+                    this.drawRectFoldingTypeB(rect.width, rect.height, rect.points[0]);
+                    break;
+                case rectTypes.TYPE_C:
+                    this.drawRectFoldingTypeC(rect.width, rect.height, rect.points[0]);
                     break;
             }
         }
 
+        private updateFoldingThumbnails() {
+            let thumbnails: string[] = [];
+            for (let i = 0; i < this.foldingRectangles.length; i++) {
+                const rect = this.foldingRectangles[i];
+                this.setRectangleBasicInfo(rect);
+                const data = this.canvas.toDataURL('image/png', 1 );
+                thumbnails.push(data);
+            }
+            this.setFoldingRectThumbnailsMutation(thumbnails);
+        }
+
         @Watch('selectedFoldingRectangle')
         private watchSelectedFoldingRectangle() {
-            this.setRectangleBasicInfo();
+            this.setRectangleBasicInfo(this.selectedFoldingRectangle);
         }
 
         private mounted() {
@@ -246,7 +267,9 @@
                 this.ctx = ctx;
             }
 
-            this.setRectangleBasicInfo();
+            this.updateFoldingThumbnails();
+
+            this.setRectangleBasicInfo(this.selectedFoldingRectangle);
             this.moveSpot();
         }
     }

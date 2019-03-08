@@ -63,6 +63,11 @@ const mutations = {
             // todo
         }
     },
+    [types.SET_FOLDING_RECT_THUMBNAILS](state: State, thumbnails: string[]) {
+        for (let i = 0; i < state.foldingRectangles.length; i++) {
+            state.foldingRectangles[i].thumbnail = thumbnails[i];
+        }
+    },
 };
 
 export default {
