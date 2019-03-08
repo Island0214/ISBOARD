@@ -139,3 +139,20 @@ export class Blackboard implements Blackboard {
         this.createdAt = 0;
     }
 }
+
+export interface FoldingRectangle {
+    type: string;
+    thumbnail: string;
+    width: number;
+    height: number;
+    points: Point[];
+}
+
+export class FoldingRectangle implements FoldingRectangle {
+    constructor(type: string, width: number, height :number, points: Point[]) {
+        this.type = type;
+        this.width = width;
+        this.height = height;
+        this.points = points;
+    }
+}
