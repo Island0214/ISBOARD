@@ -12,7 +12,7 @@
 
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
-    import {FoldingRectangle, Point} from '../../store';
+    import {FoldingRectangle, Point, Node} from '../../store';
     import {Getter, Mutation} from 'vuex-class';
     import * as rectTypes from '../../base/rectangle-folding'
     import * as mutations from '../../store/mutation-types'
@@ -21,23 +21,26 @@
     export default class ShapeDisplayArea extends Vue {
         private canvas!: HTMLCanvasElement;
         private ctx!: CanvasRenderingContext2D;
-        private canvasWidth: number = 800;
-        private canvasHeight: number = 600;
         private dash: number[] = [5, 5];
         private fontSize: number = 24;
         private textMargin: number = 10;
-        private spot1: Point = {x: 350, y: 150};
+        private spot1: Point = new Point(350, 150);
         private spot2: Point = {x: 0, y: 0};
         private minX: number = 150;
         private maxX: number = 650;
         private minY: number = 150;
         private maxY: number = 450;
+        private allPoints: Node[]= [];
 
+        @Getter('canvasWidth') private canvasWidth!: number;
+        @Getter('canvasHeight') private canvasHeight!: number;
         @Getter('color') private color!: string;
         @Getter('thick') private thickness!: number;
         @Getter('foldingRectangles') private foldingRectangles!: FoldingRectangle[];
         @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: FoldingRectangle;
         @Mutation(mutations.SET_FOLDING_RECT_THUMBNAILS) private setFoldingRectThumbnailsMutation!: any;
+        @Mutation(mutations.SET_NODES) private setNodesMutation!: any;
+        @Mutation(mutations.UPDATE_SELECTED_FOLDING) private updateSelectedFoldingMutation!: any;
         get spot1Css() {
             return {
                 marginLeft: this.spot1.x - this.thickness * 1.25 + 'px',
@@ -67,13 +70,23 @@
 
             moveSpot1.onmouseup = () => {
                 document.onmousemove = null;
-                this.drawRectFoldingTypeA(500, 300, this.spot1);
+                this.updateCurrentFolding();
             };
 
             document.onmouseup = () => {
                 document.onmousemove = null;
-                this.drawRectFoldingTypeA(500, 300, this.spot1);
+                this.updateCurrentFolding();
             };
+        }
+
+        private updateCurrentFolding() {
+            switch (this.selectedFoldingRectangle.type) {
+                case rectTypes.TYPE_A:
+                    // this.updateSelectedFoldingMutation([new Point(this.spot1.x, this.minY)]);
+                    break;
+            }
+            this.updateFoldingThumbnails();
+            this.setRectangleBasicInfo(this.selectedFoldingRectangle);
         }
 
         private redoLine(from: Point, to: Point, dash: number[]) {
@@ -168,21 +181,26 @@
 
         private drawRectFoldingTypeA(width: number, height: number, point: Point) {
             this.canvas.height = this.canvasHeight;
+            this.allPoints = [];
             // this.spot1 = point;
             const ctx = this.ctx;
             ctx.font = 'bold ' + (this.fontSize * 3 / 2) + 'px Arial';
-            ctx.fillText('E', point.x - this.fontSize / 2, point.y - this.textMargin);
             const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
+            this.allPoints.push(new Node('A', pointA));
             ctx.fillText('A', pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
             const pointB = new Point(pointA.x, pointA.y + height);
+            this.allPoints.push(new Node('B', pointB));
             ctx.fillText('B', pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
             const pointC = new Point(pointA.x + width, pointA.y + height);
+            this.allPoints.push(new Node('C', pointC));
             ctx.fillText('C', pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
             const pointD = new Point(pointA.x + width, pointA.y);
+            this.allPoints.push(new Node('D', pointD));
             ctx.fillText('D', pointD.x + this.textMargin, pointD.y - this.textMargin);
-
             this.drawPath([pointB, pointA, point], this.dash);
             this.drawPolygon([pointB, pointC, pointD, point], []);
+            ctx.fillText('E', point.x - this.fontSize / 2, point.y - this.textMargin);
+            this.allPoints.push(new Node('E', point));
 
             // find the symmetric point
             const a = pointB.y - pointA.y;
@@ -191,6 +209,7 @@
             const x = -2 * a * c / (Math.pow(b, 2) + Math.pow(a, 2));
             const y = -2 * b * c / (Math.pow(b, 2) + Math.pow(a, 2));
             const pointF = new Point(x + pointA.x, -y + pointA.y);
+            this.allPoints.push(new Node('F', pointF));
             ctx.fillText('F', pointF.x + this.textMargin, pointF.y + this.fontSize / 2);
             this.drawPath([pointB, pointF, point], []);
 
@@ -201,7 +220,9 @@
                 const newPointX = transPointE.y * (transPointF.x  - transPointE.x) / (transPointE.y - transPointF.y) + transPointE.x + pointB.x;
                 const pointG = new Point(newPointX, pointB.y);
                 ctx.fillText('G', pointG.x - this.fontSize - this.textMargin, pointG.y - this.fontSize / 2);
+                this.allPoints.push(new Node('G', pointG));
             }
+            this.setNodesMutation(this.allPoints);
         }
 
         private drawRectFoldingTypeB(width: number, height: number, point: Point) {
@@ -227,6 +248,8 @@
             this.maxY = this.canvasHeight - this.minY;
             switch (rect.type) {
                 case rectTypes.TYPE_A:
+                    this.spot1.y = this.minY;
+                    this.updateSelectedFoldingMutation([new Point(this.spot1.x, this.minY)]);
                     this.drawRectFoldingTypeA(rect.width, rect.height, rect.points[0]);
                     setTimeout(() => {
                         this.moveSpot();
@@ -252,9 +275,16 @@
             this.setFoldingRectThumbnailsMutation(thumbnails);
         }
 
-        @Watch('selectedFoldingRectangle')
-        private watchSelectedFoldingRectangle() {
-            this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+        @Watch('selectedFoldingRectangle', {deep: true})
+        private watchSelectedFoldingRectangle(oldVal: FoldingRectangle, newVal: FoldingRectangle) {
+            let points = this.selectedFoldingRectangle.points;
+            if (points[0].toString() !== this.spot1.toString()) {
+                this.spot1 = new Point(points[0].x, points[0].y);
+                this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+            }
+            if (oldVal.width !== newVal.width || oldVal.height !== newVal.height) {
+                this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+            }
         }
 
         private mounted() {
@@ -268,7 +298,6 @@
             }
 
             this.updateFoldingThumbnails();
-
             this.setRectangleBasicInfo(this.selectedFoldingRectangle);
             this.moveSpot();
         }

@@ -76,12 +76,19 @@ export class Blackboard {
         this.createdAt = 0;
     }
 }
+export class Node {
+    constructor(name, point) {
+        this.name = name;
+        this.point = point;
+    }
+}
 export class FoldingRectangle {
     constructor(type, width, height, points) {
         this.type = type;
         this.width = width;
         this.height = height;
         this.points = points;
+        this.nodes = [];
     }
 }
 //# sourceMappingURL=index.js.map

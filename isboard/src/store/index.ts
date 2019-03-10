@@ -140,12 +140,25 @@ export class Blackboard implements Blackboard {
     }
 }
 
+export interface Node {
+    name: string;
+    point: Point;
+}
+
+export class Node implements Node {
+    constructor(name: string, point: Point) {
+        this.name = name;
+        this.point = point;
+    }
+}
+
 export interface FoldingRectangle {
     type: string;
     thumbnail: string;
     width: number;
     height: number;
     points: Point[];
+    nodes: Node[];
 }
 
 export class FoldingRectangle implements FoldingRectangle {
@@ -154,5 +167,7 @@ export class FoldingRectangle implements FoldingRectangle {
         this.width = width;
         this.height = height;
         this.points = points;
+        this.nodes = [];
     }
 }
+

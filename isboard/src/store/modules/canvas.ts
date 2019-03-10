@@ -5,6 +5,8 @@ export interface State {
     thick: number;
     tool: string;
     clear: boolean;
+    canvasWidth: number;
+    canvasHeight: number;
 }
 
 const initState: State = {
@@ -12,6 +14,8 @@ const initState: State = {
     thick: 5,
     tool: 'pen',
     clear: false,
+    canvasWidth: 800,
+    canvasHeight: 600,
 };
 
 // getters
@@ -20,6 +24,8 @@ const getters = {
     color: (state: State) => state.color,
     tool: (state: State) => state.tool,
     clear: (state: State) => state.clear,
+    canvasWidth: (state: State) => state.canvasWidth,
+    canvasHeight: (state: State) => state.canvasHeight,
 };
 
 // actions

@@ -4,6 +4,8 @@ const initState = {
     thick: 5,
     tool: 'pen',
     clear: false,
+    canvasWidth: 800,
+    canvasHeight: 600,
 };
 // getters
 const getters = {
@@ -11,6 +13,8 @@ const getters = {
     color: (state) => state.color,
     tool: (state) => state.tool,
     clear: (state) => state.clear,
+    canvasWidth: (state) => state.canvasWidth,
+    canvasHeight: (state) => state.canvasHeight,
 };
 // actions
 const actions = {};

@@ -1,14 +1,310 @@
 <template>
     <div class="data-area-wrapper">
+        <h4>长度设置 (px)</h4>
+        <div class="input-wrapper" v-for="(border, index) in displayBorders">
+            <h3>边{{ border }}</h3>
+            <el-input type="number" class="border-input" :min="1" :controls="false" v-model="borderLengths[index]" :precision="2" @blur="inputBlur"></el-input>
+        </div>
+        <div class="input-wrapper" v-for="(border, index) in disableBorders">
+            <h3>边{{ border }}</h3>
+            <el-input type="number" class="border-input" :min="1" :controls="false" v-model="disableBorderLengths[index]" :precision="2" :disabled="true"></el-input>
+        </div>
 
+        <h4>角度设置 (°)</h4>
+        <div class="input-wrapper" v-for="(angle, index) in displayAngles">
+            <h3>∠{{ angle }}</h3>
+            <el-input type="number" :min=1 label="描述文字" :controls="false" v-model="anglesList[index]" :precision="2" @blur="inputBlur"></el-input>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from 'vue-property-decorator';
+    import {Component, Vue, Watch} from 'vue-property-decorator';
+    import {Getter, Mutation} from 'vuex-class';
+    import {FoldingRectangle, Node, Point} from "../../store";
+    import * as rectTypes from '../../base/rectangle-folding'
+    import * as mutations from '../../store/mutation-types'
+
+    interface Border {
+        name: string;
+        length: number;
+        lengthModel: number;
+    }
+
+    class Border implements Border {
+        name: string;
+        length: number;
+        lengthModel: number;
+
+        constructor(node1: Node, node2: Node) {
+            this.name = node1.name + node2.name;
+            const x = Math.abs(node1.point.x - node2.point.x);
+            const y = Math.abs(node1.point.y - node2.point.y);
+            this.length = Math.pow(x * x + y * y, 0.5);
+            this.lengthModel = Math.pow(x * x + y * y, 0.5);
+        }
+    }
 
     @Component({})
     export default class DataArea extends Vue {
+        @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: FoldingRectangle;
+        @Mutation(mutations.UPDATE_RECTANGLE_SIZE) private updateRectangleSizeMutation!: any;
+        @Mutation(mutations.UPDATE_SELECTED_FOLDING) private updateSelectedFoldingMutation!: any;
+        private nodesTwoCombine: Node[][] = [];
+        private nodesThreeCombine: Node[][] = [];
+        private originBorders: any = {};
+        private borderLengths: number[] = [];
+        private disableBorderLengths: number[] = [];
+        private allBorders: any = {};
+        private allNodes: any = {};
+        private allAngles: any = {};
+        private nodeNames: string[] = [];
+        private displayBorders: string[] = [];
+        private disableBorders: string[] = [];
+        private displayAngles: string[] = [];
+        private anglesList: number[] = [];
+        private elementType: any = {
+            border: '边',
+            angle: '∠'
+        };
+
+        private re: RegExp = /^[0-9]+.?[0-9]*$/;
+
+        private getAngle(points: Point[]) {
+            const [point1, point2, point3] = points;
+            const x1 = point1.x - point2.x;
+            const x2 = point3.x - point2.x;
+            const y1 = point1.y - point2.y;
+            const y2 = point3.y - point2.y;
+            const dot = x1 * x2 + y1 * y2;
+            const det = x1 * y2 - y1 * x2;
+            const angle = Math.atan2(det, dot) / Math.PI * 180;
+            // return Math.abs(angle);
+            // return (angle + 360) % 180;
+            return Math.min((angle + 360) % 360, 360 - (angle + 360) % 360);
+        };
+
+        private combine(nodes: Node[], start: number, result: Node[], count: number, num: number) {
+            for (let i = start; i < nodes.length + 1 - count; i++)
+            {
+                result[count - 1] = nodes[i];
+                if (count - 1 == 0)
+                {
+                    if (num === 2) {
+                        this.nodesTwoCombine.push([result[0], result[1]]);
+                    } else if (num === 3) {
+                        this.nodesThreeCombine.push([result[0], result[1], result[2]]);
+                    }
+                }
+                else {
+                    this.combine(nodes, i + 1, result, count - 1, num);
+                }
+            }
+        }
+
+        private updateFoldingTypeA(element: string, index: number, originLength: number) {
+            let x = 0;
+            const point = this.selectedFoldingRectangle.points[0];
+            const pointA = this.selectedFoldingRectangle.nodes[0].point;
+            if (element === this.elementType.border) {
+                const border = this.borderLengths[index];
+                const width = this.selectedFoldingRectangle.width;
+                const height = this.selectedFoldingRectangle.height;
+                switch (index) {
+                    case 2:
+                        if (border <= 0 || border >= width) {
+                            this.borderLengths[index] = originLength;
+                            this.exceedNotification(this.elementType.border, this.displayBorders[index]);
+                        } else {
+                            x = this.selectedFoldingRectangle.width - border;
+                            this.updateSelectedFoldingMutation([new Point(pointA.x + x, point.y)]);
+                        }
+                        break;
+                    case 3:
+                        if (border <= height || border >= Math.pow(width * width + height * height, 0.5)) {
+                            this.borderLengths[index] = originLength;
+                            this.exceedNotification(this.elementType.border, this.displayBorders[index]);
+                        } else {
+                            x = Math.pow(border * border - height * height, 0.5);
+                            this.updateSelectedFoldingMutation([new Point(pointA.x + x, point.y)]);
+                        }
+                        break;
+                }
+            } else {
+                let angle = 0;
+                let cur = parseFloat(this.anglesList[index] + '');
+                switch (index) {
+                    case 0:
+                        angle = (180 - cur) / 2;
+                        break;
+                    case 1:
+                        angle = cur;
+                        break;
+                    case 2:
+                        angle = 90 - cur;
+                        break;
+                    case 3:
+                        angle = 45 + cur;
+                        break;
+                }
+                x = this.selectedFoldingRectangle.height / Math.tan(angle / 180 * Math.PI);
+                if (0 < x && x < this.selectedFoldingRectangle.width) {
+                    this.updateSelectedFoldingMutation([new Point(pointA.x + parseFloat(x.toFixed(2)), point.y)]);
+                } else {
+                    this.exceedNotification(this.elementType.angle, this.displayAngles[index]);
+                }
+            }
+
+        }
+
+        private inputBlur() {
+            for (let i = 0; i < this.displayBorders.length; i++) {
+                let origin = parseFloat(this.originBorders[this.displayBorders[i]].toFixed(2));
+                // console.log(typeof this.borderLengths[i])
+                if (!this.re.test(this.borderLengths[i] + '')){
+                    this.borderLengths[i] = origin;
+                    return;
+                }
+                let cur = parseFloat(this.borderLengths[i] + '');
+
+                if (origin !== cur) {
+                    if (i <= 1) {
+                        const width = parseFloat(this.borderLengths[1] + '');
+                        const height = parseFloat(this.borderLengths[0] + '');
+                        if (width < 200 || width > 800 || height < 100 || height > 600) {
+                            console.log(cur);
+                            const originWidth = this.originBorders[this.displayBorders[1]];
+                            const originHeight = this.originBorders[this.displayBorders[0]];
+                            this.borderLengths[0] = originHeight;
+                            this.borderLengths[1] = originWidth;
+                            this.exceedNotification(this.elementType.border, this.displayBorders[i]);
+                        } else {
+                            this.updateRectangleSizeMutation(new Point(width, height));
+                        }
+                    } else {
+                        switch (this.selectedFoldingRectangle.type) {
+                            case rectTypes.TYPE_A:
+                                this.updateFoldingTypeA(this.elementType.border, i, origin);
+                                break;
+                        }
+                    }
+                    this.calculate();
+                    break;
+                }
+            }
+
+            for (let i = 0; i < this.displayAngles.length; i++) {
+                let origin = parseFloat(this.allAngles[this.displayAngles[i]].toFixed(2));
+                // console.log(typeof this.borderLengths[i])
+                if (!this.re.test(this.anglesList[i] + '')){
+                    this.anglesList[i] = origin;
+                    return;
+                }
+                let cur = parseFloat(this.anglesList[i] + '');
+                if (cur !== origin) {
+                    switch (this.selectedFoldingRectangle.type) {
+                        case rectTypes.TYPE_A:
+                            this.updateFoldingTypeA(this.elementType.angle, i, origin);
+                            break;
+                    }
+                    this.calculate();
+                    break;
+                }
+
+            }
+        }
+
+        private calculateTypeA() {
+            let n = this.nodeNames;
+            this.displayBorders = [n[0] + n[1], n[0] + n[3], n[3] + n[4], n[1] + n[4]];
+            this.disableBorders = [];
+            if (this.selectedFoldingRectangle.nodes.length > 6) {
+                this.disableBorders.push(n[1] + n[6]);
+            }
+            this.displayAngles = [n[3] + n[4] + n[5], n[1] + n[4] + n[5], n[4] + n[1] + n[5], n[2] + n[1] + n[5]];
+
+            this.getBorderLengths(null, this.selectedFoldingRectangle);
+        }
+
+        @Watch('displayBorders', {deep: true})
+        private getBorderLengths(oldVal: string[], newVal: string[]) {
+            if (!oldVal || oldVal.toString() !== newVal.toString()) {
+                this.borderLengths = [];
+                for (let i = 0; i < this.displayBorders.length; i++) {
+                    this.borderLengths.push(parseFloat(this.allBorders[this.displayBorders[i]].toFixed(2)));
+                }
+
+                this.disableBorderLengths = [];
+                for (let i = 0; i < this.disableBorders.length; i++) {
+                    this.disableBorderLengths.push(parseFloat(this.allBorders[this.disableBorders[i]].toFixed(2)));
+                }
+            }
+        }
+
+        private calculate() {
+            // console.log('calculate');
+            let pointB = this.selectedFoldingRectangle.nodes[1].point;
+            this.nodeNames = [];
+            for (let i = 0; i < this.selectedFoldingRectangle.nodes.length; i++) {
+                this.nodeNames.push(this.selectedFoldingRectangle.nodes[i].name);
+                let point = this.selectedFoldingRectangle.nodes[i].point;
+                this.allNodes[this.selectedFoldingRectangle.nodes[i].name] = new Point(point.x - pointB.x, pointB.y - point.y);
+            }
+            this.combine(this.selectedFoldingRectangle.nodes, 0, [new Node('', new Point(0,0)),new Node('', new Point(0,0))], 2, 2);
+            this.combine(this.selectedFoldingRectangle.nodes, 0, [new Node('', new Point(0,0)),new Node('', new Point(0,0)),new Node('', new Point(0,0))], 3, 3);
+
+            this.allBorders = {};
+            this.originBorders = {};
+            for (let i = 0; i < this.nodesTwoCombine.length; i++) {
+                const [node1, node2] = this.nodesTwoCombine[i];
+                const border = new Border(node2, node1);
+                this.allBorders[border.name] = border.length;
+                this.originBorders[border.name] = border.lengthModel;
+            }
+
+            switch (this.selectedFoldingRectangle.type) {
+                case rectTypes.TYPE_A:
+                    this.calculateTypeA();
+            }
+
+            // this.getBorderLengths();
+        }
+
+        @Watch('displayAngles', {deep: true})
+        private watchDisplayAnglesChange() {
+            this.anglesList = [];
+            this.allAngles = {};
+            for (let i = 0; i < this.displayAngles.length; i++) {
+                let nodes = [];
+                let angle = this.displayAngles[i];
+                if (angle.length !== 3) {
+                    continue;
+                }
+                for (let j = 0; j < angle.length; j++) {
+                    nodes.push(this.allNodes[angle[j]]);
+                }
+                this.allAngles[angle] = parseFloat(this.getAngle(nodes).toFixed(2));
+                this.anglesList.push(parseFloat(this.getAngle(nodes).toFixed(2)));
+            }
+        }
+
+        @Watch('selectedFoldingRectangle', {deep: true})
+        private watchSelectedFoldingRectangle(oldVal: FoldingRectangle, newVal: FoldingRectangle) {
+            this.calculate();
+            // console.log([oldVal.points[0].x, newVal.points[0].x])
+        }
+
+        private exceedNotification(type: string, name: string) {
+            this.$notify.error({
+                title: '错误',
+                message: '超过' + type + name + '的设定范围！'
+            });
+        }
+
+        private mounted() {
+            this.calculate();
+        }
+
 
     }
 </script>

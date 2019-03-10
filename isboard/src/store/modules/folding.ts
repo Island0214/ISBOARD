@@ -4,7 +4,7 @@ import * as types from '../mutation-types';
 // import * as userApi from '../../api/user';
 import * as rectTypes from '../../base/rectangle-folding'
 import * as questions from '../../base/question-type'
-import {FoldingRectangle, Point} from "../index";
+import {FoldingRectangle, Point, Node} from "../index";
 
 export interface State {
     selectedFoldingType: string;
@@ -17,13 +17,19 @@ const initState: State = {
     selectedFoldingType: '',
     selectedQuestionType: '',
     foldingRectangles: [{
-        type: rectTypes.TYPE_A, thumbnail: '', height: 300, width: 500, points: [{x: 350, y: 150}]
+        type: rectTypes.TYPE_A, thumbnail: '', height: 300, width: 500, points: [{x: 350, y: 150}], nodes: []
     }, {
-        type: rectTypes.TYPE_B, thumbnail: '', height: 300, width: 500, points: [{x: 400, y: 150}]
-    },{
-        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}]
+        type: rectTypes.TYPE_B, thumbnail: '', height: 300, width: 500, points: [{x: 400, y: 150}], nodes: []
+    }, {
+        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
+    }, {
+        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
+    }, {
+        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
+    }, {
+        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
     },],
-    selectedFoldingRectangle: {type: '', thumbnail: '', height: 0, width: 0, points: []},
+    selectedFoldingRectangle: {type: '', thumbnail: '', height: 0, width: 0, points: [], nodes: []},
 };
 
 // getters
@@ -67,6 +73,16 @@ const mutations = {
         for (let i = 0; i < state.foldingRectangles.length; i++) {
             state.foldingRectangles[i].thumbnail = thumbnails[i];
         }
+    },
+    [types.SET_NODES](state: State, nodes: Node[]) {
+        state.selectedFoldingRectangle.nodes = nodes;
+    },
+    [types.UPDATE_SELECTED_FOLDING](state: State, points: Point[]) {
+        state.selectedFoldingRectangle.points = [...points];
+    },
+    [types.UPDATE_RECTANGLE_SIZE](state: State, size: Point) {
+        state.selectedFoldingRectangle.width = size.x;
+        state.selectedFoldingRectangle.height = size.y;
     },
 };
 

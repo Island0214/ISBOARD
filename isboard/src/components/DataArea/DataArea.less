@@ -5,4 +5,38 @@
   height: @totalHeight + 18px;
   width: 200px;
   text-align: center;
+  overflow-y: scroll;
+
+  h4 {
+    margin: 0 5% 10px 5%;
+    padding: 10px 0;
+    width: 90%;
+    border-top: @border;
+    border-bottom: @border;
+  }
+  .input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 90%;
+    margin: 0 0 10px 0;
+    h3 {
+      text-align: left;
+      margin: 0 15px 3px 18px;
+      letter-spacing: 3px;
+    }
+
+    .el-select {
+      width: 100%;
+      /deep/ .el-input {
+        //input {
+        font-size: 16px;
+        //}
+      }
+    }
+
+    .el-textarea {
+      font-size: 16px;
+    }
+  }
+
 }

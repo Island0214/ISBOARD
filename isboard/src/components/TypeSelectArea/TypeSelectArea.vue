@@ -1,13 +1,13 @@
 <template>
     <div class="type-select-area-wrapper">
-        <div :class="['single-type-wrapper', {'selected-blackboard': rect === selectedFoldingType}]" v-for="rect in foldingRectangles" @click="selectFoldingType(rect)">
+        <div :class="['single-type-wrapper', {'selected-blackboard': rect === selectedFoldingRectangle}]" v-for="rect in foldingRectangles" @click="selectFoldingType(rect)">
             <img :src="rect.thumbnail"/>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-    import {Component, Vue, Watch} from 'vue-property-decorator';
+    import {Component, Vue} from 'vue-property-decorator';
     import * as rectTypes from '../../base/rectangle-folding'
     import {Getter, Mutation} from 'vuex-class';
     import * as mutations from '../../store/mutation-types'
@@ -19,14 +19,13 @@
 
         @Getter('selectedFoldingType') private selectedFoldingType!: string;
         @Getter('foldingRectangles') private foldingRectangles!: string;
+        @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: string;
         @Mutation(mutations.SET_FOLDING_TYPE) private setFoldingTypeMutation!: any;
 
-        // @Watch()
 
         private selectFoldingType(rect: FoldingRectangle) {
             this.setFoldingTypeMutation(rect.type);
         }
-
     }
 </script>
 
