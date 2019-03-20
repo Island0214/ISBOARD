@@ -167,7 +167,6 @@
                 const border = this.borderLengths[index];
                 switch (index) {
                     case 2:
-                        console.log(border)
                         if (border <= 0 || border > Math.pow(width * width - height * height, 0.5)) {
                             this.borderLengths[index] = originLength;
                             this.exceedNotification(this.elementType.border, this.displayBorders[index]);
@@ -198,14 +197,7 @@
                         break;
                 }
                 const pointF = this.selectedFoldingRectangle.nodes[5].point;
-                console.log(angle)
                 x = pointF.x + this.selectedFoldingRectangle.height / Math.tan(angle / 180 * Math.PI);
-                console.log(x)
-                console.log(pointA.x)
-                console.log(pointA.x + Math.pow(width * width - height * height, 0.5))
-                // console.log(Math.tan(90 / 180 * Math.PI))
-                // console.log(x);
-
                 if (x < pointA.x || x > pointA.x + Math.pow(width * width - height * height, 0.5)) {
                     this.exceedNotification(this.elementType.angle, this.displayAngles[index]);
                 } else {

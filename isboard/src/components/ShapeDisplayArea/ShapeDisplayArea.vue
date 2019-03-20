@@ -180,27 +180,30 @@
             ctx.closePath();
         }
 
+        private addNewPoint(name: string, point: Point, positionX: number, positionY: number) {
+            const ctx = this.ctx;
+            ctx.font = 'bold ' + (this.fontSize * 3 / 2) + 'px Arial';
+            this.allPoints.push(new Node(name, point));
+            ctx.fillText(name, positionX, positionY);
+        }
+
         private drawRectFoldingTypeA(width: number, height: number, point: Point) {
             this.canvas.height = this.canvasHeight;
             this.allPoints = [];
-            const ctx = this.ctx;
-            ctx.font = 'bold ' + (this.fontSize * 3 / 2) + 'px Arial';
+
             const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
-            this.allPoints.push(new Node('A', pointA));
-            ctx.fillText('A', pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
+            this.addNewPoint('A', pointA, pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
+
             const pointB = new Point(pointA.x, pointA.y + height);
-            this.allPoints.push(new Node('B', pointB));
-            ctx.fillText('B', pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
+            this.addNewPoint('B', pointB, pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
+
             const pointC = new Point(pointA.x + width, pointA.y + height);
-            this.allPoints.push(new Node('C', pointC));
-            ctx.fillText('C', pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
+            this.addNewPoint('C', pointC, pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
+
             const pointD = new Point(pointA.x + width, pointA.y);
-            this.allPoints.push(new Node('D', pointD));
-            ctx.fillText('D', pointD.x + this.textMargin, pointD.y - this.textMargin);
-            this.drawPath([pointB, pointA, point], this.dash);
-            this.drawPolygon([pointB, pointC, pointD, point], []);
-            ctx.fillText('E', point.x - this.fontSize / 2, point.y - this.textMargin);
-            this.allPoints.push(new Node('E', point));
+            this.addNewPoint('D', pointD, pointD.x + this.textMargin, pointD.y - this.textMargin);
+
+            this.addNewPoint('E', point, point.x - this.fontSize / 2, point.y - this.textMargin);
 
             // find the symmetric point
             const a = pointB.y - pointA.y;
@@ -209,8 +212,11 @@
             const x = -2 * a * c / (Math.pow(b, 2) + Math.pow(a, 2));
             const y = -2 * b * c / (Math.pow(b, 2) + Math.pow(a, 2));
             const pointF = new Point(x + pointA.x, -y + pointA.y);
-            this.allPoints.push(new Node('F', pointF));
-            ctx.fillText('F', pointF.x + this.textMargin, pointF.y + this.fontSize / 2);
+            this.addNewPoint('F', pointF, pointF.x + this.textMargin, pointF.y + this.fontSize / 2);
+
+            // draw shape
+            this.drawPath([pointB, pointA, point], this.dash);
+            this.drawPolygon([pointB, pointC, pointD, point], []);
             this.drawPath([pointB, pointF, point], []);
 
             // find new cross point
@@ -219,8 +225,7 @@
                 const transPointF = new Point(pointF.x - pointB.x, pointB.y - pointF.y);
                 const newPointX = transPointE.y * (transPointF.x  - transPointE.x) / (transPointE.y - transPointF.y) + transPointE.x + pointB.x;
                 const pointG = new Point(newPointX, pointB.y);
-                ctx.fillText('G', pointG.x - this.fontSize - this.textMargin, pointG.y - this.fontSize / 2);
-                this.allPoints.push(new Node('G', pointG));
+                this.addNewPoint('G', pointG, pointG.x - this.fontSize - this.textMargin, pointG.y - this.fontSize / 2);
             }
             this.setNodesMutation(this.allPoints);
         }
@@ -229,36 +234,33 @@
             this.canvas.height = this.canvasHeight;
             this.maxX = this.minX + Math.pow(width * width - height * height, 0.5);
             this.allPoints = [];
-            const ctx = this.ctx;
-            ctx.font = 'bold ' + (this.fontSize * 3 / 2) + 'px Arial';
+            // const ctx = this.ctx;
+
             const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
-            this.allPoints.push(new Node('A', pointA));
-            ctx.fillText('A', pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
+            this.addNewPoint('A', pointA, pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
+
             const pointB = new Point(pointA.x, pointA.y + height);
-            this.allPoints.push(new Node('B', pointB));
-            ctx.fillText('B', pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
+            this.addNewPoint('B', pointB, pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
+
             const pointC = new Point(pointA.x + width, pointA.y + height);
-            this.allPoints.push(new Node('C', pointC));
-            ctx.fillText('C', pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
+            this.addNewPoint('C', pointC, pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
+
             const pointD = new Point(pointA.x + width, pointA.y);
-            this.allPoints.push(new Node('D', pointD));
-            ctx.fillText('D', pointD.x + this.textMargin, pointD.y - this.textMargin);
-            ctx.fillText('E', point.x - this.fontSize / 2, point.y - this.textMargin);
-            this.allPoints.push(new Node('E', point));
+            this.addNewPoint('D', pointD, pointD.x + this.textMargin, pointD.y - this.textMargin);
+
+            this.addNewPoint('E', point, point.x - this.fontSize / 2, point.y - this.textMargin);
 
             // find the symmetric line
             const k = (point.x - pointC.x) / (point.y - pointC.y);
             const middle = new Point((point.x + pointC.x) / 2 - pointA.x, pointB.y - (point.y + pointC.y) / 2);
             const pointF = new Point(pointB.x + middle.x - middle.y / k, pointB.y);
-            ctx.fillText('F', pointF.x + this.fontSize / 2, pointF.y + this.fontSize + this.textMargin);
-            this.allPoints.push(new Node('F', pointF));
+            this.addNewPoint('F', pointF, pointF.x + this.fontSize / 2, pointF.y + this.fontSize + this.textMargin);
 
             let pointG;
             const tempHeight = k * (pointC.x - pointA.x - middle.x) + middle.y;
             if (tempHeight < height) {
                 pointG = new Point(pointC.x, pointC.y - tempHeight);
-                ctx.fillText('G', pointG.x + this.textMargin, pointG.y);
-                this.allPoints.push(new Node('G', pointG));
+                this.addNewPoint('G', pointG, pointG.x + this.textMargin, pointG.y);
 
                 this.drawPolygon([pointA, pointB, pointF, pointG, pointD], []);
                 this.drawPath([pointF, point, pointG], []);
@@ -268,12 +270,10 @@
                 this.drawPath([pointF, point, pointD], []);
                 this.drawPath([pointF, pointC, pointD], this.dash);
                 pointG = new Point(pointD.x, pointD.y);
-                ctx.fillText('G', pointD.x + this.textMargin, pointD.y - this.textMargin);
-                this.allPoints.push(new Node('G', pointG));
+                this.addNewPoint('G', pointG, pointD.x + this.textMargin, pointD.y - this.textMargin);
             } else {
                 pointG = new Point((height - middle.y) / k + middle.x + pointA.x, pointD.y);
-                ctx.fillText('G', pointG.x, pointG.y - this.textMargin);
-                this.allPoints.push(new Node('G', pointG));
+                this.addNewPoint('G', pointG, pointG.x, pointG.y - this.textMargin);
 
                 // find the symmetric point
                 const a = k;
@@ -284,9 +284,8 @@
                 const x = ((b * b - a * a) * x0 - 2 * a * b * y0 - 2 * a * c) / (a * a + b * b);
                 const y = ((- b * b + a * a) * y0 - 2 * a * b * x0 - 2 * b * c) / (a * a + b * b);
                 const pointH = new Point(x + pointA.x, - y + height + pointD.y);
+                this.addNewPoint('H', pointH, pointH.x + this.textMargin, pointH.y + this.fontSize / 2);
 
-                this.allPoints.push(new Node('H', pointH));
-                ctx.fillText('H', pointH.x + this.textMargin, pointH.y + this.fontSize / 2);
                 this.drawPath([point, pointG], this.dash);
                 this.drawPolygon([pointA, pointB, pointF, point, pointA], []);
                 this.drawPath([pointF, pointG, pointH, point], []);
