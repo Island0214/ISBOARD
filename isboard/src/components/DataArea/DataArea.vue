@@ -157,6 +157,63 @@
 
         }
 
+        private updateFoldingTypeB(element: string, index: number, originLength: number) {
+            let x = 0;
+            const point = this.selectedFoldingRectangle.points[0];
+            const pointA = this.selectedFoldingRectangle.nodes[0].point;
+            const width = this.selectedFoldingRectangle.width;
+            const height = this.selectedFoldingRectangle.height;
+            if (element === this.elementType.border) {
+                const border = this.borderLengths[index];
+                switch (index) {
+                    case 2:
+                        console.log(border)
+                        if (border <= 0 || border > Math.pow(width * width - height * height, 0.5)) {
+                            this.borderLengths[index] = originLength;
+                            this.exceedNotification(this.elementType.border, this.displayBorders[index]);
+                        } else {
+                            x = parseFloat(border);
+                            this.updateSelectedFoldingMutation([new Point(pointA.x + x, point.y)]);
+                        }
+                        break;
+                    case 3:
+                        if (border <= height || border >= Math.pow(width * width + height * height, 0.5)) {
+                            this.borderLengths[index] = originLength;
+                            this.exceedNotification(this.elementType.border, this.displayBorders[index]);
+                        } else {
+                            x = Math.pow(border * border - height * height, 0.5);
+                            this.updateSelectedFoldingMutation([new Point(pointA.x + x, point.y)]);
+                        }
+                        break;
+                }
+            } else {
+                let angle = 0;
+                let cur = parseFloat(this.anglesList[index] + '');
+                switch (index) {
+                    case 0:
+                        angle = 2 * cur;
+                        break;
+                    case 1:
+                        angle = 90 - cur;
+                        break;
+                }
+                const pointF = this.selectedFoldingRectangle.nodes[5].point;
+                console.log(angle)
+                x = pointF.x + this.selectedFoldingRectangle.height / Math.tan(angle / 180 * Math.PI);
+                console.log(x)
+                console.log(pointA.x)
+                console.log(pointA.x + Math.pow(width * width - height * height, 0.5))
+                // console.log(Math.tan(90 / 180 * Math.PI))
+                // console.log(x);
+
+                if (x < pointA.x || x > pointA.x + Math.pow(width * width - height * height, 0.5)) {
+                    this.exceedNotification(this.elementType.angle, this.displayAngles[index]);
+                } else {
+                    this.updateSelectedFoldingMutation([new Point(parseFloat(x.toFixed(2)), point.y)]);
+                }
+            }
+        }
+
         private inputBlur() {
             for (let i = 0; i < this.displayBorders.length; i++) {
                 let origin = parseFloat(this.originBorders[this.displayBorders[i]].toFixed(2));
@@ -172,7 +229,6 @@
                         const width = parseFloat(this.borderLengths[1] + '');
                         const height = parseFloat(this.borderLengths[0] + '');
                         if (width < 200 || width > 800 || height < 100 || height > 600) {
-                            console.log(cur);
                             const originWidth = this.originBorders[this.displayBorders[1]];
                             const originHeight = this.originBorders[this.displayBorders[0]];
                             this.borderLengths[0] = originHeight;
@@ -185,6 +241,9 @@
                         switch (this.selectedFoldingRectangle.type) {
                             case rectTypes.TYPE_A:
                                 this.updateFoldingTypeA(this.elementType.border, i, origin);
+                                break;
+                            case rectTypes.TYPE_B:
+                                this.updateFoldingTypeB(this.elementType.border, i, origin);
                                 break;
                         }
                     }
@@ -206,6 +265,9 @@
                         case rectTypes.TYPE_A:
                             this.updateFoldingTypeA(this.elementType.angle, i, origin);
                             break;
+                        case rectTypes.TYPE_B:
+                            this.updateFoldingTypeB(this.elementType.angle, i, origin);
+                            break;
                     }
                     this.calculate();
                     break;
@@ -218,10 +280,21 @@
             let n = this.nodeNames;
             this.displayBorders = [n[0] + n[1], n[0] + n[3], n[3] + n[4], n[1] + n[4]];
             this.disableBorders = [];
-            if (this.selectedFoldingRectangle.nodes.length > 6) {
-                this.disableBorders.push(n[1] + n[6]);
-            }
             this.displayAngles = [n[3] + n[4] + n[5], n[1] + n[4] + n[5], n[4] + n[1] + n[5], n[2] + n[1] + n[5]];
+
+            this.getBorderLengths([], this.displayBorders);
+        }
+
+        private calculateTypeB() {
+            let n = this.nodeNames;
+            this.displayBorders = [n[0] + n[1], n[0] + n[3], n[0] + n[4]];
+            this.disableBorders = [n[3] + n[6], n[5] + n[6], n[2] + n[5]];
+            this.displayAngles = [n[2] + n[5] + n[6]];
+            if (n.length > 7) {
+                this.displayAngles.push(n[6] + n[4] + n[7]);
+            } else {
+                this.displayAngles.push(n[3] + n[4] + n[6]);
+            }
 
             this.getBorderLengths([], this.displayBorders);
         }
@@ -265,6 +338,10 @@
             switch (this.selectedFoldingRectangle.type) {
                 case rectTypes.TYPE_A:
                     this.calculateTypeA();
+                    break;
+                case rectTypes.TYPE_B:
+                    this.calculateTypeB();
+                    break;
             }
 
             // this.getBorderLengths();

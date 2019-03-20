@@ -258,6 +258,8 @@
             if (tempHeight < height) {
                 pointG = new Point(pointC.x, pointC.y - tempHeight);
                 ctx.fillText('G', pointG.x + this.textMargin, pointG.y);
+                this.allPoints.push(new Node('G', pointG));
+
                 this.drawPolygon([pointA, pointB, pointF, pointG, pointD], []);
                 this.drawPath([pointF, point, pointG], []);
                 this.drawPath([pointF, pointC, pointG], this.dash);
@@ -265,9 +267,13 @@
                 this.drawPolygon([pointA, pointB, pointF, pointD], []);
                 this.drawPath([pointF, point, pointD], []);
                 this.drawPath([pointF, pointC, pointD], this.dash);
+                pointG = new Point(pointD.x, pointD.y);
+                ctx.fillText('G', pointD.x + this.textMargin, pointD.y - this.textMargin);
+                this.allPoints.push(new Node('G', pointG));
             } else {
                 pointG = new Point((height - middle.y) / k + middle.x + pointA.x, pointD.y);
                 ctx.fillText('G', pointG.x, pointG.y - this.textMargin);
+                this.allPoints.push(new Node('G', pointG));
 
                 // find the symmetric point
                 const a = k;
@@ -281,7 +287,7 @@
 
                 this.allPoints.push(new Node('H', pointH));
                 ctx.fillText('H', pointH.x + this.textMargin, pointH.y + this.fontSize / 2);
-
+                this.drawPath([point, pointG], this.dash);
                 this.drawPolygon([pointA, pointB, pointF, point, pointA], []);
                 this.drawPath([pointF, pointG, pointH, point], []);
                 this.drawPath([pointF, pointC, pointD, pointG], this.dash);
@@ -351,13 +357,12 @@
             }
             if (oldVal.type === newVal.type && (point.x !== this.spot1.x || point.y !== this.spot1.y)) {
                 this.spot1 = new Point(points[0].x, points[0].y);
+                console.log(this.spot1)
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
-                console.log(1)
                 return;
             }
             if (oldVal.width !== newVal.width || oldVal.height !== newVal.height) {
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
-                console.log(2)
                 return;
             }
         }
