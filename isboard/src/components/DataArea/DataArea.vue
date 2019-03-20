@@ -223,7 +223,7 @@
             }
             this.displayAngles = [n[3] + n[4] + n[5], n[1] + n[4] + n[5], n[4] + n[1] + n[5], n[2] + n[1] + n[5]];
 
-            this.getBorderLengths(null, this.selectedFoldingRectangle);
+            this.getBorderLengths([], this.displayBorders);
         }
 
         @Watch('displayBorders', {deep: true})

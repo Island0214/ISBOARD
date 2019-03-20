@@ -51,7 +51,8 @@
         }
 
         get showSpot1() {
-            return this.selectedFoldingRectangle.type === rectTypes.TYPE_A;
+            return this.selectedFoldingRectangle.type === rectTypes.TYPE_A
+                || this.selectedFoldingRectangle.type === rectTypes.TYPE_B;
         }
 
         private moveSpot() {
@@ -182,7 +183,6 @@
         private drawRectFoldingTypeA(width: number, height: number, point: Point) {
             this.canvas.height = this.canvasHeight;
             this.allPoints = [];
-            // this.spot1 = point;
             const ctx = this.ctx;
             ctx.font = 'bold ' + (this.fontSize * 3 / 2) + 'px Arial';
             const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
@@ -227,6 +227,67 @@
 
         private drawRectFoldingTypeB(width: number, height: number, point: Point) {
             this.canvas.height = this.canvasHeight;
+            this.maxX = this.minX + Math.pow(width * width - height * height, 0.5);
+            this.allPoints = [];
+            const ctx = this.ctx;
+            ctx.font = 'bold ' + (this.fontSize * 3 / 2) + 'px Arial';
+            const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
+            this.allPoints.push(new Node('A', pointA));
+            ctx.fillText('A', pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
+            const pointB = new Point(pointA.x, pointA.y + height);
+            this.allPoints.push(new Node('B', pointB));
+            ctx.fillText('B', pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
+            const pointC = new Point(pointA.x + width, pointA.y + height);
+            this.allPoints.push(new Node('C', pointC));
+            ctx.fillText('C', pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
+            const pointD = new Point(pointA.x + width, pointA.y);
+            this.allPoints.push(new Node('D', pointD));
+            ctx.fillText('D', pointD.x + this.textMargin, pointD.y - this.textMargin);
+            ctx.fillText('E', point.x - this.fontSize / 2, point.y - this.textMargin);
+            this.allPoints.push(new Node('E', point));
+
+            // find the symmetric line
+            const k = (point.x - pointC.x) / (point.y - pointC.y);
+            const middle = new Point((point.x + pointC.x) / 2 - pointA.x, pointB.y - (point.y + pointC.y) / 2);
+            const pointF = new Point(pointB.x + middle.x - middle.y / k, pointB.y);
+            ctx.fillText('F', pointF.x + this.fontSize / 2, pointF.y + this.fontSize + this.textMargin);
+            this.allPoints.push(new Node('F', pointF));
+
+            let pointG;
+            const tempHeight = k * (pointC.x - pointA.x - middle.x) + middle.y;
+            if (tempHeight < height) {
+                pointG = new Point(pointC.x, pointC.y - tempHeight);
+                ctx.fillText('G', pointG.x + this.textMargin, pointG.y);
+                this.drawPolygon([pointA, pointB, pointF, pointG, pointD], []);
+                this.drawPath([pointF, point, pointG], []);
+                this.drawPath([pointF, pointC, pointG], this.dash);
+            } else if (tempHeight === height) {
+                this.drawPolygon([pointA, pointB, pointF, pointD], []);
+                this.drawPath([pointF, point, pointD], []);
+                this.drawPath([pointF, pointC, pointD], this.dash);
+            } else {
+                pointG = new Point((height - middle.y) / k + middle.x + pointA.x, pointD.y);
+                ctx.fillText('G', pointG.x, pointG.y - this.textMargin);
+
+                // find the symmetric point
+                const a = k;
+                const b = -1;
+                const c = middle.y - k * middle.x;
+                const x0 = pointD.x - pointA.x;
+                const y0 = pointC.y - pointD.y;
+                const x = ((b * b - a * a) * x0 - 2 * a * b * y0 - 2 * a * c) / (a * a + b * b);
+                const y = ((- b * b + a * a) * y0 - 2 * a * b * x0 - 2 * b * c) / (a * a + b * b);
+                const pointH = new Point(x + pointA.x, - y + height + pointD.y);
+
+                this.allPoints.push(new Node('H', pointH));
+                ctx.fillText('H', pointH.x + this.textMargin, pointH.y + this.fontSize / 2);
+
+                this.drawPolygon([pointA, pointB, pointF, point, pointA], []);
+                this.drawPath([pointF, pointG, pointH, point], []);
+                this.drawPath([pointF, pointC, pointD, pointG], this.dash);
+            }
+
+            this.setNodesMutation(this.allPoints);
         }
 
         private drawRectFoldingTypeC(width: number, height: number, point: Point) {
@@ -257,6 +318,9 @@
                     break;
                 case rectTypes.TYPE_B:
                     this.drawRectFoldingTypeB(rect.width, rect.height, rect.points[0]);
+                    setTimeout(() => {
+                        this.moveSpot();
+                    }, 100);
                     break;
                 case rectTypes.TYPE_C:
                     this.drawRectFoldingTypeC(rect.width, rect.height, rect.points[0]);
@@ -278,12 +342,23 @@
         @Watch('selectedFoldingRectangle', {deep: true})
         private watchSelectedFoldingRectangle(oldVal: FoldingRectangle, newVal: FoldingRectangle) {
             let points = this.selectedFoldingRectangle.points;
-            if (points[0].toString() !== this.spot1.toString()) {
+            let point = points[0];
+
+            if (oldVal.type !== newVal.type) {
+                this.spot1 = point;
+                this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+                return;
+            }
+            if (oldVal.type === newVal.type && (point.x !== this.spot1.x || point.y !== this.spot1.y)) {
                 this.spot1 = new Point(points[0].x, points[0].y);
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+                console.log(1)
+                return;
             }
             if (oldVal.width !== newVal.width || oldVal.height !== newVal.height) {
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+                console.log(2)
+                return;
             }
         }
 
