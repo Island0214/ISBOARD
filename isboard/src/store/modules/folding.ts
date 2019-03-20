@@ -17,17 +17,15 @@ const initState: State = {
     selectedFoldingType: '',
     selectedQuestionType: '',
     foldingRectangles: [{
-        type: rectTypes.TYPE_A, thumbnail: '', height: 300, width: 500, points: [{x: 350, y: 150}], nodes: []
+        type: rectTypes.TYPE_A, thumbnail: '', height: 300, width: 400, points: [{x: 350, y: 150}], nodes: []
     }, {
-        type: rectTypes.TYPE_B, thumbnail: '', height: 300, width: 500, points: [{x: 400, y: 150}], nodes: []
+        type: rectTypes.TYPE_B, thumbnail: '', height: 300, width: 400, points: [{x: 350, y: 150}], nodes: []
     }, {
-        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
+        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 400, points: [{x: 450, y: 150}], nodes: []
     }, {
-        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
+        type: rectTypes.TYPE_D, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
     }, {
-        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
-    }, {
-        type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
+        type: rectTypes.TYPE_E, thumbnail: '', height: 300, width: 500, points: [{x: 450, y: 150}], nodes: []
     },],
     selectedFoldingRectangle: {type: '', thumbnail: '', height: 0, width: 0, points: [], nodes: []},
 };

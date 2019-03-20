@@ -151,6 +151,8 @@
             // ctx.moveTo(cur.x, cur.y);
             ctx.lineTo(start.x, start.y);
             ctx.stroke();
+            ctx.lineTo(points[1].x, points[1].y);
+            ctx.stroke();
             ctx.closePath();
         }
 
@@ -234,7 +236,6 @@
             this.canvas.height = this.canvasHeight;
             this.maxX = this.minX + Math.pow(width * width - height * height, 0.5);
             this.allPoints = [];
-            // const ctx = this.ctx;
 
             const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
             this.addNewPoint('A', pointA, pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
@@ -276,13 +277,7 @@
                 this.addNewPoint('G', pointG, pointG.x, pointG.y - this.textMargin);
 
                 // find the symmetric point
-                const a = k;
-                const b = -1;
-                const c = middle.y - k * middle.x;
-                const x0 = pointD.x - pointA.x;
-                const y0 = pointC.y - pointD.y;
-                const x = ((b * b - a * a) * x0 - 2 * a * b * y0 - 2 * a * c) / (a * a + b * b);
-                const y = ((- b * b + a * a) * y0 - 2 * a * b * x0 - 2 * b * c) / (a * a + b * b);
+                const [x, y] = this.findSymmetricPoint(k, middle, new Point(pointD.x - pointA.x, pointC.y - pointD.y));
                 const pointH = new Point(x + pointA.x, - y + height + pointD.y);
                 this.addNewPoint('H', pointH, pointH.x + this.textMargin, pointH.y + this.fontSize / 2);
 
@@ -297,6 +292,50 @@
 
         private drawRectFoldingTypeC(width: number, height: number, point: Point) {
             this.canvas.height = this.canvasHeight;
+            this.allPoints = [];
+
+            const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
+            this.addNewPoint('A', pointA, pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
+
+            const pointB = new Point(pointA.x, pointA.y + height);
+            this.addNewPoint('B', pointB, pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
+
+            const pointC = new Point(pointA.x + width, pointA.y + height);
+            this.addNewPoint('C', pointC, pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
+
+            const pointD = new Point(pointA.x + width, pointA.y);
+            this.addNewPoint('D', pointD, pointD.x + this.textMargin, pointD.y - this.textMargin);
+
+
+            // find the symmetric point
+            const k = (pointB.y - pointD.y) / (pointD.x - pointB.x);
+            const [x, y] = this.findSymmetricPoint(k, new Point(0, 0), new Point(pointC.x - pointA.x, pointC.y - pointB.y));
+            const pointE = new Point(x + pointA.x, - y + height + pointD.y);
+            this.addNewPoint('E', pointE, pointE.x - this.textMargin, pointE.y - this.fontSize / 2);
+
+            // find the cross point
+            const pointF = new Point(pointA.x + (pointB.y - pointA.y) * x / y, pointA.y);
+            this.addNewPoint('F', pointF, pointF.x - this.fontSize, pointF.y - this.textMargin);
+
+            this.drawPath([pointB, pointC, pointD], this.dash);
+            this.drawPath([pointB, pointE, pointD], []);
+            this.drawPath([pointB, pointD], []);
+            this.drawPath([pointB, pointA, pointF], []);
+            this.drawPath([pointD, pointF], this.dash);
+
+            this.setNodesMutation(this.allPoints);
+        }
+
+        private findSymmetricPoint(k: number, point: Point, origin: Point) {
+            const a = k;
+            const b = -1;
+            const c = point.y - k * point.x;
+            const x0 = origin.x;
+            const y0 = origin.y;
+            const x = ((b * b - a * a) * x0 - 2 * a * b * y0 - 2 * a * c) / (a * a + b * b);
+            const y = ((- b * b + a * a) * y0 - 2 * a * b * x0 - 2 * b * c) / (a * a + b * b);
+            return [x, y];
+
         }
 
         private getMousePosition = (canvas: HTMLCanvasElement, x: number, y: number) => {

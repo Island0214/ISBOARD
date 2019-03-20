@@ -15,6 +15,10 @@
             <h3>∠{{ angle }}</h3>
             <el-input type="number" :min=1 label="描述文字" :controls="false" v-model="anglesList[index]" :precision="2" @blur="inputBlur"></el-input>
         </div>
+        <div class="input-wrapper" v-for="(border, index) in disableAngles">
+            <h3>边{{ border }}</h3>
+            <el-input type="number" class="border-input" :min="1" :controls="false" v-model="anglesList[index]" :precision="2" :disabled="true"></el-input>
+        </div>
     </div>
 </template>
 
@@ -62,6 +66,7 @@
         private displayBorders: string[] = [];
         private disableBorders: string[] = [];
         private displayAngles: string[] = [];
+        private disableAngles: string[] = [];
         private anglesList: number[] = [];
         private elementType: any = {
             border: '边',
@@ -171,7 +176,7 @@
                             this.borderLengths[index] = originLength;
                             this.exceedNotification(this.elementType.border, this.displayBorders[index]);
                         } else {
-                            x = parseFloat(border);
+                            x = parseFloat(border + '');
                             this.updateSelectedFoldingMutation([new Point(pointA.x + x, point.y)]);
                         }
                         break;
@@ -291,6 +296,15 @@
             this.getBorderLengths([], this.displayBorders);
         }
 
+        private calculateTypeC() {
+            let n = this.nodeNames;
+            this.displayBorders = [n[0] + n[1], n[0] + n[3]];
+            this.disableBorders = [n[1] + n[3], n[0] + n[5], n[1] + n[5]];
+            this.disableAngles = [n[0] + n[1] + n[5], n[4] + n[1] + n[3], n[1] + n[5] + n[3]];
+
+            this.getBorderLengths([], this.displayBorders);
+        }
+
         @Watch('displayBorders', {deep: true})
         private getBorderLengths(oldVal: string[], newVal: string[]) {
             if (!oldVal || oldVal.toString() !== newVal.toString()) {
@@ -334,6 +348,9 @@
                 case rectTypes.TYPE_B:
                     this.calculateTypeB();
                     break;
+                case rectTypes.TYPE_C:
+                    this.calculateTypeC();
+                    break;
             }
 
             // this.getBorderLengths();
@@ -346,6 +363,24 @@
             for (let i = 0; i < this.displayAngles.length; i++) {
                 let nodes = [];
                 let angle = this.displayAngles[i];
+                if (angle.length !== 3) {
+                    continue;
+                }
+                for (let j = 0; j < angle.length; j++) {
+                    nodes.push(this.allNodes[angle[j]]);
+                }
+                this.allAngles[angle] = parseFloat(this.getAngle(nodes).toFixed(2));
+                this.anglesList.push(parseFloat(this.getAngle(nodes).toFixed(2)));
+            }
+        }
+
+        @Watch('disableAngles', {deep: true})
+        private watchDisplayAnglesChange() {
+            this.anglesList = [];
+            this.allAngles = {};
+            for (let i = 0; i < this.disableAngles.length; i++) {
+                let nodes = [];
+                let angle = this.disableAngles[i];
                 if (angle.length !== 3) {
                     continue;
                 }
