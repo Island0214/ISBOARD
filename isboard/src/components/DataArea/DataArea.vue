@@ -17,7 +17,7 @@
         </div>
         <div class="input-wrapper" v-for="(border, index) in disableAngles">
             <h3>边{{ border }}</h3>
-            <el-input type="number" class="border-input" :min="1" :controls="false" v-model="anglesList[index]" :precision="2" :disabled="true"></el-input>
+            <el-input type="number" class="border-input" :min="1" :controls="false" v-model="disableAnglesList[index]" :precision="2" :disabled="true"></el-input>
         </div>
     </div>
 </template>
@@ -68,6 +68,7 @@
         private displayAngles: string[] = [];
         private disableAngles: string[] = [];
         private anglesList: number[] = [];
+        private disableAnglesList: number[] = [];
         private elementType: any = {
             border: '边',
             angle: '∠'
@@ -278,6 +279,7 @@
             this.displayBorders = [n[0] + n[1], n[0] + n[3], n[3] + n[4], n[1] + n[4]];
             this.disableBorders = [];
             this.displayAngles = [n[3] + n[4] + n[5], n[1] + n[4] + n[5], n[4] + n[1] + n[5], n[2] + n[1] + n[5]];
+            this.disableAngles = [];
 
             this.getBorderLengths([], this.displayBorders);
         }
@@ -287,6 +289,7 @@
             this.displayBorders = [n[0] + n[1], n[0] + n[3], n[0] + n[4]];
             this.disableBorders = [n[3] + n[6], n[5] + n[6], n[2] + n[5]];
             this.displayAngles = [n[2] + n[5] + n[6]];
+            this.disableAngles = [];
             if (n.length > 7) {
                 this.displayAngles.push(n[6] + n[4] + n[7]);
             } else {
@@ -300,6 +303,7 @@
             let n = this.nodeNames;
             this.displayBorders = [n[0] + n[1], n[0] + n[3]];
             this.disableBorders = [n[1] + n[3], n[0] + n[5], n[1] + n[5]];
+            this.displayAngles = [];
             this.disableAngles = [n[0] + n[1] + n[5], n[4] + n[1] + n[3], n[1] + n[5] + n[3]];
 
             this.getBorderLengths([], this.displayBorders);
@@ -375,9 +379,9 @@
         }
 
         @Watch('disableAngles', {deep: true})
-        private watchDisplayAnglesChange() {
-            this.anglesList = [];
-            this.allAngles = {};
+        private watchDisableAnglesChange() {
+            this.disableAnglesList = [];
+            // this.allAngles = {};
             for (let i = 0; i < this.disableAngles.length; i++) {
                 let nodes = [];
                 let angle = this.disableAngles[i];
@@ -387,8 +391,8 @@
                 for (let j = 0; j < angle.length; j++) {
                     nodes.push(this.allNodes[angle[j]]);
                 }
-                this.allAngles[angle] = parseFloat(this.getAngle(nodes).toFixed(2));
-                this.anglesList.push(parseFloat(this.getAngle(nodes).toFixed(2)));
+                // this.allAngles[angle] = parseFloat(this.getAngle(nodes).toFixed(2));
+                this.disableAnglesList.push(parseFloat(this.getAngle(nodes).toFixed(2)));
             }
         }
 
