@@ -2,6 +2,7 @@
     <div class="shape-display-area-wrapper">
         <div :class="['canvas-wrapper']">
             <div :class="['spot-wrapper']" :style="spot1Css" id="move-spot-1" v-if="showSpot1"></div>
+            <!--<div :class="['spot-wrapper']" :style="spot2Css" id="move-spot-2" v-if="showSpot2"></div>-->
             <canvas id="rectangle-canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
             <!--<canvas id="setting-canvas" width="800" height="600" v-show="showSettingCanvas"></canvas>-->
             <!--<canvas id="blackboard-canvas" width="800" height="600"></canvas>-->
@@ -24,8 +25,8 @@
         private dash: number[] = [5, 5];
         private fontSize: number = 24;
         private textMargin: number = 10;
-        private spot1: Point = new Point(350, 150);
-        private spot2: Point = {x: 0, y: 0};
+        private spot1: Point = new Point(450, 150);
+        private spot2: Point = {x: 300, y: 450};
         private minX: number = 150;
         private maxX: number = 650;
         private minY: number = 150;
@@ -50,9 +51,23 @@
             }
         }
 
+        get spot2Css() {
+            return {
+                marginLeft: this.spot2.x - this.thickness * 1.25 + 'px',
+                marginTop: this.spot2.y - this.thickness * 1.25 + 'px',
+                width: this.thickness * 2.5 + 'px',
+                height: this.thickness * 2.5 + 'px',
+            }
+        }
+
         get showSpot1() {
             return this.selectedFoldingRectangle.type === rectTypes.TYPE_A
-                || this.selectedFoldingRectangle.type === rectTypes.TYPE_B;
+                || this.selectedFoldingRectangle.type === rectTypes.TYPE_B
+                || this.selectedFoldingRectangle.type === rectTypes.TYPE_D;
+        }
+
+        get showSpot2() {
+            return this.selectedFoldingRectangle.type === rectTypes.TYPE_D;
         }
 
         private moveSpot() {
@@ -290,7 +305,7 @@
             this.setNodesMutation(this.allPoints);
         }
 
-        private drawRectFoldingTypeC(width: number, height: number, point: Point) {
+        private drawRectFoldingTypeC(width: number, height: number) {
             this.canvas.height = this.canvasHeight;
             this.allPoints = [];
 
@@ -324,6 +339,51 @@
             this.drawPath([pointD, pointF], this.dash);
 
             this.setNodesMutation(this.allPoints);
+        }
+
+        private drawRectFoldingTypeD(width: number, height: number, point: Point) {
+            this.canvas.height = this.canvasHeight;
+            this.allPoints = [];
+            this.minX = this.maxX - width / 2;
+
+            const pointA = new Point((this.canvasWidth - width) / 2, (this.canvasHeight - height) / 2);
+            this.addNewPoint('A', pointA, pointA.x - this.fontSize - this.textMargin, pointA.y - this.textMargin);
+
+            const pointB = new Point(pointA.x, pointA.y + height);
+            this.addNewPoint('B', pointB, pointB.x - this.fontSize - this.textMargin, pointB.y + this.fontSize + this.textMargin);
+
+            const pointC = new Point(pointA.x + width, pointA.y + height);
+            this.addNewPoint('C', pointC, pointC.x + this.textMargin, pointC.y + this.fontSize + this.textMargin);
+
+            const pointD = new Point(pointA.x + width, pointA.y);
+            this.addNewPoint('D', pointD, pointD.x + this.textMargin, pointD.y - this.textMargin);
+
+            const pointE = point;
+            this.addNewPoint('E', pointE, pointE.x - this.textMargin, pointE.y - this.fontSize / 2);
+
+            const pointF = new Point((pointB.x + pointC.x) / 2, pointB.y);
+            this.addNewPoint('F', pointF, pointF.x, pointF.y + this.fontSize + this.textMargin);
+
+            const k = (pointF.y - pointE.y) / (pointE.x - pointF.x);
+            const [x0, y0] = this.findSymmetricPoint(k, new Point(pointF.x - pointB.x, pointF.y - pointB.y), new Point(pointC.x - pointB.x, pointC.y - pointB.y));
+            const pointG = new Point(x0 + pointA.x,  pointC.y - y0);
+            this.addNewPoint('G', pointG, pointG.x - this.fontSize - this.textMargin, pointG.y + this.fontSize);
+
+            const [x1, y1] = this.findSymmetricPoint(k, new Point(pointF.x - pointB.x, pointF.y - pointB.y), new Point(pointD.x - pointB.x, pointB.y - pointD.y));
+            const pointH = new Point(x1 + pointA.x,  pointC.y - y1);
+            this.addNewPoint('H', pointH, pointH.x - this.fontSize, pointH.y - this.textMargin);
+
+            const tmpK = (pointG.y - pointH.y) / (pointH.x - pointG.x);
+            const x = pointH.x + (pointH.y - pointA.y) / tmpK;
+            const pointI = new Point(x,  pointA.y);
+            this.addNewPoint('I', pointI, pointI.x - this.fontSize / 2, pointI.y - this.textMargin);
+
+            this.drawPath([pointI, pointA, pointB, pointF], []);
+            this.drawPath([pointI, pointE], this.dash);
+            this.drawPolygon([pointG, pointF, pointE, pointH], []);
+            this.drawPolygon([pointE, pointF, pointC, pointD], this.dash);
+            this.setNodesMutation(this.allPoints);
+
         }
 
         private findSymmetricPoint(k: number, point: Point, origin: Point) {
@@ -367,7 +427,13 @@
                     }, 100);
                     break;
                 case rectTypes.TYPE_C:
-                    this.drawRectFoldingTypeC(rect.width, rect.height, rect.points[0]);
+                    this.drawRectFoldingTypeC(rect.width, rect.height);
+                    break;
+                case rectTypes.TYPE_D:
+                    this.drawRectFoldingTypeD(rect.width, rect.height, rect.points[0]);
+                    setTimeout(() => {
+                        this.moveSpot();
+                    }, 100);
                     break;
             }
         }
@@ -389,13 +455,14 @@
             let point = points[0];
 
             if (oldVal.type !== newVal.type) {
-                this.spot1 = point;
+                if (point) {
+                    this.spot1 = point;
+                }
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
                 return;
             }
-            if (oldVal.type === newVal.type && (point.x !== this.spot1.x || point.y !== this.spot1.y)) {
+            if (point && oldVal.type === newVal.type && (point.x !== this.spot1.x || point.y !== this.spot1.y)) {
                 this.spot1 = new Point(points[0].x, points[0].y);
-                console.log(this.spot1)
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
                 return;
             }

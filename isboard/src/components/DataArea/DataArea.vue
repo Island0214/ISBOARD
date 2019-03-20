@@ -212,6 +212,54 @@
             }
         }
 
+        private updateFoldingTypeD(element: string, index: number, originLength: number) {
+            let x = 0;
+            const point = this.selectedFoldingRectangle.points[0];
+            const pointA = this.selectedFoldingRectangle.nodes[0].point;
+            const pointG = this.selectedFoldingRectangle.nodes[6].point;
+            const pointI = this.selectedFoldingRectangle.nodes[8].point;
+            const width = this.selectedFoldingRectangle.width;
+            const height = this.selectedFoldingRectangle.height;
+            if (element === this.elementType.border) {
+                const border = parseFloat(this.borderLengths[index] + '');
+                switch (index) {
+                    case 2:
+                        if (border <= 0 || border >= width) {
+                            this.borderLengths[index] = originLength;
+                            this.exceedNotification(this.elementType.border, this.displayBorders[index]);
+                        } else {
+                            x = width - parseFloat(border + '');
+                            this.updateSelectedFoldingMutation([new Point(pointA.x + x, point.y)]);
+                        }
+                        break;
+                }
+            } else {
+                let angle = 0;
+                let cur = parseFloat(this.anglesList[index] + '');
+                switch (index) {
+                    case 0:
+                        angle = (180 - cur) / 2;
+                        break;
+                    case 1:
+                        angle = (90 + cur) / 2;
+                        break;
+                    case 2:
+                        angle = cur;
+                        break;
+                    case 1:
+                        angle = (180 - cur) / 2;
+                        break;
+                }
+                const pointF = this.selectedFoldingRectangle.nodes[5].point;
+                x = pointF.x + this.selectedFoldingRectangle.height / Math.tan(angle / 180 * Math.PI);
+                if (x < pointA.x || x > pointA.x + this.selectedFoldingRectangle.width) {
+                    this.exceedNotification(this.elementType.angle, this.displayAngles[index]);
+                } else {
+                    this.updateSelectedFoldingMutation([new Point(parseFloat(x.toFixed(2)), point.y)]);
+                }
+            }
+        }
+
         private inputBlur() {
             for (let i = 0; i < this.displayBorders.length; i++) {
                 let origin = parseFloat(this.originBorders[this.displayBorders[i]].toFixed(2));
@@ -243,6 +291,9 @@
                             case rectTypes.TYPE_B:
                                 this.updateFoldingTypeB(this.elementType.border, i, origin);
                                 break;
+                            case rectTypes.TYPE_D:
+                                this.updateFoldingTypeD(this.elementType.border, i, origin);
+                                break;
                         }
                     }
                     this.calculate();
@@ -265,6 +316,9 @@
                             break;
                         case rectTypes.TYPE_B:
                             this.updateFoldingTypeB(this.elementType.angle, i, origin);
+                            break;
+                        case rectTypes.TYPE_D:
+                            this.updateFoldingTypeD(this.elementType.angle, i, origin);
                             break;
                     }
                     this.calculate();
@@ -305,6 +359,16 @@
             this.disableBorders = [n[1] + n[3], n[0] + n[5], n[1] + n[5]];
             this.displayAngles = [];
             this.disableAngles = [n[0] + n[1] + n[5], n[4] + n[1] + n[3], n[1] + n[5] + n[3]];
+
+            this.getBorderLengths([], this.displayBorders);
+        }
+
+        private calculateTypeD() {
+            let n = this.nodeNames;
+            this.displayBorders = [n[0] + n[1], n[0] + n[3], n[3] + n[4]];
+            this.disableBorders = [n[0] + n[8]];
+            this.displayAngles = [n[1] + n[5] + n[6], n[0] + n[8] + n[6], n[2] + n[5] + n[4], n[7] + n[4] + n[8]];
+            this.disableAngles = [];
 
             this.getBorderLengths([], this.displayBorders);
         }
@@ -355,7 +419,11 @@
                 case rectTypes.TYPE_C:
                     this.calculateTypeC();
                     break;
+                case rectTypes.TYPE_D:
+                    this.calculateTypeD();
+                    break;
             }
+
 
             // this.getBorderLengths();
         }
