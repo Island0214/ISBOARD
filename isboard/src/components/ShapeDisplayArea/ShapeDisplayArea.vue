@@ -421,6 +421,8 @@
                     }, 100);
                     break;
                 case rectTypes.TYPE_B:
+                    this.spot1.y = this.minY;
+                    this.updateSelectedFoldingMutation([new Point(this.spot1.x, this.minY)]);
                     this.drawRectFoldingTypeB(rect.width, rect.height, rect.points[0]);
                     setTimeout(() => {
                         this.moveSpot();
@@ -430,6 +432,8 @@
                     this.drawRectFoldingTypeC(rect.width, rect.height);
                     break;
                 case rectTypes.TYPE_D:
+                    this.spot1.y = this.minY;
+                    this.updateSelectedFoldingMutation([new Point(this.spot1.x, this.minY)]);
                     this.drawRectFoldingTypeD(rect.width, rect.height, rect.points[0]);
                     setTimeout(() => {
                         this.moveSpot();
