@@ -25,7 +25,7 @@ const initState: State = {
     }, {
         type: rectTypes.TYPE_D, thumbnail: '', height: 300, width: 400, points: [{x: 500, y: 150}], nodes: []
     }, {
-        type: rectTypes.TYPE_E, thumbnail: '', height: 300, width: 400, points: [{x: 450, y: 150}], nodes: []
+        type: rectTypes.TYPE_E, thumbnail: '', height: 300, width: 400, points: [], nodes: []
     },],
     selectedFoldingRectangle: {type: '', thumbnail: '', height: 0, width: 0, points: [], nodes: []},
 };
@@ -75,8 +75,21 @@ const mutations = {
     [types.SET_NODES](state: State, nodes: Node[]) {
         state.selectedFoldingRectangle.nodes = nodes;
     },
-    [types.UPDATE_SELECTED_FOLDING](state: State, points: Point[]) {
-        state.selectedFoldingRectangle.points = [...points];
+    [types.UPDATE_SELECTED_FOLDING](state: State, param: {points: Point[], type: string}) {
+        for (let i = 0; i < state.foldingRectangles.length; i++) {
+            if (state.foldingRectangles[i].type === param.type) {
+                state.foldingRectangles[i].points = [];
+                for (let j = 0; j < param.points.length; j++) {
+                    state.foldingRectangles[i].points.push(new Point(param.points[j].x, param.points[j].y));
+                }
+                break;
+            }
+        }
+        console.log(state.foldingRectangles[0].points === state.foldingRectangles[1].points)
+            // state.selectedFoldingRectangle.points = [...param.points];
+        // console.log(state.selectedFoldingRectangle.type)
+        // console.log([...param.points])
+        // console.log(param.type)
     },
     [types.UPDATE_RECTANGLE_SIZE](state: State, size: Point) {
         state.selectedFoldingRectangle.width = size.x;

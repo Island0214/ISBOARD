@@ -25,10 +25,17 @@
       background-color: #333333;
       border-radius: 100px;
       cursor: pointer;
+      z-index: 2;
     }
 
     .spot-wrapper:hover {
       background-color: @hoverColor;
+    }
+
+    #line-canvas {
+      position: absolute;
+      left: 0;
+      background-color: transparent;
     }
   }
 }
