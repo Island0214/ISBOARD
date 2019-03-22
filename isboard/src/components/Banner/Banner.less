@@ -1,5 +1,5 @@
 @import '../../base/base.less';
-@loginHeight: 60px;
+@loginHeight: 50px;
 
 .banner-wrapper {
   .area-wrapper();
@@ -34,6 +34,15 @@
       text-decoration: none;
       color: @hoverColor;
       border-bottom: 2px solid #F3A576;
+    }
+
+    .el-select {
+      width: 90%;
+      /deep/ .el-input {
+        //input {
+        font-size: 16px;
+        //}
+      }
     }
   }
 }
