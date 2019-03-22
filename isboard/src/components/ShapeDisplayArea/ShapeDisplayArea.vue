@@ -441,6 +441,11 @@
             const pointF = new Point(point1.x + tmpF.x, this.maxY - tmpF.y);
             this.addNewPoint('F', pointF, pointF.x - this.fontSize - this.textMargin, pointF.y - this.textMargin);
 
+            let CE = this.maxX - point1.x;
+            const tmpG = new Point(tmpO.x * CE / EO, tmpO.y * CE / EO);
+            const pointG = new Point(point1.x + tmpG.x, this.maxY - tmpG.y);
+            this.addNewPoint('G', pointG, pointG.x + this.textMargin, pointG.y - this.textMargin);
+
             const kBF = (pointB.y - pointF.y) / (pointF.x - pointB.x);
             let pointH = new Point(this.minX, this.maxY + (this.minX - point1.x) / kBF);
             if (pointH.y >= this.minY) {
@@ -457,10 +462,6 @@
                 this.drawPath([pointH, pointJ, pointF, pointE], []);
             }
 
-            let CE = this.maxX - point1.x;
-            const tmpG = new Point(tmpO.x * CE / EO, tmpO.y * CE / EO);
-            const pointG = new Point(point1.x + tmpG.x, this.maxY - tmpG.y);
-            this.addNewPoint('G', pointG, pointG.x + this.textMargin, pointG.y - this.textMargin);
 
             const kCG = (pointC.y - pointG.y) / (pointG.x - pointC.x);
             let pointI = new Point(this.maxX, this.maxY + (this.maxX - point1.x) / kCG);
@@ -546,12 +547,10 @@
                     }, 100);
                     break;
                 case rectTypes.TYPE_E:
-                    console.log('ee')
                     this.spot1.y = this.maxY;
                     if (rect.points.length === 0) {
                         this.spot2.x = this.canvasWidth / 2;
                         this.spot2.y = this.maxY - this.canvasWidth / 2;
-                        console.log('eee')
                         this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point( (this.canvasWidth / 2 + this.minX) / 2, this.maxY)], type: rect.type});
                         this.updateFoldingThumbnails();
                         // this.spot1.x = (this.canvasWidth / 2 + this.minX) / 2;
@@ -582,16 +581,7 @@
         @Watch('selectedFoldingRectangle', {deep: true})
         private watchSelectedFoldingRectangle(oldVal: FoldingRectangle, newVal: FoldingRectangle) {
             let points = this.selectedFoldingRectangle.points;
-            // console.log(this.selectedFoldingRectangle.type)
             let point = points[0];
-            // console.log(points)
-            if (this.selectedFoldingRectangle.type === rectTypes.TYPE_E) {
-                console.log(
-                    'e'
-                )
-
-            }
-
             if (oldVal.type !== newVal.type) {
                 if (point) {
                     if (this.selectedFoldingRectangle.type !== rectTypes.TYPE_E) {
@@ -604,26 +594,23 @@
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
                 return;
             }
-            // console.log(this.spot1.x);
             if (point && (point.x !== this.spot1.x || point.y !== this.spot1.y) && this.selectedFoldingRectangle.type !== rectTypes.TYPE_E) {
                 this.spot1 = new Point(point.x, point.y);
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
                 return;
             }
-            // if (point && oldVal.type !== newVal.type && this.selectedFoldingRectangle.type === rectTypes.TYPE_E) {
-            //     console.log(3)
-            //     // console.log(points)
-            //     if (point.x !== this.spot2.x || point.y !== this.spot2.y) {
-            //         this.spot2 = new Point(point.x, point.y);
-            //         this.setRectangleBasicInfo(this.selectedFoldingRectangle);
-            //     }
-            //     point = points[1];
-            //     if (point.x !== this.spot1.x || point.y !== this.spot1.y) {
-            //         this.spot1 = new Point(point.x, point.y);
-            //         this.setRectangleBasicInfo(this.selectedFoldingRectangle);
-            //     }
-            //     return;
-            // }
+            if (point && this.selectedFoldingRectangle.type === rectTypes.TYPE_E) {
+                if (point.x !== this.spot2.x || point.y !== this.spot2.y) {
+                    this.spot2 = new Point(point.x, point.y);
+                    this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+                }
+                point = points[1];
+                if (point.x !== this.spot1.x || point.y !== this.spot1.y) {
+                    this.spot1 = new Point(point.x, point.y);
+                    this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+                }
+                return;
+            }
             if (oldVal.width !== newVal.width || oldVal.height !== newVal.height) {
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
                 return;

@@ -84,12 +84,13 @@ const mutations = {
                 }
                 break;
             }
+            if (state.selectedFoldingRectangle.type === param.type) {
+                state.selectedFoldingRectangle.points = [];
+                for (let j = 0; j < param.points.length; j++) {
+                    state.selectedFoldingRectangle.points.push(new Point(param.points[j].x, param.points[j].y));
+                }
+            }
         }
-        console.log(state.foldingRectangles[0].points === state.foldingRectangles[1].points)
-            // state.selectedFoldingRectangle.points = [...param.points];
-        // console.log(state.selectedFoldingRectangle.type)
-        // console.log([...param.points])
-        // console.log(param.type)
     },
     [types.UPDATE_RECTANGLE_SIZE](state: State, size: Point) {
         state.selectedFoldingRectangle.width = size.x;
