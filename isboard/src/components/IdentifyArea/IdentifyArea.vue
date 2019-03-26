@@ -27,17 +27,12 @@
         <!--<el-button style="margin: 10px 0;" class="my-button">识 别 题 干</el-button>-->
         <div class="input-wrapper">
             <h3>类型特点</h3>
-            <!--{{foldingFeatures}}-->
-            <!--{{// Object.keys(foldingFeatures) }}-->
             <div v-for="foldingFeatureKey in Object.keys(foldingFeatures)">
                 <h4>{{foldingFeatureKey}}</h4>
                 <p class="table-col" v-for="foldingFeature in foldingFeatures[foldingFeatureKey]">
                     {{ foldingFeature }}
                 </p>
             </div>
-            <!--<p class="table-col" v-for="foldingFeature in foldingFeatures">-->
-                <!--{{ foldingFeature }}-->
-            <!--</p>-->
         </div>
     </div>
 </template>
@@ -58,7 +53,7 @@
         private textarea: string = '';
         private questionTypes: string[] = [questions.FOLDING, questions.UNFOLDING];
         private foldingType: string = rectTypes.TYPE_A;
-        private foldingTypes: string[] = [rectTypes.TYPE_A, rectTypes.TYPE_B, rectTypes.TYPE_C, rectTypes.TYPE_D, rectTypes.TYPE_E];
+        private foldingTypes: string[] = [rectTypes.TYPE_A, rectTypes.TYPE_B, rectTypes.TYPE_C, rectTypes.TYPE_D, rectTypes.TYPE_E, rectTypes.TYPE_F];
         @Getter('selectedQuestionType') private selectedQuestionType!: string;
         @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: FoldingRectangle;
         @Mutation(mutations.SET_QUESTION_TYPE) private setQuestionTypeMutation!: any;
@@ -76,6 +71,8 @@
                     return '该折叠类型，通过在矩形的一条对边上各取一个点，沿着两点的连线对矩形进行折叠。';
                 case rectTypes.TYPE_E:
                     return '该折叠类型，通过在矩形的一条边上取一点，由该点分割的两条边分别折叠，折叠后两边落至同一直线。';
+                case rectTypes.TYPE_F:
+                    return '该折叠类型，通过在矩形的一条边上取一点，将由该点分割的两条边分别进行折叠。';
             }
         }
 
@@ -110,6 +107,13 @@
                     return {
                         '通用：': ['△ABE ≌ △AFE', '△CEI ≌ △GEI', '△HEF ∽ △EIG', '△ABE ∽ △ECI', ],
                         '当连线为矩形中线时：': ['△HEF ≌ △EIG', '△ABE ≌ △ECI']
+                    };
+                case rectTypes.TYPE_F:
+                    return {
+                        '通用：': ['△BEH ≌ △FEH', '△CEI ≌ △GEI'],
+                        '△FEH与△GEI无重叠时：': ['2∠BEH + 2∠CEI + ∠FEG = 180°'],
+                        '△FEH与△GEI部分重叠时：': ['2∠BEH + 2∠CEI - ∠FEG = 180°'],
+                        'EF与EG重合时变为类型5。': [],
                     };
             }
         }

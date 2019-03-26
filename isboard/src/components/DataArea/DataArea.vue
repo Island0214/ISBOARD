@@ -261,7 +261,6 @@
 
         private updateFoldingTypeE(element: string, index: number, originLength: number) {
             let x = 0;
-            const point = this.selectedFoldingRectangle.points[0];
             const pointA = this.selectedFoldingRectangle.nodes[0].point;
             const width = this.selectedFoldingRectangle.width;
             const point1 = this.selectedFoldingRectangle.points[0];
@@ -292,17 +291,81 @@
                         break;
                 }
 
-                x = this.canvasWidth / 2 * Math.cos(angle / 180 * Math.PI);
-                let y = Math.pow(this.canvasWidth * this.canvasWidth / 4 - x * x, 0.5);
-                console.log(point2.x - point1.x);
-
                 if (angle <= 0 || angle >= 180) {
                     this.exceedNotification(this.elementType.angle, this.displayAngles[index]);
                 } else {
-                    this.updateSelectedFoldingMutation({points: [new Point(point2.x + x, point2.y - y), new Point(point2.x, point2.y)], type:this.selectedFoldingRectangle.type});
+                    let k = Math.tan(angle * Math.PI / 180);
+                    let a = this.canvasWidth / 2;
+                    let b = point2.x - this.canvasWidth / 2;
+                    let cross = this.getCrossPoint(k, a, b);
+                    this.updateSelectedFoldingMutation({points: [new Point(this.canvasWidth / 2 + cross.x, point2.y - cross.y), new Point(point2.x, point2.y)], type:this.selectedFoldingRectangle.type});
                 }
             }
         }
+
+        private updateFoldingTypeF(element: string, index: number, originLength: number) {
+            let x = 0;
+            const pointA = this.selectedFoldingRectangle.nodes[0].point;
+            const width = this.selectedFoldingRectangle.width;
+            const point1 = this.selectedFoldingRectangle.points[0];
+            const point2 = this.selectedFoldingRectangle.points[1];
+            const point3 = this.selectedFoldingRectangle.points[2];
+            if (element === this.elementType.border) {
+                const border = parseFloat(this.borderLengths[index] + '');
+                console.log(border)
+                switch (index) {
+                    case 2:
+                        if (border <= 0 || border >= width) {
+                            this.borderLengths[index] = originLength;
+                            this.exceedNotification(this.elementType.border, this.displayBorders[index]);
+                        } else {
+                            x = parseFloat(border + '');
+                            this.updateSelectedFoldingMutation({points: [new Point(point1.x, point1.y), new Point(pointA.x + border, point2.y), new Point(point3.x, point3.y)], type:this.selectedFoldingRectangle.type});
+                        }
+                        break;
+                }
+            } else {
+                let angle = 0;
+                let cur = parseFloat(this.anglesList[index] + '');
+                if (cur <= 0 || cur >= 90) {
+                    this.exceedNotification(this.elementType.angle, this.displayAngles[index]);
+                } else {
+                    let k;
+                    let a = this.canvasWidth / 2;
+                    let b = point2.x - this.canvasWidth / 2;
+                    let cross;
+                    switch (index) {
+                        case 0:
+                            angle = 180 - cur * 2;
+                            k = Math.tan(angle * Math.PI / 180);
+                            cross = this.getCrossPoint(k, a, b);
+                            this.updateSelectedFoldingMutation({points: [new Point(this.canvasWidth / 2 + cross.x, point2.y - cross.y), new Point(point2.x, point2.y), new Point(point3.x, point3.y)], type:this.selectedFoldingRectangle.type});
+                            break;
+                        case 1:
+                            angle = 2 * cur;
+                            k = Math.tan(angle * Math.PI / 180);
+                            cross = this.getCrossPoint(k, a, b);
+                            this.updateSelectedFoldingMutation({points: [new Point(point1.x, point1.y), new Point(point2.x, point2.y), new Point(this.canvasWidth / 2 + cross.x, point2.y - cross.y)], type:this.selectedFoldingRectangle.type});
+                            break;
+                    }
+                }
+            }
+        }
+
+        private getCrossPoint (k: number, a: number, b:number) {
+            const tmp1 = b * k * k / (1 + k * k);
+            const tmp2 = Math.pow(a * a - b * b * k * k + a * a * k * k, 0.5) / (1 + k * k);
+            let x;
+            if (k < 0) {
+                x = Math.min(tmp1 - tmp2, tmp1 + tmp2);
+            } else {
+                x = Math.max(tmp1 - tmp2, tmp1 + tmp2);
+            }
+
+            const y = Math.pow(this.canvasWidth * this.canvasWidth / 4 - x * x, 0.5);
+            return new Point(x, y);
+        }
+
 
         private inputBlur() {
             for (let i = 0; i < this.displayBorders.length; i++) {
@@ -361,6 +424,9 @@
                             case rectTypes.TYPE_E:
                                 this.updateFoldingTypeE(this.elementType.border, i, origin);
                                 break;
+                            case rectTypes.TYPE_F:
+                                this.updateFoldingTypeF(this.elementType.border, i, origin);
+                                break;
                         }
                     }
                     this.calculate();
@@ -389,6 +455,9 @@
                             break;
                         case rectTypes.TYPE_E:
                             this.updateFoldingTypeE(this.elementType.angle, i, origin);
+                            break;
+                        case rectTypes.TYPE_F:
+                            this.updateFoldingTypeF(this.elementType.angle, i, origin);
                             break;
                     }
                     this.calculate();
@@ -453,6 +522,17 @@
             this.getBorderLengths([], this.displayBorders);
         }
 
+        private calculateTypeF() {
+            let n = this.nodeNames;
+            this.displayBorders = [n[0] + n[1], n[0] + n[3], n[1] + n[4]];
+            this.disableBorders = [n[4] + n[7], n[4] + n[8]];
+            this.displayAngles = [n[1] + n[4] + n[7], n[2] + n[4] + n[8]];
+            this.disableAngles = [n[5] + n[4] + n[6]];
+
+            this.getBorderLengths([], this.displayBorders);
+        }
+
+
         @Watch('displayBorders', {deep: true})
         private getBorderLengths(oldVal: string[], newVal: string[]) {
             if (!oldVal || oldVal.toString() !== newVal.toString()) {
@@ -507,6 +587,9 @@
                     break;
                 case rectTypes.TYPE_E:
                     this.calculateTypeE();
+                    break;
+                case rectTypes.TYPE_F:
+                    this.calculateTypeF();
                     break;
             }
 

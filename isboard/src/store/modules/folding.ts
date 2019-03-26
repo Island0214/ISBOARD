@@ -26,6 +26,8 @@ const initState: State = {
         type: rectTypes.TYPE_D, thumbnail: '', height: 300, width: 400, points: [{x: 500, y: 150}], nodes: []
     }, {
         type: rectTypes.TYPE_E, thumbnail: '', height: 300, width: 400, points: [], nodes: []
+    }, {
+        type: rectTypes.TYPE_F, thumbnail: '', height: 300, width: 400, points: [], nodes: []
     },],
     selectedFoldingRectangle: {type: '', thumbnail: '', height: 0, width: 0, points: [], nodes: []},
 };
