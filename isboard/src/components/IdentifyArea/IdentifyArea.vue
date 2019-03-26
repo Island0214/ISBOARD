@@ -101,7 +101,9 @@
                     };
                 case rectTypes.TYPE_D:
                     return {
-                        '通用：': ['∠BFG + ∠AIG = 90°', '∠HEI = ∠GFB', '梯形CDEF ≌ 梯形GHEF'],
+                        '通用：': ['∠HEI = ∠GFB', '梯形CDEF ≌ 梯形GHEF'],
+                        '当GH与AD相交时：': ['∠BFG + ∠AIG = 90°'],
+                        '当GH与AD不相交时：': ['∠BFG = ∠AIG', 'IE = IF'],
                         'E点与D点重合时变为类型1。': [],
                     };
                 case rectTypes.TYPE_E:

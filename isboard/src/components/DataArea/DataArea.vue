@@ -239,13 +239,13 @@
                     case 0:
                         angle = (180 - cur) / 2;
                         break;
+                    // case 1:
+                    //     angle = (90 + cur) / 2;
+                    //     break;
                     case 1:
-                        angle = (90 + cur) / 2;
-                        break;
-                    case 2:
                         angle = cur;
                         break;
-                    case 1:
+                    case 2:
                         angle = (180 - cur) / 2;
                         break;
                 }
@@ -326,6 +326,26 @@
                             this.exceedNotification(this.elementType.border, this.displayBorders[i]);
                         } else {
                             this.updateRectangleSizeMutation(new Point(width, height));
+                            let point;
+                            switch (this.selectedFoldingRectangle.type) {
+                                case rectTypes.TYPE_A:
+                                    point = this.selectedFoldingRectangle.points[0];
+                                    this.updateSelectedFoldingMutation({points: [new Point(point.x, (this.canvasHeight - height) / 2)], type:this.selectedFoldingRectangle.type});
+                                    break;
+                                case rectTypes.TYPE_B:
+                                    point = this.selectedFoldingRectangle.points[0];
+                                    this.updateSelectedFoldingMutation({points: [new Point(point.x, (this.canvasHeight - height) / 2)], type:this.selectedFoldingRectangle.type});
+                                    break;
+                                case rectTypes.TYPE_D:
+                                    point = this.selectedFoldingRectangle.points[0];
+                                    this.updateSelectedFoldingMutation({points: [new Point(point.x, (this.canvasHeight - height) / 2)], type:this.selectedFoldingRectangle.type});
+                                    break;
+                                case rectTypes.TYPE_E:
+                                    let point1 = this.selectedFoldingRectangle.points[0];
+                                    let point2 = this.selectedFoldingRectangle.points[1];
+                                    this.updateSelectedFoldingMutation({points: [new Point(point1.x, point1.y), new Point(point2.x, (this.canvasHeight + height) / 2)], type:this.selectedFoldingRectangle.type});
+                                    break;
+                            }
                         }
                     } else {
                         switch (this.selectedFoldingRectangle.type) {
@@ -417,8 +437,8 @@
             let n = this.nodeNames;
             this.displayBorders = [n[0] + n[1], n[0] + n[3], n[3] + n[4]];
             this.disableBorders = [n[0] + n[8]];
-            this.displayAngles = [n[1] + n[5] + n[6], n[0] + n[8] + n[6], n[2] + n[5] + n[4], n[7] + n[4] + n[8]];
-            this.disableAngles = [];
+            this.displayAngles = [n[1] + n[5] + n[6], n[2] + n[5] + n[4], n[7] + n[4] + n[8]];
+            this.disableAngles = [n[0] + n[8] + n[6]];
 
             this.getBorderLengths([], this.displayBorders);
         }
