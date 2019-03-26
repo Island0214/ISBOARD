@@ -15,8 +15,8 @@
             <h3>∠{{ angle }}</h3>
             <el-input type="number" :min=1 label="描述文字" :controls="false" v-model="anglesList[index]" :precision="2" @blur="inputBlur"></el-input>
         </div>
-        <div class="input-wrapper" v-for="(border, index) in disableAngles">
-            <h3>边{{ border }}</h3>
+        <div class="input-wrapper" v-for="(angle, index) in disableAngles">
+            <h3>∠{{ angle }}</h3>
             <el-input type="number" class="border-input" :min="1" :controls="false" v-model="disableAnglesList[index]" :precision="2" :disabled="true"></el-input>
         </div>
     </div>
