@@ -17,9 +17,9 @@ const initState: State = {
     selectedFoldingType: '',
     selectedQuestionType: '',
     foldingRectangles: [{
-        type: rectTypes.TYPE_A, thumbnail: '', height: 300, width: 400, points: [{x: 350, y: 150}], nodes: []
-    }, {
         type: rectTypes.TYPE_B, thumbnail: '', height: 300, width: 400, points: [{x: 350, y: 150}], nodes: []
+    }, {
+        type: rectTypes.TYPE_A, thumbnail: '', height: 300, width: 400, points: [{x: 350, y: 150}], nodes: []
     }, {
         type: rectTypes.TYPE_C, thumbnail: '', height: 300, width: 400, points: [], nodes: []
     }, {

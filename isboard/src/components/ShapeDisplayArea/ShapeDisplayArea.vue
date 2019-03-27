@@ -8,6 +8,9 @@
             <canvas id="line-canvas-2" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showSpot3"></canvas>
             <canvas id="rectangle-canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         </div>
+        <div class="button-wrapper">
+            <el-button class="my-button">展 示 折 叠 过 程</el-button>
+        </div>
     </div>
 </template>
 
@@ -44,6 +47,7 @@
         @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: FoldingRectangle;
         @Mutation(mutations.SET_FOLDING_RECT_THUMBNAILS) private setFoldingRectThumbnailsMutation!: any;
         @Mutation(mutations.SET_NODES) private setNodesMutation!: any;
+        @Mutation(mutations.SET_FOLDING_TYPE) private setFoldingTypeMutation!: any;
         @Mutation(mutations.UPDATE_SELECTED_FOLDING) private updateSelectedFoldingMutation!: any;
         get spot1Css() {
             return {
@@ -701,7 +705,7 @@
                         this.spot2.x = this.canvasWidth / 2;
                         this.spot2.y = this.maxY - this.canvasWidth / 2;
                         this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point( (this.canvasWidth / 2 + this.minX) / 2, this.maxY)], type: rect.type});
-                        this.updateFoldingThumbnails();
+                        // this.updateFoldingThumbnails();
                     } else {
                         this.drawRectFoldingTypeE(rect.width, rect.height, rect.points[1], rect.points[0]);
                         setTimeout(() => {
@@ -722,7 +726,7 @@
                         relativeX = this.spot3.x - radius;
                         this.spot3.y = this.maxY - Math.pow(radius * radius - relativeX * relativeX, 0.5);
                         this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point(this.canvasWidth / 2, this.maxY), new Point(this.spot3.x, this.spot3.y)], type: rect.type});
-                        this.updateFoldingThumbnails();
+                        // this.updateFoldingThumbnails();
                     } else {
                         this.drawRectFoldingTypeF(rect.width, rect.height, rect.points[1], rect.points[0], rect.points[2]);
                         setTimeout(() => {
@@ -741,6 +745,7 @@
             let thumbnails: string[] = [];
             for (let i = 0; i < this.foldingRectangles.length; i++) {
                 const rect = this.foldingRectangles[i];
+                // console.log(rect.type);
                 this.setRectangleBasicInfo(rect);
                 const data = this.canvas.toDataURL('image/png', 1 );
                 thumbnails.push(data);
@@ -754,11 +759,15 @@
             let point = points[0];
             if (oldVal.type !== newVal.type) {
                 if (point) {
-                    if (this.selectedFoldingRectangle.type !== rectTypes.TYPE_E) {
+                    if (this.selectedFoldingRectangle.type !== rectTypes.TYPE_E && this.selectedFoldingRectangle.type !== rectTypes.TYPE_F) {
                         this.spot1 = new Point(point.x, point.y);
+                    } else if (this.selectedFoldingRectangle.type === rectTypes.TYPE_E) {
+                        this.spot1 = new Point(points[1].x, points[1].y);
+                        this.spot2 = new Point(points[0].x, points[0].y);
                     } else {
                         this.spot1 = new Point(points[1].x, points[1].y);
                         this.spot2 = new Point(points[0].x, points[0].y);
+                        this.spot3 = new Point(points[2].x, points[2].y);
                     }
                 }
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
@@ -815,7 +824,10 @@
             }
 
             this.updateFoldingThumbnails();
-            this.setRectangleBasicInfo(this.selectedFoldingRectangle);
+            setTimeout(() => {
+                this.updateFoldingThumbnails();
+                this.setFoldingTypeMutation(rectTypes.TYPE_B);
+            }, 10);
         }
     }
 </script>
