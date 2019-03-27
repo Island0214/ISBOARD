@@ -4,12 +4,14 @@
             <div :class="['spot-wrapper']" :style="spot1Css" id="move-spot-1" v-if="showSpot1"></div>
             <div :class="['spot-wrapper']" :style="spot2Css" id="move-spot-2" v-if="showSpot2"></div>
             <div :class="['spot-wrapper']" :style="spot3Css" id="move-spot-3" v-if="showSpot3"></div>
+            <canvas id="animation-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showAnimation"></canvas>
+
             <canvas id="line-canvas-1" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showSpot2"></canvas>
             <canvas id="line-canvas-2" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showSpot3"></canvas>
             <canvas id="rectangle-canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         </div>
         <div class="button-wrapper">
-            <el-button class="my-button">展 示 折 叠 过 程</el-button>
+            <el-button class="my-button" @click="showFoldingProcess()">展 示 折 叠 过 程</el-button>
         </div>
     </div>
 </template>
@@ -38,6 +40,7 @@
         private allPoints: Node[]= [];
         private rectWidth: number = 800;
         private rectHeight: number = 600;
+        private showAnimation: boolean = false;
 
         @Getter('canvasWidth') private canvasWidth!: number;
         @Getter('canvasHeight') private canvasHeight!: number;
@@ -77,11 +80,11 @@
         }
 
         get showSpot1() {
-            return this.selectedFoldingRectangle.type === rectTypes.TYPE_A
+            return !this.showAnimation && (this.selectedFoldingRectangle.type === rectTypes.TYPE_A
                 || this.selectedFoldingRectangle.type === rectTypes.TYPE_B
                 || this.selectedFoldingRectangle.type === rectTypes.TYPE_D
                 || this.selectedFoldingRectangle.type === rectTypes.TYPE_E
-                || this.selectedFoldingRectangle.type === rectTypes.TYPE_F;
+                || this.selectedFoldingRectangle.type === rectTypes.TYPE_F);
         }
 
         get showSpot2() {
@@ -198,6 +201,13 @@
             }
         }
 
+        private showFoldingProcess() {
+            this.showAnimation = true;
+            setTimeout(() => {
+                this.showAnimation = false
+            }, 2000);
+        }
+
         private updateCurrentFolding() {
             switch (this.selectedFoldingRectangle.type) {
                 case rectTypes.TYPE_A:
@@ -207,7 +217,6 @@
                     this.updateSelectedFoldingMutation({points: [new Point(this.spot1.x, this.minY)], type: this.selectedFoldingRectangle.type});
                     break;
                 case rectTypes.TYPE_C:
-                    // this.updateSelectedFoldingMutation({points: [new Point(this.spot1.x, this.minY)], type: this.selectedFoldingRectangle.type});
                     break;
                 case rectTypes.TYPE_D:
                     this.updateSelectedFoldingMutation({points: [new Point(this.spot1.x, this.minY)], type: this.selectedFoldingRectangle.type});
@@ -705,7 +714,7 @@
                         this.spot2.x = this.canvasWidth / 2;
                         this.spot2.y = this.maxY - this.canvasWidth / 2;
                         this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point( (this.canvasWidth / 2 + this.minX) / 2, this.maxY)], type: rect.type});
-                        // this.updateFoldingThumbnails();
+                        this.updateFoldingThumbnails();
                     } else {
                         this.drawRectFoldingTypeE(rect.width, rect.height, rect.points[1], rect.points[0]);
                         setTimeout(() => {
@@ -755,6 +764,7 @@
 
         @Watch('selectedFoldingRectangle', {deep: true})
         private watchSelectedFoldingRectangle(oldVal: FoldingRectangle, newVal: FoldingRectangle) {
+            console.log(this.selectedFoldingRectangle.type);
             let points = this.selectedFoldingRectangle.points;
             let point = points[0];
             if (oldVal.type !== newVal.type) {
@@ -824,10 +834,10 @@
             }
 
             this.updateFoldingThumbnails();
-            setTimeout(() => {
-                this.updateFoldingThumbnails();
-                this.setFoldingTypeMutation(rectTypes.TYPE_B);
-            }, 10);
+            // setTimeout(() => {
+            //     this.updateFoldingThumbnails();
+            //     // this.setFoldingTypeMutation(rectTypes.TYPE_B);
+            // }, 10);
         }
     }
 </script>
