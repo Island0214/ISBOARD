@@ -4,7 +4,7 @@
             <div :class="['spot-wrapper']" :style="spot1Css" id="move-spot-1" v-if="showSpot1"></div>
             <div :class="['spot-wrapper']" :style="spot2Css" id="move-spot-2" v-if="showSpot2"></div>
             <div :class="['spot-wrapper']" :style="spot3Css" id="move-spot-3" v-if="showSpot3"></div>
-            <canvas id="animation-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showAnimation"></canvas>
+            <canvas id="animation-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-show="showAnimation"></canvas>
 
             <canvas id="line-canvas-1" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showSpot2"></canvas>
             <canvas id="line-canvas-2" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showSpot3"></canvas>
@@ -27,6 +27,8 @@
     export default class ShapeDisplayArea extends Vue {
         private canvas!: HTMLCanvasElement;
         private ctx!: CanvasRenderingContext2D;
+        private animationCanvas!: HTMLCanvasElement;
+        private animationCtx!: CanvasRenderingContext2D;
         private dash: number[] = [5, 5];
         private fontSize: number = 24;
         private textMargin: number = 10;
@@ -41,6 +43,7 @@
         private rectWidth: number = 800;
         private rectHeight: number = 600;
         private showAnimation: boolean = false;
+        private animationSpeed: number = 10;
 
         @Getter('canvasWidth') private canvasWidth!: number;
         @Getter('canvasHeight') private canvasHeight!: number;
@@ -201,11 +204,144 @@
             }
         }
 
+        private getAnimationCtx() {
+            const animationCanvas: HTMLCanvasElement = document.getElementById('animation-canvas') as HTMLCanvasElement;
+            if (!animationCanvas || !animationCanvas.getContext('2d')) {
+                return false;
+            } else {
+                const animationCtx = animationCanvas.getContext('2d') as CanvasRenderingContext2D;
+                this.animationCanvas = animationCanvas;
+                this.animationCtx = animationCtx;
+            }
+        }
+
+        private showFoldingProcessTypeA() {
+            this.getAnimationCtx();
+
+            if (this.allPoints.length < 6) {
+                this.showAnimation = false;
+                return;
+            }
+            const pointA = this.allPoints[0].point;
+            const pointB = this.allPoints[1].point;
+            const pointC = this.allPoints[2].point;
+            const pointD = this.allPoints[3].point;
+            const pointE = this.allPoints[4].point;
+            const pointF = this.allPoints[5].point;
+
+            const kAF = (pointA.y - pointF.y) / (pointF.x - pointA.x);
+
+            const start = pointA.x;
+            let y = pointB.y - pointA.y;
+            let tmpF;
+            for (let i = pointA.x; i <= pointF.x; i++) {
+                setTimeout(() => {
+                    this.animationCanvas.height = this.canvasHeight;
+
+                    y = pointB.y - pointA.y + kAF * (i - start);
+                    tmpF = new Point(i, pointB.y - y);
+
+                    this.drawPath([pointB, pointA, pointE], this.dash, this.animationCtx);
+                    this.drawPolygon([pointB, pointC, pointD, pointE], [], this.animationCtx);
+                    this.drawPath([pointB, tmpF, pointE], [], this.animationCtx);
+
+                    if (i === pointF.x) {
+                        this.showAnimation = false;
+                    }
+                }, (i - start) * this.animationSpeed);
+            }
+        }
+
+        private showFoldingProcessTypeB() {
+            this.getAnimationCtx();
+
+            if (this.allPoints.length < 7) {
+                this.showAnimation = false;
+                return;
+            }
+            const pointA = this.allPoints[0].point;
+            const pointB = this.allPoints[1].point;
+            const pointC = this.allPoints[2].point;
+            const pointD = this.allPoints[3].point;
+            const pointE = this.allPoints[4].point;
+            const pointF = this.allPoints[5].point;
+            const pointG = this.allPoints[6].point;
+
+            const kCE = (pointC.y - pointE.y) / (pointE.x - pointC.x);
+            const start = pointC.x;
+            const end = pointE.x;
+            let xCE = pointC.x - pointB.x;
+            let yCE = pointC.y;
+            let tmpE;
+            if (this.allPoints.length === 7) {
+                for (let i = start; i >= end; i--) {
+                    setTimeout(() => {
+                        this.animationCanvas.height = this.canvasHeight;
+
+                        yCE = kCE * (i - pointB.x - xCE);
+
+                        tmpE = new Point(i, pointB.y - yCE);
+                        this.drawPolygon([pointA, pointB, pointF, pointG, pointD], [], this.animationCtx);
+                        this.drawPath([pointF, tmpE, pointG], [], this.animationCtx);
+                        this.drawPath([pointF, pointC, pointG], this.dash, this.animationCtx);
+                        if (i === end) {
+                            this.showAnimation = false;
+                        }
+                    }, (start - i) * this.animationSpeed);
+                }
+            } else {
+                const pointH = this.allPoints[7].point;
+                const kDH = (pointD.y - pointH.y) / (pointH.x - pointD.x);
+                let yDH = pointC.y;
+                let tmpH;
+                for (let i = start; i >= end; i--) {
+                    setTimeout(() => {
+                        this.animationCanvas.height = this.canvasHeight;
+
+                        yCE = kCE * (i - pointB.x - xCE);
+                        tmpE = new Point(i, pointB.y - yCE);
+
+                        let ratio = (pointD.x - pointG.x) / (pointC.x - pointF.x);
+                        let tmpX = pointG.x + (i - pointF.x) * ratio;
+                        yDH = kDH * (tmpX - pointD.x) + (pointB.y - pointD.y);
+                        tmpH = new Point(tmpX, pointB.y - yDH);
+
+
+                        this.drawPath([pointE, pointG], this.dash, this.animationCtx);
+                        this.drawPath([pointE, pointA, pointB, pointF], [], this.animationCtx);
+                        this.drawPath([pointF, pointC, pointD, pointG], this.dash, this.animationCtx);
+                        this.drawPath([pointF, tmpE], [], this.animationCtx);
+                        this.drawPath([tmpE, tmpH], [], this.animationCtx);
+                        this.drawPath([tmpH, pointG], [], this.animationCtx);
+                        this.drawPath([pointG, pointF], [], this.animationCtx);
+
+                        let kHE = (tmpH.y - tmpE.y) / (tmpE.x - tmpH.x);
+                        let crossX = (tmpE.x - pointB.x) + (tmpE.y - pointA.y) / kHE;
+                        if (crossX < pointG.x - pointA.x) {
+                            let cross = new Point(pointA.x + crossX, pointA.y);
+                            this.drawPath([cross, pointE], [], this.animationCtx);
+                        } else {
+                            this.drawPath([pointE, pointG], [], this.animationCtx);
+                        }
+
+                        if (i === end) {
+                            this.showAnimation = false;
+                        }
+                    }, (start - i) * this.animationSpeed);
+                }
+            }
+        }
+
         private showFoldingProcess() {
             this.showAnimation = true;
-            setTimeout(() => {
-                this.showAnimation = false
-            }, 2000);
+            switch (this.selectedFoldingRectangle.type) {
+                case rectTypes.TYPE_A:
+                    this.showFoldingProcessTypeA();
+                    break;
+                case rectTypes.TYPE_B:
+                    this.showFoldingProcessTypeB();
+                    break;
+            }
         }
 
         private updateCurrentFolding() {
@@ -232,8 +368,8 @@
             this.setRectangleBasicInfo(this.selectedFoldingRectangle);
         }
 
-        private drawPolygon(points: Point[], dash: number[]) {
-            const ctx = this.ctx;
+        private drawPolygon(points: Point[], dash: number[], context: CanvasRenderingContext2D = this.ctx) {
+            const ctx = context;
             if (points.length < 2) {
                 return;
             }
@@ -263,8 +399,8 @@
             ctx.closePath();
         }
 
-        private drawPath(points: Point[], dash: number[]) {
-            const ctx = this.ctx;
+        private drawPath(points: Point[], dash: number[], context: CanvasRenderingContext2D = this.ctx) {
+            const ctx = context;
             if (points.length < 2) {
                 return;
             }
@@ -764,7 +900,6 @@
 
         @Watch('selectedFoldingRectangle', {deep: true})
         private watchSelectedFoldingRectangle(oldVal: FoldingRectangle, newVal: FoldingRectangle) {
-            console.log(this.selectedFoldingRectangle.type);
             let points = this.selectedFoldingRectangle.points;
             let point = points[0];
             if (oldVal.type !== newVal.type) {
@@ -834,10 +969,6 @@
             }
 
             this.updateFoldingThumbnails();
-            // setTimeout(() => {
-            //     this.updateFoldingThumbnails();
-            //     // this.setFoldingTypeMutation(rectTypes.TYPE_B);
-            // }, 10);
         }
     }
 </script>
