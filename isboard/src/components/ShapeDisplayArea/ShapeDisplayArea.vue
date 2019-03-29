@@ -91,12 +91,12 @@
         }
 
         get showSpot2() {
-            return this.selectedFoldingRectangle.type === rectTypes.TYPE_E
-                || this.selectedFoldingRectangle.type === rectTypes.TYPE_F;
+            return !this.showAnimation && (this.selectedFoldingRectangle.type === rectTypes.TYPE_E
+                || this.selectedFoldingRectangle.type === rectTypes.TYPE_F);
         }
 
         get showSpot3() {
-            return this.selectedFoldingRectangle.type === rectTypes.TYPE_F;
+            return !this.showAnimation && (this.selectedFoldingRectangle.type === rectTypes.TYPE_F);
         }
 
         private moveSpot1() {
@@ -332,6 +332,55 @@
             }
         }
 
+        private showFoldingProcessTypeC() {
+            this.getAnimationCtx();
+            if (this.allPoints.length < 6) {
+                this.showAnimation = false;
+                return;
+            }
+
+            const pointA = this.allPoints[0].point;
+            const pointB = this.allPoints[1].point;
+            const pointC = this.allPoints[2].point;
+            const pointD = this.allPoints[3].point;
+            const pointE = this.allPoints[4].point;
+
+            const kCE = (pointC.y - pointE.y) / (pointE.x - pointC.x);
+            const start = pointC.x;
+            const end = pointE.x;
+            let xCE = pointC.x - pointB.x;
+            let yCE = pointC.y;
+            let tmpE;
+            for (let i = start; i >= end; i--) {
+                setTimeout(() => {
+                    this.animationCanvas.height = this.canvasHeight;
+
+                    yCE = kCE * (i - pointB.x - xCE);
+
+                    tmpE = new Point(i, pointB.y - yCE);
+                    if (tmpE.y > pointA.y) {
+                        this.drawPath([pointB, pointA, pointD], [], this.animationCtx);
+                        this.drawPath([pointB, tmpE, pointD], [], this.animationCtx);
+                        this.drawPath([pointD, pointB], [], this.animationCtx);
+                        this.drawPolygon([pointB, pointC, pointD], this.dash, this.animationCtx);
+                    } else {
+                        let kBE = (pointB.y - tmpE.y) / (tmpE.x - pointB.x);
+
+                        let tmpF = new Point(pointA.x + (pointB.y - pointA.y) / kBE, pointA.y);
+                        this.drawPath([pointB, pointA, tmpF], [], this.animationCtx);
+                        this.drawPath([pointD, tmpF], this.dash, this.animationCtx);
+                        this.drawPath([pointB, tmpE, pointD], [], this.animationCtx);
+                        this.drawPath([pointD, pointB], [], this.animationCtx);
+                        this.drawPolygon([pointB, pointC, pointD], this.dash, this.animationCtx);
+                    }
+                    if (i === end) {
+                        this.showAnimation = false;
+                    }
+                }, (start - i) * this.animationSpeed);
+            }
+
+        }
+
         private showFoldingProcess() {
             this.showAnimation = true;
             switch (this.selectedFoldingRectangle.type) {
@@ -340,6 +389,9 @@
                     break;
                 case rectTypes.TYPE_B:
                     this.showFoldingProcessTypeB();
+                    break;
+                case rectTypes.TYPE_C:
+                    this.showFoldingProcessTypeC();
                     break;
             }
         }
