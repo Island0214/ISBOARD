@@ -381,6 +381,79 @@
 
         }
 
+        private showFoldingProcessTypeD() {
+            this.getAnimationCtx();
+
+            if (this.allPoints.length < 8) {
+                this.showAnimation = false;
+                return;
+            }
+
+            const pointA = this.allPoints[0].point;
+            const pointB = this.allPoints[1].point;
+            const pointC = this.allPoints[2].point;
+            const pointD = this.allPoints[3].point;
+            const pointE = this.allPoints[4].point;
+            const pointF = this.allPoints[5].point;
+            const pointG = this.allPoints[6].point;
+            const pointH = this.allPoints[7].point;
+
+            const kCG = (pointC.y - pointG.y) / (pointG.x - pointC.x);
+            const start = pointC.x;
+            const end = pointG.x;
+            let xCG = pointC.x - pointB.x;
+            let yCG = pointC.y;
+            let tmpG;
+
+            const kDH = (pointD.y - pointH.y) / (pointH.x - pointD.x);
+            let yDH = pointC.y;
+            let tmpH;
+            for (let i = start; i >= end; i--) {
+                setTimeout(() => {
+                    this.animationCanvas.height = this.canvasHeight;
+
+                    yCG = kCG * (i - pointB.x - xCG);
+                    tmpG = new Point(i, pointB.y - yCG);
+
+                    let ratio = (pointD.x - pointE.x) / (pointC.x - pointF.x);
+                    let tmpX = pointE.x + (i - pointF.x) * ratio;
+                    yDH = kDH * (tmpX - pointD.x) + (pointB.y - pointD.y);
+                    tmpH = new Point(tmpX, pointB.y - yDH);
+
+
+                    this.drawPath([pointF, pointC, pointD, pointA], this.dash, this.animationCtx);
+                    this.drawPath([pointF, pointE], [], this.animationCtx);
+                    this.drawPath([pointF, tmpG], [], this.animationCtx);
+                    this.drawPath([tmpG, tmpH], [], this.animationCtx);
+                    this.drawPath([tmpH, pointE], [], this.animationCtx);
+
+                    if (tmpG.y >= pointA.y) {
+                        let kGH = (tmpH.y - tmpG.y) / (tmpG.x - tmpH.x);
+                        let crossX = (tmpG.x - pointB.x) + (tmpG.y - pointA.y) / kGH;
+                        if (crossX >= pointG.x - pointA.x && crossX <= pointE.x - pointA.x) {
+                                let cross = new Point(pointA.x + crossX, pointA.y);
+                                this.drawPath([cross, pointA, pointB, pointF], [], this.animationCtx);
+                        } else {
+                                this.drawPath([pointE, pointA, pointB, pointF], [], this.animationCtx);
+                        }
+                    } else {
+                        let kGF = (pointF.y - tmpG.y) / (tmpG.x - pointF.x);
+                        let crossX = (tmpG.x - pointB.x) + (tmpG.y - pointA.y) / kGF;
+                        if (crossX >= pointG.x - pointA.x && crossX <= pointF.x - pointA.x) {
+                            let cross = new Point(pointA.x + crossX, pointA.y);
+                            this.drawPath([cross, pointA, pointB, pointF], [], this.animationCtx);
+                        } else {
+                            this.drawPath([pointE, pointA, pointB, pointF], [], this.animationCtx);
+                        }
+                    }
+
+                    if (i === end) {
+                        this.showAnimation = false;
+                    }
+                }, (start - i) * this.animationSpeed);
+            }
+        }
+
         private showFoldingProcess() {
             this.showAnimation = true;
             switch (this.selectedFoldingRectangle.type) {
@@ -392,6 +465,9 @@
                     break;
                 case rectTypes.TYPE_C:
                     this.showFoldingProcessTypeC();
+                    break;
+                case rectTypes.TYPE_D:
+                    this.showFoldingProcessTypeD();
                     break;
             }
         }
