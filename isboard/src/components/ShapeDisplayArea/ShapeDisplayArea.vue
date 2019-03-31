@@ -473,51 +473,33 @@
             const pointJ = this.allPoints[9].point;
             const pointK = this.allPoints[10].point;
 
+            let speedRatio = (pointF.x - pointB.x) / (pointC.x - pointG.x);
+
+            let speed = this.animationSpeed * 4;
+            if (speedRatio <= 1) {
+                speed *= speedRatio;
+            } else {
+                speed /= speedRatio;
+            }
+
             const kBF = (pointB.y - pointF.y) / (pointF.x - pointB.x);
             const start = pointA.x;
             const end = pointF.x;
 
             let y = pointB.y - pointA.y;
             let tmpF;
-            for (let i = start; i <= end; i++) {
-                setTimeout(() => {
-                    this.animationCanvas.height = this.canvasHeight;
-
-                    y = kBF * (i - start);
-                    tmpF = new Point(i, pointB.y - y);
-
-                    this.drawPolygon([pointA, pointB, pointC, pointD,], this.dash, this.animationCtx);
-                    if (pointJ.x < 0) {
-                        this.drawPath([pointH, tmpF], [], this.animationCtx);
-                        this.drawPath([tmpF, pointE], [], this.animationCtx);
-                        this.drawPath([pointH, pointE], [], this.animationCtx);
-                    } else {
-                        let ratio = (pointH.x - pointA.x) / (pointE.x - pointB.x);
-                        let tmpX = pointA.x + (tmpF.x - pointB.x) * ratio;
-                        let tmpY = pointA.y - (tmpX - pointA.x) * kBF;
-                        let tmpJ = new Point(tmpX, tmpY);
-                        this.drawPath([pointH, tmpJ], [], this.animationCtx);
-                        this.drawPath([tmpJ, tmpF], [], this.animationCtx);
-                        this.drawPath([tmpF, pointE], [], this.animationCtx);
-                        this.drawPath([pointH, pointE], [], this.animationCtx);
-                        // yDH = kDH * (tmpX - pointD.x) + (pointB.y - pointD.y);
-                        // tmpH = new Point(tmpX, pointB.y - yDH);
-                    }
-                    if (i === parseInt(end + '')) {
-                        this.showAnimation = false;
-                    }
-                }, (i - start) * this.animationSpeed);
-            }
+            let tmpJ = new Point(0, 0);
 
             const kCG = (pointC.y - pointG.y) / (pointG.x - pointC.x);
             let tmpG;
+            let tmpK = new Point(0, 0);
             for (let i = start; i <= end; i++) {
                 setTimeout(() => {
                     this.animationCanvas.height = this.canvasHeight;
 
+                    // left part
                     y = kBF * (i - start);
                     tmpF = new Point(i, pointB.y - y);
-
                     this.drawPolygon([pointA, pointB, pointC, pointD,], this.dash, this.animationCtx);
                     if (pointJ.x < 0) {
                         this.drawPath([pointH, tmpF], [], this.animationCtx);
@@ -527,18 +509,106 @@
                         let ratio = (pointH.x - pointA.x) / (pointE.x - pointB.x);
                         let tmpX = pointA.x + (tmpF.x - pointB.x) * ratio;
                         let tmpY = pointA.y - (tmpX - pointA.x) * kBF;
-                        let tmpJ = new Point(tmpX, tmpY);
+                        tmpJ = new Point(tmpX, tmpY);
                         this.drawPath([pointH, tmpJ], [], this.animationCtx);
                         this.drawPath([tmpJ, tmpF], [], this.animationCtx);
                         this.drawPath([tmpF, pointE], [], this.animationCtx);
                         this.drawPath([pointH, pointE], [], this.animationCtx);
-                        // yDH = kDH * (tmpX - pointD.x) + (pointB.y - pointD.y);
-                        // tmpH = new Point(tmpX, pointB.y - yDH);
+                    }
+
+                    let x = pointC.x - (i - start) * (pointC.x - pointG.x) / (pointF.x - pointB.x);
+                    y = pointC.x - (i - start) * (pointC.x - pointG.x) / (pointF.x - pointB.x);
+                    tmpG = new Point(x, pointB.y - kCG * (x - pointC.x));
+
+                    if (pointK.x < 0) {
+                        this.drawPath([pointI, tmpG], [], this.animationCtx);
+                        this.drawPath([tmpG, pointE], [], this.animationCtx);
+                        this.drawPath([pointI, pointE], [], this.animationCtx);
+                    } else {
+                        let ratio = (pointD.x - pointI.x) / (pointC.x - pointE.x);
+                        let tmpX = pointI.x + (tmpG.x - pointE.x) * ratio;
+                        let tmpY = pointI.y - (tmpX - pointD.x) * kCG;
+                        tmpK = new Point(tmpX, tmpY);
+                        this.drawPath([pointI, tmpK], [], this.animationCtx);
+                        this.drawPath([tmpK, tmpG], [], this.animationCtx);
+                        this.drawPath([tmpG, pointE], [], this.animationCtx);
+                        this.drawPath([pointI, pointE], [], this.animationCtx);
+                    }
+
+                    let cross1;
+                    let cross2;
+                    let cross3;
+                    let cross4;
+                    let crossX;
+                    let crossY;
+                    let kJF = (tmpJ.y - tmpF.y) / (tmpF.x - tmpJ.x);
+                    let kEF = (pointE.y - tmpF.y) / (tmpF.x - pointE.x);
+
+                    // JF cross AD
+                    crossX = (tmpJ.x - pointA.x) + (tmpJ.y - pointA.y) / kJF;
+                    cross1 = new Point(pointA.x + crossX, this.minY);
+
+                    // JF cross CD
+                    crossY = kJF * (this.maxX - tmpJ.x) + (this.maxY - tmpJ.y);
+                    cross2 = new Point(this.maxX, this.maxY - crossY);
+
+                    // EF cross AD
+                    crossX = (pointE.x - pointA.x) + (pointE.y - pointA.y) / kEF;
+                    cross3 = new Point(pointA.x + crossX, this.minY);
+
+                    // EF cross CD
+                    crossY = kEF * (this.maxX - pointE.x);
+                    cross4 = new Point(this.maxX, this.maxY - crossY);
+
+                    if (pointH.x === this.minX && pointH.y > this.minY && pointI.y > this.minY && pointI.x === this.maxX) {
+                        if (tmpF.y < this.minY) {
+                            let kHF = (pointH.y - tmpF.y) / (tmpF.x - pointH.x);
+                            crossX = (pointH.x - pointA.x) + (pointH.y - pointA.y) / kHF;
+                            let cross5 = new Point(pointA.x + crossX, this.minY);
+
+                            this.drawPath([pointH, pointA, cross5], [], this.animationCtx);
+                            this.drawPath([cross3, pointD, pointI], [], this.animationCtx);
+                        } else {
+                            this.drawPath([pointH, pointA, pointD, pointI], [], this.animationCtx);
+                        }
+                    } else if (pointH.x >= this.minX && pointH.y === this.minY && pointI.y >= this.minY && pointI.x === this.maxX) {
+                        // right triangle
+                        if (cross1.x < pointH.x  && cross4.y > pointI.y) {
+                            this.drawPath([pointH, pointD, pointI], [], this.animationCtx);
+                        }
+                        if (cross1.x >= pointH.x && this.betweenInterval(cross1)) {
+                            this.drawPath([cross1, pointD, pointI], [], this.animationCtx);
+                        }
+                        if (this.betweenInterval(cross1) && this.betweenInterval(cross4)) {
+                            if (this.betweenInterval(cross4) && cross2.y < pointI.y) {
+                                this.drawPath([cross1, pointD, cross2], [], this.animationCtx);
+                                this.drawPath([cross4, pointI], [], this.animationCtx);
+                            }
+                        }
+
+                        if (!this.betweenInterval(cross1) && !this.betweenInterval(cross2)) {
+                            if (this.betweenInterval(cross3)) {
+                                this.drawPath([cross3, pointD, pointI], [], this.animationCtx);
+                            } else {
+                                this.drawPath([cross4, pointI], [], this.animationCtx);
+                            }
+                        }
+
+                    } else if (pointH.x === this.minX && pointH.y >= this.minY && pointI.y === this.minY && pointI.x <= this.maxX) {
+                        // left triangle
+                        let kKG = (tmpK.y - tmpG.y) / (tmpG.x - tmpK.x);
+                        let crossX = (tmpK.x - pointA.x) + (tmpK.y - pointA.y) / kKG;
+                        cross1 = new Point(pointA.x + crossX, this.minY);
+                        if (cross1.x <= pointI.x) {
+                            this.drawPath([cross1, pointA, pointH], [], this.animationCtx);
+                        } else {
+                            this.drawPath([pointI, pointA, pointH], [], this.animationCtx);
+                        }
                     }
                     if (i === parseInt(end + '')) {
                         this.showAnimation = false;
                     }
-                }, (i - start) * this.animationSpeed);
+                }, (i - start) * speed);
             }
 
         }
