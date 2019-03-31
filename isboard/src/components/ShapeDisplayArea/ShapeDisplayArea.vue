@@ -4,10 +4,13 @@
             <div :class="['spot-wrapper']" :style="spot1Css" id="move-spot-1" v-if="showSpot1"></div>
             <div :class="['spot-wrapper']" :style="spot2Css" id="move-spot-2" v-if="showSpot2"></div>
             <div :class="['spot-wrapper']" :style="spot3Css" id="move-spot-3" v-if="showSpot3"></div>
-            <canvas id="animation-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-show="showAnimation"></canvas>
+            <canvas id="animation-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight"
+                    v-show="showAnimation"></canvas>
 
-            <canvas id="line-canvas-1" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showSpot2"></canvas>
-            <canvas id="line-canvas-2" class="line-canvas" :width="canvasWidth" :height="canvasHeight" v-if="showSpot3"></canvas>
+            <canvas id="line-canvas-1" class="line-canvas" :width="canvasWidth" :height="canvasHeight"
+                    v-show="showSpot2"></canvas>
+            <canvas id="line-canvas-2" class="line-canvas" :width="canvasWidth" :height="canvasHeight"
+                    v-show="showSpot3"></canvas>
             <canvas id="rectangle-canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         </div>
         <div class="button-wrapper">
@@ -39,7 +42,7 @@
         private maxX: number = 650;
         private minY: number = 150;
         private maxY: number = 450;
-        private allPoints: Node[]= [];
+        private allPoints: Node[] = [];
         private rectWidth: number = 800;
         private rectHeight: number = 600;
         private showAnimation: boolean = false;
@@ -55,6 +58,7 @@
         @Mutation(mutations.SET_NODES) private setNodesMutation!: any;
         @Mutation(mutations.SET_FOLDING_TYPE) private setFoldingTypeMutation!: any;
         @Mutation(mutations.UPDATE_SELECTED_FOLDING) private updateSelectedFoldingMutation!: any;
+
         get spot1Css() {
             return {
                 marginLeft: this.spot1.x - this.thickness * 1.25 + 'px',
@@ -107,7 +111,11 @@
             moveSpot1.onmousedown = (e) => {
                 document.onmousemove = (event) => {
                     const {x, y} = this.getMousePosition(this.canvas, event.clientX, event.clientY);
-                    if (this.minX < x && x < this.maxX) {
+                    let min = this.minX;
+                    if (this.selectedFoldingRectangle.type === rectTypes.TYPE_E || this.selectedFoldingRectangle.type === rectTypes.TYPE_F) {
+                        min = this.canvasWidth / 2;
+                    }
+                    if (min < x && x < this.maxX) {
                         this.spot1.x = x;
                         this.watchSpot2Change();
                         this.watchSpot3Change();
@@ -216,8 +224,6 @@
         }
 
         private showFoldingProcessTypeA() {
-            this.getAnimationCtx();
-
             if (this.allPoints.length < 6) {
                 this.showAnimation = false;
                 return;
@@ -245,7 +251,7 @@
                     this.drawPolygon([pointB, pointC, pointD, pointE], [], this.animationCtx);
                     this.drawPath([pointB, tmpF, pointE], [], this.animationCtx);
 
-                    if (i === pointF.x) {
+                    if (i === parseInt(pointF.x + '')) {
                         this.showAnimation = false;
                     }
                 }, (i - start) * this.animationSpeed);
@@ -253,8 +259,6 @@
         }
 
         private showFoldingProcessTypeB() {
-            this.getAnimationCtx();
-
             if (this.allPoints.length < 7) {
                 this.showAnimation = false;
                 return;
@@ -333,7 +337,6 @@
         }
 
         private showFoldingProcessTypeC() {
-            this.getAnimationCtx();
             if (this.allPoints.length < 6) {
                 this.showAnimation = false;
                 return;
@@ -382,8 +385,6 @@
         }
 
         private showFoldingProcessTypeD() {
-            this.getAnimationCtx();
-
             if (this.allPoints.length < 8) {
                 this.showAnimation = false;
                 return;
@@ -431,10 +432,10 @@
                         let kGH = (tmpH.y - tmpG.y) / (tmpG.x - tmpH.x);
                         let crossX = (tmpG.x - pointB.x) + (tmpG.y - pointA.y) / kGH;
                         if (crossX >= pointG.x - pointA.x && crossX <= pointE.x - pointA.x) {
-                                let cross = new Point(pointA.x + crossX, pointA.y);
-                                this.drawPath([cross, pointA, pointB, pointF], [], this.animationCtx);
+                            let cross = new Point(pointA.x + crossX, pointA.y);
+                            this.drawPath([cross, pointA, pointB, pointF], [], this.animationCtx);
                         } else {
-                                this.drawPath([pointE, pointA, pointB, pointF], [], this.animationCtx);
+                            this.drawPath([pointE, pointA, pointB, pointF], [], this.animationCtx);
                         }
                     } else {
                         let kGF = (pointF.y - tmpG.y) / (tmpG.x - pointF.x);
@@ -454,8 +455,98 @@
             }
         }
 
+        private showFoldingProcessTypeE() {
+            if (this.allPoints.length < 9) {
+                this.showAnimation = false;
+                return;
+            }
+
+            const pointA = this.allPoints[0].point;
+            const pointB = this.allPoints[1].point;
+            const pointC = this.allPoints[2].point;
+            const pointD = this.allPoints[3].point;
+            const pointE = this.allPoints[4].point;
+            const pointF = this.allPoints[5].point;
+            const pointG = this.allPoints[6].point;
+            const pointH = this.allPoints[7].point;
+            const pointI = this.allPoints[8].point;
+            const pointJ = this.allPoints[9].point;
+            const pointK = this.allPoints[10].point;
+
+            const kBF = (pointB.y - pointF.y) / (pointF.x - pointB.x);
+            const start = pointA.x;
+            const end = pointF.x;
+
+            let y = pointB.y - pointA.y;
+            let tmpF;
+            for (let i = start; i <= end; i++) {
+                setTimeout(() => {
+                    this.animationCanvas.height = this.canvasHeight;
+
+                    y = kBF * (i - start);
+                    tmpF = new Point(i, pointB.y - y);
+
+                    this.drawPolygon([pointA, pointB, pointC, pointD,], this.dash, this.animationCtx);
+                    if (pointJ.x < 0) {
+                        this.drawPath([pointH, tmpF], [], this.animationCtx);
+                        this.drawPath([tmpF, pointE], [], this.animationCtx);
+                        this.drawPath([pointH, pointE], [], this.animationCtx);
+                    } else {
+                        let ratio = (pointH.x - pointA.x) / (pointE.x - pointB.x);
+                        let tmpX = pointA.x + (tmpF.x - pointB.x) * ratio;
+                        let tmpY = pointA.y - (tmpX - pointA.x) * kBF;
+                        let tmpJ = new Point(tmpX, tmpY);
+                        this.drawPath([pointH, tmpJ], [], this.animationCtx);
+                        this.drawPath([tmpJ, tmpF], [], this.animationCtx);
+                        this.drawPath([tmpF, pointE], [], this.animationCtx);
+                        this.drawPath([pointH, pointE], [], this.animationCtx);
+                        // yDH = kDH * (tmpX - pointD.x) + (pointB.y - pointD.y);
+                        // tmpH = new Point(tmpX, pointB.y - yDH);
+                    }
+                    if (i === parseInt(end + '')) {
+                        this.showAnimation = false;
+                    }
+                }, (i - start) * this.animationSpeed);
+            }
+
+            const kCG = (pointC.y - pointG.y) / (pointG.x - pointC.x);
+            let tmpG;
+            for (let i = start; i <= end; i++) {
+                setTimeout(() => {
+                    this.animationCanvas.height = this.canvasHeight;
+
+                    y = kBF * (i - start);
+                    tmpF = new Point(i, pointB.y - y);
+
+                    this.drawPolygon([pointA, pointB, pointC, pointD,], this.dash, this.animationCtx);
+                    if (pointJ.x < 0) {
+                        this.drawPath([pointH, tmpF], [], this.animationCtx);
+                        this.drawPath([tmpF, pointE], [], this.animationCtx);
+                        this.drawPath([pointH, pointE], [], this.animationCtx);
+                    } else {
+                        let ratio = (pointH.x - pointA.x) / (pointE.x - pointB.x);
+                        let tmpX = pointA.x + (tmpF.x - pointB.x) * ratio;
+                        let tmpY = pointA.y - (tmpX - pointA.x) * kBF;
+                        let tmpJ = new Point(tmpX, tmpY);
+                        this.drawPath([pointH, tmpJ], [], this.animationCtx);
+                        this.drawPath([tmpJ, tmpF], [], this.animationCtx);
+                        this.drawPath([tmpF, pointE], [], this.animationCtx);
+                        this.drawPath([pointH, pointE], [], this.animationCtx);
+                        // yDH = kDH * (tmpX - pointD.x) + (pointB.y - pointD.y);
+                        // tmpH = new Point(tmpX, pointB.y - yDH);
+                    }
+                    if (i === parseInt(end + '')) {
+                        this.showAnimation = false;
+                    }
+                }, (i - start) * this.animationSpeed);
+            }
+
+        }
+
         private showFoldingProcess() {
             this.showAnimation = true;
+            this.getAnimationCtx();
+
             switch (this.selectedFoldingRectangle.type) {
                 case rectTypes.TYPE_A:
                     this.showFoldingProcessTypeA();
@@ -469,27 +560,45 @@
                 case rectTypes.TYPE_D:
                     this.showFoldingProcessTypeD();
                     break;
+                case rectTypes.TYPE_E:
+                    this.showFoldingProcessTypeE();
+                    break;
             }
         }
 
         private updateCurrentFolding() {
             switch (this.selectedFoldingRectangle.type) {
                 case rectTypes.TYPE_A:
-                    this.updateSelectedFoldingMutation({points: [new Point(this.spot1.x, this.minY)], type: this.selectedFoldingRectangle.type});
+                    this.updateSelectedFoldingMutation({
+                        points: [new Point(this.spot1.x, this.minY)],
+                        type: this.selectedFoldingRectangle.type
+                    });
                     break;
                 case rectTypes.TYPE_B:
-                    this.updateSelectedFoldingMutation({points: [new Point(this.spot1.x, this.minY)], type: this.selectedFoldingRectangle.type});
+                    this.updateSelectedFoldingMutation({
+                        points: [new Point(this.spot1.x, this.minY)],
+                        type: this.selectedFoldingRectangle.type
+                    });
                     break;
                 case rectTypes.TYPE_C:
                     break;
                 case rectTypes.TYPE_D:
-                    this.updateSelectedFoldingMutation({points: [new Point(this.spot1.x, this.minY)], type: this.selectedFoldingRectangle.type});
+                    this.updateSelectedFoldingMutation({
+                        points: [new Point(this.spot1.x, this.minY)],
+                        type: this.selectedFoldingRectangle.type
+                    });
                     break;
                 case rectTypes.TYPE_E:
-                    this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point(this.spot1.x, this.maxY)], type: this.selectedFoldingRectangle.type});
+                    this.updateSelectedFoldingMutation({
+                        points: [new Point(this.spot2.x, this.spot2.y), new Point(this.spot1.x, this.maxY)],
+                        type: this.selectedFoldingRectangle.type
+                    });
                     break;
                 case rectTypes.TYPE_F:
-                    this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point(this.spot1.x, this.maxY), new Point(this.spot3.x, this.spot3.y)], type: this.selectedFoldingRectangle.type});
+                    this.updateSelectedFoldingMutation({
+                        points: [new Point(this.spot2.x, this.spot2.y), new Point(this.spot1.x, this.maxY), new Point(this.spot3.x, this.spot3.y)],
+                        type: this.selectedFoldingRectangle.type
+                    });
                     break;
             }
             this.updateFoldingThumbnails();
@@ -596,7 +705,7 @@
             if (pointF.y > this.maxY) {
                 const transPointE = new Point(point.x - pointB.x, pointB.y - point.y);
                 const transPointF = new Point(pointF.x - pointB.x, pointB.y - pointF.y);
-                const newPointX = transPointE.y * (transPointF.x  - transPointE.x) / (transPointE.y - transPointF.y) + transPointE.x + pointB.x;
+                const newPointX = transPointE.y * (transPointF.x - transPointE.x) / (transPointE.y - transPointF.y) + transPointE.x + pointB.x;
                 const pointG = new Point(newPointX, pointB.y);
                 this.addNewPoint('G', pointG, pointG.x - this.fontSize - this.textMargin, pointG.y - this.fontSize / 2);
             }
@@ -649,7 +758,7 @@
 
                 // find the symmetric point
                 const [x, y] = this.findSymmetricPoint(k, middle, new Point(pointD.x - pointA.x, pointC.y - pointD.y));
-                const pointH = new Point(x + pointA.x, - y + height + pointD.y);
+                const pointH = new Point(x + pointA.x, -y + height + pointD.y);
                 this.addNewPoint('H', pointH, pointH.x + this.textMargin, pointH.y + this.fontSize / 2);
 
                 this.drawPath([point, pointG], this.dash);
@@ -681,7 +790,7 @@
             // find the symmetric point
             const k = (pointB.y - pointD.y) / (pointD.x - pointB.x);
             const [x, y] = this.findSymmetricPoint(k, new Point(0, 0), new Point(pointC.x - pointA.x, pointC.y - pointB.y));
-            const pointE = new Point(x + pointA.x, - y + height + pointD.y);
+            const pointE = new Point(x + pointA.x, -y + height + pointD.y);
             this.addNewPoint('E', pointE, pointE.x - this.textMargin, pointE.y - this.fontSize / 2);
 
             // find the cross point
@@ -722,17 +831,17 @@
 
             const k = (pointF.y - pointE.y) / (pointE.x - pointF.x);
             const [x0, y0] = this.findSymmetricPoint(k, new Point(pointF.x - pointB.x, pointF.y - pointB.y), new Point(pointC.x - pointB.x, pointC.y - pointB.y));
-            const pointG = new Point(x0 + pointA.x,  pointC.y - y0);
+            const pointG = new Point(x0 + pointA.x, pointC.y - y0);
             this.addNewPoint('G', pointG, pointG.x - this.fontSize - this.textMargin, pointG.y + this.fontSize);
 
             const [x1, y1] = this.findSymmetricPoint(k, new Point(pointF.x - pointB.x, pointF.y - pointB.y), new Point(pointD.x - pointB.x, pointB.y - pointD.y));
-            const pointH = new Point(x1 + pointA.x,  pointC.y - y1);
+            const pointH = new Point(x1 + pointA.x, pointC.y - y1);
             this.addNewPoint('H', pointH, pointH.x - this.fontSize, pointH.y - this.textMargin);
 
             if (pointG.y > this.minY) {
                 const tmpK = (pointG.y - pointH.y) / (pointH.x - pointG.x);
                 const x = pointH.x + (pointH.y - pointA.y) / tmpK;
-                const pointI = new Point(x,  pointA.y);
+                const pointI = new Point(x, pointA.y);
                 this.addNewPoint('I', pointI, pointI.x - this.fontSize / 2, pointI.y - this.textMargin);
                 this.drawPath([pointI, pointA, pointB, pointF], []);
                 this.drawPath([pointI, pointE], this.dash);
@@ -743,7 +852,7 @@
             } else {
                 const tmpK = (pointG.y - pointF.y) / (pointF.x - pointG.x);
                 const x = pointF.x + (pointF.y - pointA.y) / tmpK;
-                const pointI = new Point(x,  pointA.y);
+                const pointI = new Point(x, pointA.y);
                 this.addNewPoint('I', pointI, pointI.x - this.fontSize / 2, pointI.y + this.fontSize + this.textMargin);
                 this.drawPath([pointI, pointA, pointB, pointF], []);
                 this.drawPath([pointI, pointE], this.dash);
@@ -794,6 +903,7 @@
 
             const kBF = (pointB.y - pointF.y) / (pointF.x - pointB.x);
             let pointH = new Point(this.minX, this.maxY + (this.minX - point1.x) / kBF);
+            let pointJ = new Point(-1, -1);
             if (pointH.y >= this.minY) {
                 this.addNewPoint('H', pointH, pointH.x - this.fontSize - this.textMargin, pointH.y);
                 this.drawPath([pointE, pointH], []);
@@ -803,7 +913,7 @@
                 pointH = new Point(point1.x - kBF * (this.maxY - this.minY), this.minY);
                 this.addNewPoint('H', pointH, pointH.x - this.textMargin * 2, pointH.y - this.fontSize / 2);
                 let [x, y] = this.findSymmetricPoint(-1 / kBF, new Point(0, 0), new Point(pointA.x - point1.x, point1.y - pointA.y));
-                const pointJ = new Point(point1.x + x, point1.y - y);
+                pointJ = new Point(point1.x + x, point1.y - y);
                 this.drawPath([pointE, pointH], []);
                 this.drawPolygon([pointH, pointJ, pointF, pointE], []);
             }
@@ -811,6 +921,7 @@
 
             const kCG = (pointC.y - pointG.y) / (pointG.x - pointC.x);
             let pointI = new Point(this.maxX, this.maxY + (this.maxX - point1.x) / kCG);
+            let pointK = new Point(-1, -1);
             if (pointI.y >= this.minY) {
                 this.addNewPoint('I', pointI, pointI.x + this.textMargin, pointI.y);
                 this.drawPath([pointE, pointI], []);
@@ -820,20 +931,79 @@
                 pointI = new Point(point1.x - kCG * (this.maxY - this.minY), this.minY);
                 this.addNewPoint('I', pointI, pointI.x - this.textMargin * 2, pointI.y - this.fontSize / 2);
                 let [x, y] = this.findSymmetricPoint(-1 / kCG, new Point(0, 0), new Point(pointD.x - point1.x, point1.y - pointD.y));
-                const pointK = new Point(point1.x + x, point1.y - y);
+                pointK = new Point(point1.x + x, point1.y - y);
                 this.drawPolygon([pointE, pointI, pointK, pointG], []);
             }
 
-            if (pointH.y > this.minY && pointI.y > this.minY) {
-                this.drawPath([pointH, pointA, pointD, pointI], []);
-            } else if (pointH.y <= this.minY && pointI.y >= this.minY) {
-                this.drawPath([pointH, pointD, pointI], []);
-            } else if (pointH.y >= this.minY && pointI.y <= this.minY) {
-                this.drawPath([pointH, pointA, pointI], []);
+
+            let cross1;
+            let cross2;
+            let cross3;
+            let cross4;
+            let crossX;
+            let crossY;
+            let kJF = (pointJ.y - pointF.y) / (pointF.x - pointJ.x);
+            let kEF = (pointE.y - pointF.y) / (pointF.x - pointE.x);
+
+            // JF cross AD
+            crossX = (pointJ.x - pointA.x) + (pointJ.y - pointA.y) / kJF;
+            cross1 = new Point(pointA.x + crossX, this.minY);
+
+            // JF cross CD
+            crossY = kJF * (this.maxX - pointJ.x) + (this.maxY - pointJ.y);
+            cross2 = new Point(this.maxX, this.maxY - crossY);
+
+            // EF cross AD
+            crossX = (pointE.x - pointA.x) + (pointE.y - pointA.y) / kEF;
+            cross3 = new Point(pointA.x + crossX, this.minY);
+
+            // EF cross CD
+            crossY = kEF * (this.maxX - pointE.x);
+            cross4 = new Point(this.maxX, this.maxY - crossY);
+
+            if (pointH.x === this.minX && pointH.y > this.minY && pointI.y > this.minY && pointI.x === this.maxX) {
+                if (pointF.y < this.minY) {
+                    let kHF = (pointH.y - pointF.y) / (pointF.x - pointH.x);
+                    crossX = (pointH.x - pointA.x) + (pointH.y - pointA.y) / kHF;
+                    let cross5 = new Point(pointA.x + crossX, this.minY);
+
+                    this.drawPath([pointH, pointA, cross5], []);
+                    this.drawPath([cross3, pointD, pointI], []);
+                } else {
+                    this.drawPath([pointH, pointA, pointD, pointI], []);
+                }
+            } else if (pointH.x >= this.minX && pointH.y === this.minY && pointI.y >= this.minY && pointI.x === this.maxX) {
+                // right triangle
+                if (this.betweenInterval(cross1) && this.betweenInterval(cross2)) {
+                    if (this.betweenInterval(cross4)) {
+                        this.drawPath([cross1, pointD, cross2], []);
+                        this.drawPath([cross4, pointI], []);
+                    } else {
+                        this.drawPath([cross1, pointD, pointI], []);
+                    }
+                }
+
+                if (!this.betweenInterval(cross1) && !this.betweenInterval(cross2)) {
+                    if (this.betweenInterval(cross3)) {
+                        this.drawPath([cross3, pointD, pointI], []);
+                    } else {
+                        this.drawPath([cross4, pointI], []);
+                    }
+                }
+
+
+            } else if (pointH.x === this.minX && pointH.y >= this.minY && pointI.y === this.minY && pointI.x <= this.maxX) {
+                // left triangle
+                let kKG = (pointK.y - pointG.y) / (pointG.x - pointK.x);
+                let crossX = (pointK.x - pointA.x) + (pointK.y - pointA.y) / kKG;
+                cross1 = new Point(pointA.x + crossX, this.minY);
+                this.drawPath([cross1, pointA, pointH], []);
             }
 
             this.drawPolygon([pointA, pointB, pointC, pointD], this.dash);
 
+            this.allPoints.push(new Node('J', pointJ));
+            this.allPoints.push(new Node('K', pointK));
             this.setNodesMutation(this.allPoints);
         }
 
@@ -924,6 +1094,10 @@
             this.setNodesMutation(this.allPoints);
         }
 
+        private betweenInterval(cross: Point) {
+            return (cross.x > this.minX && cross.x < this.maxX) || (cross.y > this.minY && cross.y < this.maxY);
+        }
+
         private findSymmetricPoint(k: number, point: Point, origin: Point) {
             const a = k;
             const b = -1;
@@ -931,7 +1105,7 @@
             const x0 = origin.x;
             const y0 = origin.y;
             const x = ((b * b - a * a) * x0 - 2 * a * b * y0 - 2 * a * c) / (a * a + b * b);
-            const y = ((- b * b + a * a) * y0 - 2 * a * b * x0 - 2 * b * c) / (a * a + b * b);
+            const y = ((-b * b + a * a) * y0 - 2 * a * b * x0 - 2 * b * c) / (a * a + b * b);
             return [x, y];
 
         }
@@ -974,10 +1148,14 @@
                     }, 100);
                     break;
                 case rectTypes.TYPE_E:
+                    // this.minX = this.canvasWidth / 2;
                     if (rect.points.length === 0) {
                         this.spot2.x = this.canvasWidth / 2;
                         this.spot2.y = this.maxY - this.canvasWidth / 2;
-                        this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point( (this.canvasWidth / 2 + this.minX) / 2, this.maxY)], type: rect.type});
+                        this.updateSelectedFoldingMutation({
+                            points: [new Point(this.spot2.x, this.spot2.y), new Point((this.canvasWidth + this.minX) / 2, this.maxY)],
+                            type: rect.type
+                        });
                         this.updateFoldingThumbnails();
                     } else {
                         this.drawRectFoldingTypeE(rect.width, rect.height, rect.points[1], rect.points[0]);
@@ -998,7 +1176,10 @@
                         this.spot2.y = this.maxY - Math.pow(radius * radius - relativeX * relativeX, 0.5);
                         relativeX = this.spot3.x - radius;
                         this.spot3.y = this.maxY - Math.pow(radius * radius - relativeX * relativeX, 0.5);
-                        this.updateSelectedFoldingMutation({points: [new Point(this.spot2.x, this.spot2.y), new Point(this.canvasWidth / 2, this.maxY), new Point(this.spot3.x, this.spot3.y)], type: rect.type});
+                        this.updateSelectedFoldingMutation({
+                            points: [new Point(this.spot2.x, this.spot2.y), new Point(this.canvasWidth / 2, this.maxY), new Point(this.spot3.x, this.spot3.y)],
+                            type: rect.type
+                        });
                         // this.updateFoldingThumbnails();
                     } else {
                         this.drawRectFoldingTypeF(rect.width, rect.height, rect.points[1], rect.points[0], rect.points[2]);
@@ -1020,7 +1201,7 @@
                 const rect = this.foldingRectangles[i];
                 // console.log(rect.type);
                 this.setRectangleBasicInfo(rect);
-                const data = this.canvas.toDataURL('image/png', 1 );
+                const data = this.canvas.toDataURL('image/png', 1);
                 thumbnails.push(data);
             }
             this.setFoldingRectThumbnailsMutation(thumbnails);
