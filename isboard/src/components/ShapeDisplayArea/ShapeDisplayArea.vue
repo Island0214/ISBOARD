@@ -47,6 +47,8 @@
         private rectHeight: number = 600;
         private showAnimation: boolean = false;
         private animationSpeed: number = 10;
+        private maxSpot2X: number = 650;
+        private minSpot3X: number = 650;
 
         @Getter('canvasWidth') private canvasWidth!: number;
         @Getter('canvasHeight') private canvasHeight!: number;
@@ -142,7 +144,11 @@
             moveSpot2.onmousedown = (e) => {
                 document.onmousemove = (event) => {
                     const {x, y} = this.getMousePosition(this.canvas, event.clientX, event.clientY);
-                    if (0 < x && x < this.canvasWidth) {
+                    let max = this.canvasWidth;
+                    if (this.selectedFoldingRectangle.type === rectTypes.TYPE_F) {
+                        max = this.maxSpot2X;
+                    }
+                    if (0 < x && x < max) {
                         this.spot2.x = x;
                         let radius = this.canvasWidth / 2;
                         let relativeX = x - radius;
@@ -165,7 +171,11 @@
             moveSpot3.onmousedown = (e) => {
                 document.onmousemove = (event) => {
                     const {x, y} = this.getMousePosition(this.canvas, event.clientX, event.clientY);
-                    if (0 < x && x < this.canvasWidth) {
+                    let min = 0;
+                    if (this.selectedFoldingRectangle.type === rectTypes.TYPE_F) {
+                        min = this.minSpot3X;
+                    }
+                    if (min < x && x < this.canvasWidth) {
                         this.spot3.x = x;
                         let radius = this.canvasWidth / 2;
                         let relativeX = x - radius;
@@ -1121,6 +1131,7 @@
 
             const kBF = (pointB.y - pointF.y) / (pointF.x - pointB.x);
             let pointH = new Point(this.minX, this.maxY + (this.minX - point1.x) / kBF);
+            let pointJ = new Point(-1, -1);
             if (pointH.y >= this.minY) {
                 this.addNewPoint('H', pointH, pointH.x - this.fontSize - this.textMargin, pointH.y);
                 this.drawPath([pointE, pointH], []);
@@ -1130,7 +1141,7 @@
                 pointH = new Point(point1.x - kBF * (this.maxY - this.minY), this.minY);
                 this.addNewPoint('H', pointH, pointH.x - this.textMargin * 2, pointH.y - this.fontSize / 2);
                 let [x, y] = this.findSymmetricPoint(-1 / kBF, new Point(0, 0), new Point(pointA.x - point1.x, point1.y - pointA.y));
-                const pointJ = new Point(point1.x + x, point1.y - y);
+                pointJ = new Point(point1.x + x, point1.y - y);
                 this.drawPath([pointE, pointH], []);
                 this.drawPolygon([pointH, pointJ, pointF, pointE], []);
             }
@@ -1138,6 +1149,7 @@
 
             const kCG = (pointC.y - pointG.y) / (pointG.x - pointC.x);
             let pointI = new Point(this.maxX, this.maxY + (this.maxX - point1.x) / kCG);
+            let pointK = new Point(-1, -1);
             if (pointI.y >= this.minY) {
                 this.addNewPoint('I', pointI, pointI.x + this.textMargin, pointI.y);
                 this.drawPath([pointE, pointI], []);
@@ -1147,21 +1159,100 @@
                 pointI = new Point(point1.x - kCG * (this.maxY - this.minY), this.minY);
                 this.addNewPoint('I', pointI, pointI.x - this.textMargin * 2, pointI.y - this.fontSize / 2);
                 let [x, y] = this.findSymmetricPoint(-1 / kCG, new Point(0, 0), new Point(pointD.x - point1.x, point1.y - pointD.y));
-                const pointK = new Point(point1.x + x, point1.y - y);
+                pointK = new Point(point1.x + x, point1.y - y);
                 this.drawPolygon([pointE, pointI, pointK, pointG], []);
             }
 
-            if (pointH.y > this.minY && pointI.y > this.minY) {
-                this.drawPath([pointH, pointA, pointD, pointI], []);
-            } else if (pointH.y <= this.minY && pointI.y >= this.minY) {
-                this.drawPath([pointH, pointD, pointI], []);
-            } else if (pointH.y >= this.minY && pointI.y <= this.minY) {
-                this.drawPath([pointH, pointA, pointI], []);
+            let cross1;
+            let cross2;
+            let cross3;
+            let cross4;
+            let crossX;
+            let crossY;
+            let kJF = (pointJ.y - pointF.y) / (pointF.x - pointJ.x);
+            let kEF = (pointE.y - pointF.y) / (pointF.x - pointE.x);
+
+            // JF cross AD
+            crossX = (pointJ.x - pointA.x) + (pointJ.y - pointA.y) / kJF;
+            cross1 = new Point(pointA.x + crossX, this.minY);
+
+            // JF cross CD
+            crossY = kJF * (this.maxX - pointJ.x) + (this.maxY - pointJ.y);
+            cross2 = new Point(this.maxX, this.maxY - crossY);
+
+            // EF cross AD
+            crossX = (pointE.x - pointA.x) + (pointE.y - pointA.y) / kEF;
+            cross3 = new Point(pointA.x + crossX, this.minY);
+
+            // EF cross CD
+            crossY = kEF * (this.maxX - pointE.x);
+            cross4 = new Point(this.maxX, this.maxY - crossY);
+
+            if (pointH.x === this.minX && pointH.y > this.minY && pointI.y > this.minY && pointI.x === this.maxX) {
+                if (pointF.y < this.minY) {
+                    let kHF = (pointH.y - pointF.y) / (pointF.x - pointH.x);
+                    crossX = (pointH.x - pointA.x) + (pointH.y - pointA.y) / kHF;
+                    let cross5 = new Point(pointA.x + crossX, this.minY);
+
+                    this.drawPath([pointH, pointA, cross5], []);
+                    this.drawPath([cross3, pointD, pointI], []);
+                } else {
+                    this.drawPath([pointH, pointA, pointD, pointI], []);
+                }
+            } else if (pointH.x >= this.minX && pointH.y === this.minY && pointI.y >= this.minY && pointI.x === this.maxX) {
+                // right triangle
+                if (this.betweenInterval(cross1) && this.betweenInterval(cross2)) {
+                    if (this.betweenInterval(cross4) && cross2.y <= pointI.y) {
+                        this.drawPath([cross1, pointD, cross2], []);
+                        this.drawPath([cross4, pointI], []);
+                    } else {
+                        this.drawPath([cross1, pointD, pointI], []);
+                    }
+                }
+
+                if (!this.betweenInterval(cross1) && !this.betweenInterval(cross2)) {
+                    if (this.betweenInterval(cross3)) {
+                        this.drawPath([cross3, pointD, pointI], []);
+                    } else {
+                        this.drawPath([cross4, pointI], []);
+                    }
+                }
+            } else if (pointH.x === this.minX && pointH.y >= this.minY && pointI.y === this.minY && pointI.x <= this.maxX) {
+                // left triangle
+                let kKG = (pointK.y - pointG.y) / (pointG.x - pointK.x);
+                let crossX = (pointK.x - pointA.x) + (pointK.y - pointA.y) / kKG;
+                cross1 = new Point(pointA.x + crossX, this.minY);
+                this.drawPath([cross1, pointA, pointH], []);
+            } else {
+                // no triangle
+                let kGK = (pointG.y - pointK.y) / (pointK.x - pointG.x);
+                crossX = (pointG.x - pointA.x) + (pointG.y - pointA.y) / kGK;
+                let cross5 = new Point(pointA.x + crossX, this.minY);
+                this.drawPath([cross1, cross5], []);
             }
 
-            this.drawPolygon([pointA, pointB, pointC, pointD], this.dash);
 
+            this.drawPolygon([pointA, pointB, pointC, pointD], this.dash);
+            this.allPoints.push(new Node('J', pointJ));
+            this.allPoints.push(new Node('K', pointK));
             this.setNodesMutation(this.allPoints);
+
+            // set Spots Intervals
+            let kEH = (pointE.y - pointH.y) / (pointH.x - pointE.x);
+            let a = this.canvasWidth / 2;
+            let b = pointE.x - a;
+            let minSpot3 = this.getCrossPoint(kEH, a, b);
+            this.minSpot3X = a + minSpot3.x;
+
+            let angle = this.getAngle([pointB, pointE, pointG]);
+            if (angle < 90) {
+                angle = 180 - 2 * angle;
+                let targetEF = Math.tan(angle * Math.PI / 180);
+                let maxSpot2 = this.getCrossPoint(targetEF, a, b);
+                this.maxSpot2X = a + maxSpot2.x;
+            } else {
+                this.maxSpot2X = this.canvasWidth;
+            }
         }
 
         private betweenInterval(cross: Point) {
@@ -1335,6 +1426,32 @@
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
                 return;
             }
+        }
+
+        private getCrossPoint (k: number, a: number, b:number) {
+            const tmp1 = b * k * k / (1 + k * k);
+            const tmp2 = Math.pow(a * a - b * b * k * k + a * a * k * k, 0.5) / (1 + k * k);
+            let x;
+            if (k < 0) {
+                x = Math.min(tmp1 - tmp2, tmp1 + tmp2);
+            } else {
+                x = Math.max(tmp1 - tmp2, tmp1 + tmp2);
+            }
+
+            const y = Math.pow(a * a - x * x, 0.5);
+            return new Point(x, y);
+        }
+
+        private getAngle(points: Point[]) {
+            const [point1, point2, point3] = points;
+            const x1 = point1.x - point2.x;
+            const x2 = point3.x - point2.x;
+            const y1 = point1.y - point2.y;
+            const y2 = point3.y - point2.y;
+            const dot = x1 * x2 + y1 * y2;
+            const det = x1 * y2 - y1 * x2;
+            const angle = Math.atan2(det, dot) / Math.PI * 180;
+            return Math.min((angle + 360) % 360, 360 - (angle + 360) % 360);
         }
 
         private mounted() {

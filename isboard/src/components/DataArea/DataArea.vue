@@ -87,10 +87,8 @@
             const dot = x1 * x2 + y1 * y2;
             const det = x1 * y2 - y1 * x2;
             const angle = Math.atan2(det, dot) / Math.PI * 180;
-            // return Math.abs(angle);
-            // return (angle + 360) % 180;
             return Math.min((angle + 360) % 360, 360 - (angle + 360) % 360);
-        };
+        }
 
         private combine(nodes: Node[], start: number, result: Node[], count: number, num: number) {
             for (let i = start; i < nodes.length + 1 - count; i++)
@@ -362,7 +360,7 @@
                 x = Math.max(tmp1 - tmp2, tmp1 + tmp2);
             }
 
-            const y = Math.pow(this.canvasWidth * this.canvasWidth / 4 - x * x, 0.5);
+            const y = Math.pow(a * a - x * x, 0.5);
             return new Point(x, y);
         }
 
