@@ -1,0 +1,8 @@
+export const BORDER_EQUALITY = 'BORDER_EQUALITY';
+export const ANGLE_EQUALITY = 'ANGLE_EQUALITY';
+export const ANGLE_PLUS = 'ANGLE_PLUS';
+export const ANGLE_MINUS = 'ANGLE_MINUS';
+export const CONGRUENCE = 'CONGRUENCE';
+export const SIMILARITY = 'SIMILARITY';
+export const TWO_ANGLE_PLUS = 'TWO_ANGLE_PLUS';
+export const TWO_ANGLE_MINUS = 'TWO_ANGLE_MINUS';

@@ -7,6 +7,8 @@ import user from './modules/user';
 import canvas from './modules/canvas';
 import animation from './modules/animation';
 import folding from './modules/folding';
+import * as features from '../base/features';
+import * as featureTypes from '../base/feature-types';
 Vue.use(Vuex);
 export default new Vuex.Store({
     actions,
@@ -91,4 +93,48 @@ export class FoldingRectangle {
         this.nodes = [];
     }
 }
+export class FoldingFeature {
+    constructor(feature, condition, type, param1, param2, param3 = '') {
+        this.feature = feature;
+        this.condition = condition;
+        this.type = type;
+        this.param1 = param1;
+        this.param2 = param2;
+        this.param3 = param3;
+        this.result = 90;
+    }
+}
+FoldingFeature.prototype.toString = function () {
+    let type;
+    switch (this.type) {
+        case featureTypes.ANGLE:
+            type = '∠';
+            break;
+        case featureTypes.TRIANGLE:
+            type = '△';
+            break;
+        case featureTypes.ECHELON:
+            type = '梯形';
+            break;
+    }
+    switch (this.feature) {
+        case features.ANGLE_EQUALITY:
+            return '∠' + this.param1 + ' = ∠' + this.param2;
+        case features.BORDER_EQUALITY:
+            return this.param1 + ' = ' + this.param2;
+        case features.ANGLE_PLUS:
+            return '∠' + this.param1 + ' + ∠' + this.param2 + ' = ' + this.result + '°';
+        case features.ANGLE_MINUS:
+            return '∠' + this.param1 + ' - ∠' + this.param2 + ' = ' + this.result + '°';
+        case features.CONGRUENCE:
+            return type + this.param1 + ' ≌ ' + type + this.param2;
+        case features.SIMILARITY:
+            return type + this.param1 + ' ∽ ' + type + this.param2;
+        case features.TWO_ANGLE_PLUS:
+            return '2' + type + this.param1 + ' + 2' + type + this.param2 + ' + ' + type + this.param3 + ' = ' + 2 * this.result + '°';
+        case features.TWO_ANGLE_MINUS:
+            return '2' + type + this.param1 + ' + 2' + type + this.param2 + ' - ' + type + this.param3 + ' = ' + 2 * this.result + '°';
+    }
+    return '';
+};
 //# sourceMappingURL=index.js.map

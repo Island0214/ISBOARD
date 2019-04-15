@@ -30,7 +30,7 @@
             <div v-for="foldingFeatureKey in Object.keys(foldingFeatures)">
                 <h4>{{foldingFeatureKey}}</h4>
                 <p class="table-col" v-for="foldingFeature in foldingFeatures[foldingFeatureKey]">
-                    {{ foldingFeature }}
+                    {{ foldingFeature.toString() }}
                 </p>
             </div>
         </div>
@@ -43,7 +43,10 @@
     import * as rectTypes from '../../base/rectangle-folding';
     import {Getter, Mutation} from 'vuex-class';
     import * as mutations from '../../store/mutation-types'
-    import {FoldingRectangle} from '../../store';
+    import {FoldingRectangle, FoldingFeature} from '../../store';
+    import * as features from '../../base/features'
+    import * as featureTypes from '../../base/feature-types'
+    import * as featureConditions from '../../base/feature-conditions'
 
     @Component({
         components: {
@@ -80,39 +83,82 @@
             switch (this.selectedFoldingRectangle.type) {
                 case rectTypes.TYPE_A:
                     return {
-                        '通用：': ['△ABE ≌ △FBE', '∠DEF = ∠ABF'],
-                        '当EF与BC不相交时：': ['∠DEF + ∠CBF = 90°'],
-                        '当EF与BC相交时：': ['∠DEF - ∠CBF = 90°', 'BG = EG'],
+                        '通用：': [
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABE', 'FBE'),
+                            new FoldingFeature(features.ANGLE_EQUALITY, featureConditions.NORMAL, featureTypes.ANGLE, 'DEF', 'ABF'),
+                        ],
+                        '当EF与BC不相交时：': [
+                            new FoldingFeature(features.ANGLE_PLUS, featureConditions.UNCROSS, featureTypes.ANGLE, 'DEF', 'CBF'),
+                        ],
+                        '当EF与BC相交时：': [
+                            new FoldingFeature(features.ANGLE_MINUS, featureConditions.CROSS, featureTypes.ANGLE, 'DEF', 'CBF'),
+                            new FoldingFeature(features.BORDER_EQUALITY, featureConditions.CROSS, featureTypes.BORDER, 'BG', 'EG'),
+                        ],
                         'E点与D点重合时变为类型3。': [],
                     };
                 case rectTypes.TYPE_B:
                     return {
-                        '通用：': ['∠EFG = ∠CFG',],
-                        'G点在边CD上：': ['∠EFC = ∠EGD',],
-                        'G点在边AD上：': ['∠EFC = ∠HGD',],
-                        'F点与B点重合时：': ['△EBG ≌ △CBG',],
+                        '通用：': [
+                            new FoldingFeature(features.ANGLE_EQUALITY, featureConditions.NORMAL, featureTypes.ANGLE, 'EFG', 'CFG'),
+                        ],
+                        'G点在边CD上：': [
+                            new FoldingFeature(features.ANGLE_EQUALITY, featureConditions.CROSS, featureTypes.ANGLE, 'EFC', 'EGD'),
+                        ],
+                        'G点在边AD上：': [
+                            new FoldingFeature(features.ANGLE_EQUALITY, featureConditions.UNCROSS, featureTypes.ANGLE, 'EFC', 'HGD'),
+                        ],
+                        'F点与B点重合时：': [
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.UNSELECTABLE, featureTypes.TRIANGLE, 'EBG', 'CBG'),
+                        ],
                     };
                 case rectTypes.TYPE_C:
                     return {
-                        '通用：': ['∠EFG = ∠CFG', '△ABD ≌ △EDB', '△ABF ≌ △EDF',],
+                        '通用：': [
+                            new FoldingFeature(features.ANGLE_EQUALITY, featureConditions.NORMAL, featureTypes.ANGLE, 'EFG', 'CFG'),
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABD', 'EDB'),
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABF', 'EDF'),
+                        ],
                     };
                 case rectTypes.TYPE_D:
                     return {
-                        '通用：': ['∠HEI = ∠GFB', '梯形CDEF ≌ 梯形GHEF'],
-                        '当GH与AD相交时：': ['∠BFG + ∠AIG = 90°'],
-                        '当GH与AD不相交时：': ['∠BFG = ∠AIG', 'IE = IF'],
+                        '通用：': [
+                            new FoldingFeature(features.ANGLE_EQUALITY, featureConditions.NORMAL, featureTypes.ANGLE, 'HEI', 'GFB'),
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.ECHELON, 'CDEF', 'GHEF'),
+                        ],
+                        '当GH与AD相交时：': [
+                            new FoldingFeature(features.ANGLE_PLUS, featureConditions.CROSS, featureTypes.ANGLE, 'BFG', 'AIG'),
+                        ],
+                        '当GH与AD不相交时：': [
+                            new FoldingFeature(features.ANGLE_EQUALITY, featureConditions.UNCROSS, featureTypes.ANGLE, 'BFG', 'AIG'),
+                            new FoldingFeature(features.BORDER_EQUALITY, featureConditions.UNCROSS, featureTypes.BORDER, 'IE', 'IF'),
+                        ],
                         'E点与D点重合时变为类型1。': [],
                     };
                 case rectTypes.TYPE_E:
                     return {
-                        '通用：': ['△ABE ≌ △AFE', '△CEI ≌ △GEI', '△HEF ∽ △EIG', '△ABE ∽ △ECI', ],
-                        '当连线为矩形中线时：': ['△HEF ≌ △EIG', '△ABE ≌ △ECI']
+                        '通用：': [
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABE', 'AFE'),
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'CEI', 'GEI'),
+                            new FoldingFeature(features.SIMILARITY, featureConditions.NORMAL, featureTypes.TRIANGLE, 'HEF', 'EIG'),
+                            new FoldingFeature(features.SIMILARITY, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABE', 'ECI'),
+                        ],
+                        '当连线为矩形中线时：': [
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.UNSELECTABLE, featureTypes.TRIANGLE, 'HEF', 'EIG'),
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.UNSELECTABLE, featureTypes.TRIANGLE, 'ABE', 'ECI'),
+                        ],
                     };
                 case rectTypes.TYPE_F:
                     return {
-                        '通用：': ['△BEH ≌ △FEH', '△CEI ≌ △GEI'],
-                        '△FEH与△GEI无重叠时：': ['2∠BEH + 2∠CEI + ∠FEG = 180°'],
-                        '△FEH与△GEI部分重叠时：': ['2∠BEH + 2∠CEI - ∠FEG = 180°'],
+                        '通用：': [
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'BEH', 'FEH'),
+                            new FoldingFeature(features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'CEI', 'GEI'),
+                        ],
+                        '△FEH与△GEI无重叠时：': [
+                            new FoldingFeature(features.TWO_ANGLE_PLUS, featureConditions.UNCROSS, featureTypes.ANGLE, 'BEH', 'CEI', 'FEG'),
+                        ],
+                        '△FEH与△GEI部分重叠时：': [
+                            new FoldingFeature(features.TWO_ANGLE_MINUS, featureConditions.UNCROSS, featureTypes.ANGLE, 'BEH', 'CEI', 'FEG'),
+                        ],
                         'EF与EG重合时变为类型5。': [],
                     };
             }
