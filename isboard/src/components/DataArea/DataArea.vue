@@ -379,7 +379,7 @@
                     if (i <= 1) {
                         const width = parseFloat(this.borderLengths[1] + '');
                         const height = parseFloat(this.borderLengths[0] + '');
-                        if (width < 200 || width > 600 || height < 100 || height > 400) {
+                        if (width < 200 || width > 600 || height < 100 || height > 400 || width < height) {
                             const originWidth = this.originBorders[this.displayBorders[1]];
                             const originHeight = this.originBorders[this.displayBorders[0]];
                             this.borderLengths[0] = originHeight;

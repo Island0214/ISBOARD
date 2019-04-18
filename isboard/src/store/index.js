@@ -7,6 +7,7 @@ import user from './modules/user';
 import canvas from './modules/canvas';
 import animation from './modules/animation';
 import folding from './modules/folding';
+import feature from './modules/feature';
 import * as features from '../base/features';
 import * as featureTypes from '../base/feature-types';
 Vue.use(Vuex);
@@ -20,6 +21,7 @@ export default new Vuex.Store({
         // blackboard,
         animation,
         folding,
+        feature,
     },
 });
 export class Point {
@@ -94,7 +96,8 @@ export class FoldingRectangle {
     }
 }
 export class FoldingFeature {
-    constructor(feature, condition, type, param1, param2, param3 = '') {
+    constructor(foldingType, feature, condition, type, param1, param2, param3 = '') {
+        this.foldingType = foldingType;
         this.feature = feature;
         this.condition = condition;
         this.type = type;

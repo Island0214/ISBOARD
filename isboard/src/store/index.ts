@@ -8,6 +8,7 @@ import canvas, {State as CanvasState} from './modules/canvas';
 import blackboard, {State as BlackboardState} from './modules/blackboard';
 import animation, {State as AnimationState} from './modules/animation';
 import folding, {State as FoldingState} from './modules/folding';
+import feature, {State as FeatureState} from './modules/feature';
 import * as features from '../base/features'
 import * as featureTypes from '../base/feature-types'
 import * as featureConditions from '../base/feature-conditions'
@@ -24,6 +25,7 @@ export default new Vuex.Store({
         // blackboard,
         animation,
         folding,
+        feature,
     },
 });
 
@@ -38,6 +40,7 @@ export interface State {
     // blackboard: BlackboardState;
     animation: AnimationState;
     folding: FoldingState;
+    feature: FeatureState;
 }
 
 export interface UserLoginPayload {
@@ -176,6 +179,7 @@ export class FoldingRectangle implements FoldingRectangle {
 
 
 export interface FoldingFeature {
+    foldingType: string;
     feature: string;
     condition: string;
     type: string;
@@ -186,7 +190,8 @@ export interface FoldingFeature {
 }
 
 export class FoldingFeature implements FoldingFeature {
-    constructor(feature: string, condition: string, type: string, param1: string, param2: string, param3: string = '') {
+    constructor(foldingType:string, feature: string, condition: string, type: string, param1: string, param2: string, param3: string = '') {
+        this.foldingType = foldingType;
         this.feature = feature;
         this.condition = condition;
         this.type = type;

@@ -4,6 +4,8 @@
             <div :class="['spot-wrapper']" :style="spot1Css" id="move-spot-1" v-if="showSpot1"></div>
             <div :class="['spot-wrapper']" :style="spot2Css" id="move-spot-2" v-if="showSpot2"></div>
             <div :class="['spot-wrapper']" :style="spot3Css" id="move-spot-3" v-if="showSpot3"></div>
+            <canvas id="feature-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight"
+                    v-show="showFeature"></canvas>
             <canvas id="animation-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight"
                     v-show="showAnimation"></canvas>
 
@@ -21,10 +23,13 @@
 
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
-    import {FoldingRectangle, Point, Node} from '../../store';
+    import {FoldingRectangle, Point, Node, FoldingFeature} from '../../store';
     import {Getter, Mutation} from 'vuex-class';
     import * as rectTypes from '../../base/rectangle-folding'
     import * as mutations from '../../store/mutation-types'
+    import * as features from '../../base/features'
+    import * as featureTypes from '../../base/feature-types'
+    import * as featureConditions from '../../base/feature-conditions'
 
     @Component({})
     export default class ShapeDisplayArea extends Vue {
@@ -56,10 +61,12 @@
         @Getter('thick') private thickness!: number;
         @Getter('foldingRectangles') private foldingRectangles!: FoldingRectangle[];
         @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: FoldingRectangle;
+        @Getter('selectedFeature') private selectedFeature!: FoldingFeature;
         @Mutation(mutations.SET_FOLDING_RECT_THUMBNAILS) private setFoldingRectThumbnailsMutation!: any;
         @Mutation(mutations.SET_NODES) private setNodesMutation!: any;
         @Mutation(mutations.SET_FOLDING_TYPE) private setFoldingTypeMutation!: any;
         @Mutation(mutations.UPDATE_SELECTED_FOLDING) private updateSelectedFoldingMutation!: any;
+        @Mutation(mutations.SET_FOLDING_FEATURE) private setFoldingFeature!: any;
 
         get spot1Css() {
             return {
@@ -103,6 +110,13 @@
 
         get showSpot3() {
             return !this.showAnimation && (this.selectedFoldingRectangle.type === rectTypes.TYPE_F);
+        }
+
+        get showFeature() {
+            if (this.selectedFeature !== undefined) {
+                return true;
+            }
+            return false;
         }
 
         private moveSpot1() {
@@ -747,7 +761,7 @@
                             } else {
                                 this.drawPath([cross1, pointD, pointI], [], this.animationCtx);
                             }
-                        }else if (!this.betweenInterval(cross1) && !this.betweenInterval(cross2)) {
+                        } else if (!this.betweenInterval(cross1) && !this.betweenInterval(cross2)) {
                             if (this.betweenInterval(cross3)) {
                                 this.drawPath([cross3, pointD, pointI], [], this.animationCtx);
                             } else {
@@ -1447,6 +1461,14 @@
             };
         };
 
+        private setTypeBSpecialCase() {
+            let [pointA] = this.getNodesByName(['A']);
+            let width = this.selectedFoldingRectangle.width;
+            let height = this.selectedFoldingRectangle.height;
+            this.spot1.x = pointA.x + Math.pow(width * width - height * height, 0.5);
+            this.updateCurrentFolding();
+        }
+
         private setRectangleBasicInfo(rect: FoldingRectangle) {
             this.minX = (this.canvasWidth - rect.width) / 2;
             this.maxX = this.canvasWidth - this.minX;
@@ -1463,6 +1485,10 @@
                     break;
                 case rectTypes.TYPE_B:
                     this.drawRectFoldingTypeB(rect.width, rect.height, rect.points[0]);
+                    let [pointF] = this.getNodesByName(['F']);
+                    if (pointF.x < this.minX) {
+                        this.setTypeBSpecialCase()
+                    }
                     setTimeout(() => {
                         this.moveSpot1();
                     }, 100);
@@ -1528,7 +1554,6 @@
             let thumbnails: string[] = [];
             for (let i = 0; i < this.foldingRectangles.length; i++) {
                 const rect = this.foldingRectangles[i];
-                // console.log(rect.type);
                 this.setRectangleBasicInfo(rect);
                 const data = this.canvas.toDataURL('image/png', 1);
                 thumbnails.push(data);
@@ -1538,6 +1563,7 @@
 
         @Watch('selectedFoldingRectangle', {deep: true})
         private watchSelectedFoldingRectangle(oldVal: FoldingRectangle, newVal: FoldingRectangle) {
+            this.setFoldingFeature(undefined);
             let points = this.selectedFoldingRectangle.points;
             let point = points[0];
             if (oldVal.type !== newVal.type) {
@@ -1593,6 +1619,133 @@
             if (oldVal.width !== newVal.width || oldVal.height !== newVal.height) {
                 this.setRectangleBasicInfo(this.selectedFoldingRectangle);
                 return;
+            }
+        }
+
+        private getNodesByName(nodeNames: string[]) {
+            let nodes: any = {};
+            for (let i = 0; i < this.allPoints.length; i++) {
+                nodes[this.allPoints[i].name] = this.allPoints[i].point;
+            }
+            let result = [];
+            for (let i = 0; i < nodeNames.length; i++) {
+                result.push(nodes[nodeNames[i]]);
+            }
+            return result;
+        }
+
+        private invalidateTypeA() {
+            let [pointF, pointC] = this.getNodesByName(['F', 'C']);
+            let cross = false;
+            if (pointF.y > pointC.y) {
+                cross = true;
+            }
+            switch (this.selectedFeature.condition) {
+                case featureConditions.CROSS:
+                    return cross;
+                case featureConditions.UNCROSS:
+                    return !cross;
+            }
+            return true;
+        }
+
+        private invalidateTypeB() {
+            let [pointD, pointG] = this.getNodesByName(['D', 'G']);
+            let cross = false;
+            if (pointG.x === pointD.x) {
+                cross = true;
+            }
+            switch (this.selectedFeature.condition) {
+                case featureConditions.CROSS:
+                    return cross;
+                case featureConditions.UNCROSS:
+                    return !cross;
+                case featureConditions.COINCIDENCE:
+                    this.setTypeBSpecialCase();
+                    return true;
+            }
+            return true;
+        }
+
+        private invalidateTypeC() {
+            return true;
+        }
+
+        private invalidateTypeD() {
+            let [pointG, pointD] = this.getNodesByName(['G', 'D']);
+            let cross = false;
+            if (pointG.y >= pointD.y) {
+                cross = true;
+            }
+            switch (this.selectedFeature.condition) {
+                case featureConditions.CROSS:
+                    return cross;
+                case featureConditions.UNCROSS:
+                    return !cross;
+            }
+            return true;
+        }
+
+        private invalidateTypeE() {
+            switch (this.selectedFeature.condition) {
+                case featureConditions.UNSELECTABLE:
+                    this.spot1.x = this.canvasWidth / 2;
+                    this.spot2.x = this.canvasWidth / 2;
+                    this.updateCurrentFolding();
+                    break;
+            }
+            return true;
+        }
+
+        private invalidateTypeF() {
+            let [pointF, pointG] = this.getNodesByName(['F', 'G']);
+            let cross = false;
+            if (pointF.x > pointG.x) {
+                cross = true;
+            }
+            switch (this.selectedFeature.condition) {
+                case featureConditions.CROSS:
+                    return cross;
+                case featureConditions.UNCROSS:
+                    return !cross;
+            }
+            return true;
+        }
+
+        @Watch('selectedFeature', {deep: true})
+        private watchSelectedFoldingFeature() {
+            console.log(this.selectedFeature);
+            if (this.selectedFeature === undefined || this.selectedFeature.foldingType !== this.selectedFoldingRectangle.type) {
+                return;
+            }
+            let invalidate = false;
+            switch (this.selectedFeature.foldingType) {
+                case rectTypes.TYPE_A:
+                    invalidate = this.invalidateTypeA();
+                    break;
+                case rectTypes.TYPE_B:
+                    invalidate = this.invalidateTypeB();
+                    break;
+                case rectTypes.TYPE_C:
+                    invalidate = this.invalidateTypeC();
+                    break;
+                case rectTypes.TYPE_D:
+                    invalidate = this.invalidateTypeD();
+                    break;
+                case rectTypes.TYPE_E:
+                    invalidate = this.invalidateTypeE();
+                    break;
+                case rectTypes.TYPE_F:
+                    invalidate = this.invalidateTypeF();
+                    break;
+            }
+
+            if (!invalidate) {
+                this.setFoldingFeature(undefined);
+                this.$notify.error({
+                    title: '错误',
+                    message: '当前折叠图形不符合所选特点需要满足的前提条件。'
+                });
             }
         }
 
