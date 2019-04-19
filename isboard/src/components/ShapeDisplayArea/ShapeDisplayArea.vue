@@ -4,6 +4,9 @@
             <div :class="['spot-wrapper']" :style="spot1Css" id="move-spot-1" v-if="showSpot1"></div>
             <div :class="['spot-wrapper']" :style="spot2Css" id="move-spot-2" v-if="showSpot2"></div>
             <div :class="['spot-wrapper']" :style="spot3Css" id="move-spot-3" v-if="showSpot3"></div>
+            <div class="feature-data-wrapper" v-if="showFeatureData">
+                <p v-for="data in Object.keys(featureData)"><span>{{data}}</span> = {{featureData[data]}}</p>
+            </div>
             <canvas id="feature-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight"
                     v-show="showFeature"></canvas>
             <canvas id="animation-canvas" class="line-canvas" :width="canvasWidth" :height="canvasHeight"
@@ -23,7 +26,7 @@
 
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
-    import {FoldingRectangle, Point, Node, FoldingFeature} from '../../store';
+    import {FoldingRectangle, Point, Node, FoldingFeature, Border} from '../../store';
     import {Getter, Mutation} from 'vuex-class';
     import * as rectTypes from '../../base/rectangle-folding'
     import * as mutations from '../../store/mutation-types'
@@ -37,6 +40,8 @@
         private ctx!: CanvasRenderingContext2D;
         private animationCanvas!: HTMLCanvasElement;
         private animationCtx!: CanvasRenderingContext2D;
+        private featureCanvas!: HTMLCanvasElement;
+        private featureCtx!: CanvasRenderingContext2D;
         private dash: number[] = [5, 5];
         private fontSize: number = 24;
         private textMargin: number = 10;
@@ -54,6 +59,10 @@
         private animationSpeed: number = 10;
         private maxSpot2X: number = 650;
         private minSpot3X: number = 650;
+        private borderColor1: string = '#ff9e33';
+        private borderColor2: string = '#759FD2';
+        private borderColor3: string = '#a3d28a';
+        private featureData: any = {};
 
         @Getter('canvasWidth') private canvasWidth!: number;
         @Getter('canvasHeight') private canvasHeight!: number;
@@ -115,6 +124,22 @@
         get showFeature() {
             if (this.selectedFeature !== undefined) {
                 return true;
+            }
+            return false;
+        }
+
+        get showFeatureData() {
+            if (this.showFeature) {
+                console.log(this.selectedFeature.feature)
+                console.log(this.selectedFeature.feature in [features.ANGLE_MINUS, features.ANGLE_PLUS, features.TWO_ANGLE_MINUS, features.TWO_ANGLE_PLUS, features.ANGLE_EQUALITY, features.BORDER_EQUALITY])
+                if (this.selectedFeature.feature === features.ANGLE_MINUS
+                    || this.selectedFeature.feature === features.ANGLE_PLUS
+                    || this.selectedFeature.feature === features.TWO_ANGLE_MINUS
+                    || this.selectedFeature.feature === features.TWO_ANGLE_PLUS
+                    || this.selectedFeature.feature === features.ANGLE_EQUALITY
+                    || this.selectedFeature.feature === features.BORDER_EQUALITY) {
+                    return true;
+                }
             }
             return false;
         }
@@ -867,14 +892,14 @@
             this.setRectangleBasicInfo(this.selectedFoldingRectangle);
         }
 
-        private drawPolygon(points: Point[], dash: number[], context: CanvasRenderingContext2D = this.ctx) {
+        private drawPolygon(points: Point[], dash: number[], context: CanvasRenderingContext2D = this.ctx, color: string = this.color, thickness: number = this.thickness) {
             const ctx = context;
             if (points.length < 2) {
                 return;
             }
             ctx.beginPath();
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.thickness;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = thickness;
             ctx.setLineDash(dash);
             let start = points[0];
             let cur = points[1];
@@ -898,14 +923,14 @@
             ctx.closePath();
         }
 
-        private drawPath(points: Point[], dash: number[], context: CanvasRenderingContext2D = this.ctx) {
+        private drawPath(points: Point[], dash: number[], context: CanvasRenderingContext2D = this.ctx, color: string = this.color, thickness: number = this.thickness) {
             const ctx = context;
             if (points.length < 2) {
                 return;
             }
             ctx.beginPath();
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.thickness;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = thickness;
             ctx.setLineDash(dash);
             let start = points[0];
             let cur = points[1];
@@ -1712,9 +1737,73 @@
             return true;
         }
 
+        private getBeginAndEndAngle(points: Point[]) {
+            let [point1, point2] = points;
+            return Math.atan2((point1.y - point2.y), (point2.x - point1.x)) * (180 / Math.PI);
+        }
+
+        private showAngleNumber(angleString: string, color: string) {
+            const points = this.getNodesByName(angleString.split(''));
+            let angle = this.getAngle(points);
+            let point = points[1];
+            let beginAngle = this.getBeginAndEndAngle([points[1], points[0]]);
+            let endAngle = this.getBeginAndEndAngle([points[1], points[2]]);
+            this.drawPath([points[1], points[0]], [], this.featureCtx, color, this.thickness + 1);
+            this.drawPath([points[1], points[2]], [], this.featureCtx, color, this.thickness + 1);
+
+            beginAngle = beginAngle === 180 && endAngle < 0 ? -beginAngle : beginAngle;
+            endAngle = endAngle === 180 && beginAngle < 0 ? -endAngle : endAngle;
+
+            let begin = Math.max(beginAngle, endAngle);
+
+            this.featureCtx.beginPath();
+            this.featureCtx.strokeStyle = color;
+            this.featureCtx.arc(point.x, point.y, 30, (0 - begin) / 360 * 2 * Math.PI, (angle - begin) / 360 * 2 * Math.PI);
+            this.featureCtx.stroke();
+            this.featureCtx.closePath();
+
+            this.featureData['∠' + angleString] = angle.toFixed(2);
+        }
+
+        private drawBorder(param: string, color: string) {
+            let borderName = param.split('');
+            const points = this.getNodesByName(borderName);
+            this.drawPath(points, [], this.featureCtx, color, this.thickness + 1);
+            let border = new Border(new Node(borderName[0], points[0]), new Node(borderName[1], points[1]));
+            this.featureData[param] = border.length.toFixed(2);
+        }
+
+        private featureBorderEquality() {
+            this.drawBorder(this.selectedFeature.param1, this.borderColor1);
+            this.drawBorder(this.selectedFeature.param2, this.borderColor2);
+        }
+
+        private featureAngleEquality(paramCount: number) {
+            if (paramCount < 2) {
+                return;
+            }
+            const angle1 = this.getNodesByName(this.selectedFeature.param1.split(''));
+            this.showAngleNumber(this.selectedFeature.param1, this.borderColor1);
+
+
+            const angle2 = this.getNodesByName(this.selectedFeature.param2.split(''));
+            this.showAngleNumber(this.selectedFeature.param2, this.borderColor2);
+
+            if (paramCount > 2) {
+                const angle3 = this.getNodesByName(this.selectedFeature.param3.split(''));
+                this.showAngleNumber(this.selectedFeature.param3, this.borderColor3);
+            }
+        }
+
+        private featureSimilarity() {
+            const shape2 = this.getNodesByName(this.selectedFeature.param2.split(''));
+            this.drawPolygon(shape2, [], this.featureCtx, this.borderColor2, this.thickness + 1);
+            const shape1 = this.getNodesByName(this.selectedFeature.param1.split(''));
+            this.drawPolygon(shape1, [], this.featureCtx, this.borderColor1, this.thickness + 1);
+        }
+
         @Watch('selectedFeature', {deep: true})
         private watchSelectedFoldingFeature() {
-            console.log(this.selectedFeature);
             if (this.selectedFeature === undefined || this.selectedFeature.foldingType !== this.selectedFoldingRectangle.type) {
                 return;
             }
@@ -1746,7 +1835,37 @@
                     title: '错误',
                     message: '当前折叠图形不符合所选特点需要满足的前提条件。'
                 });
+                return;
             }
+            this.featureCanvas.height = this.canvasHeight;
+            this.featureData = [];
+            switch (this.selectedFeature.feature) {
+                case features.BORDER_EQUALITY:
+                    this.featureBorderEquality();
+                    break;
+                case features.ANGLE_EQUALITY:
+                    this.featureAngleEquality(2);
+                    break;
+                case features.ANGLE_PLUS:
+                    this.featureAngleEquality(2);
+                    break;
+                case features.ANGLE_MINUS:
+                    this.featureAngleEquality(2);
+                    break;
+                case features.TWO_ANGLE_PLUS:
+                    this.featureAngleEquality(3);
+                    break;
+                case features.TWO_ANGLE_MINUS:
+                    this.featureAngleEquality(3);
+                    break;
+                case features.CONGRUENCE:
+                    this.featureSimilarity();
+                    break;
+                case features.SIMILARITY:
+                    this.featureSimilarity();
+                    break;
+            }
+
         }
 
         private getCrossPoint(k: number, a: number, b: number) {
@@ -1783,6 +1902,15 @@
                 const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
                 this.canvas = canvas;
                 this.ctx = ctx;
+            }
+
+            const featureCanvas: HTMLCanvasElement = document.getElementById('feature-canvas') as HTMLCanvasElement;
+            if (!featureCanvas || !featureCanvas.getContext('2d')) {
+                return false;
+            } else {
+                const featureCtx = featureCanvas.getContext('2d') as CanvasRenderingContext2D;
+                this.featureCanvas = featureCanvas;
+                this.featureCtx = featureCtx;
             }
 
             this.updateFoldingThumbnails();

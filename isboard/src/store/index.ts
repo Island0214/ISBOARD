@@ -235,3 +235,23 @@ FoldingFeature.prototype.toString = function () {
     }
     return '';
 };
+
+export interface Border {
+    name: string;
+    length: number;
+    lengthModel: number;
+}
+
+export class Border implements Border {
+    name: string;
+    length: number;
+    lengthModel: number;
+
+    constructor(node1: Node, node2: Node) {
+        this.name = node1.name + node2.name;
+        const x = Math.abs(node1.point.x - node2.point.x);
+        const y = Math.abs(node1.point.y - node2.point.y);
+        this.length = Math.pow(x * x + y * y, 0.5);
+        this.lengthModel = Math.pow(x * x + y * y, 0.5);
+    }
+}

@@ -140,4 +140,13 @@ FoldingFeature.prototype.toString = function () {
     }
     return '';
 };
+export class Border {
+    constructor(node1, node2) {
+        this.name = node1.name + node2.name;
+        const x = Math.abs(node1.point.x - node2.point.x);
+        const y = Math.abs(node1.point.y - node2.point.y);
+        this.length = Math.pow(x * x + y * y, 0.5);
+        this.lengthModel = Math.pow(x * x + y * y, 0.5);
+    }
+}
 //# sourceMappingURL=index.js.map

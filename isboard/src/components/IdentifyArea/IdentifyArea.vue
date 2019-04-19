@@ -116,7 +116,7 @@
                 case rectTypes.TYPE_C:
                     return {
                         '通用：': [
-                            new FoldingFeature(this.selectedFoldingRectangle.type, features.ANGLE_EQUALITY, featureConditions.NORMAL, featureTypes.ANGLE, 'EFG', 'CFG'),
+                            new FoldingFeature(this.selectedFoldingRectangle.type, features.ANGLE_EQUALITY, featureConditions.NORMAL, featureTypes.ANGLE, 'EFD', 'AFB'),
                             new FoldingFeature(this.selectedFoldingRectangle.type, features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABD', 'EDB'),
                             new FoldingFeature(this.selectedFoldingRectangle.type, features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABF', 'EDF'),
                         ],
@@ -128,7 +128,7 @@
                             new FoldingFeature(this.selectedFoldingRectangle.type, features.CONGRUENCE, featureConditions.NORMAL, featureTypes.ECHELON, 'CDEF', 'GHEF'),
                         ],
                         '当GH与AD相交时：': [
-                            new FoldingFeature(this.selectedFoldingRectangle.type, features.ANGLE_PLUS, featureConditions.CROSS, featureTypes.ANGLE, 'BFG', 'AIG'),
+                            new FoldingFeature(this.selectedFoldingRectangle.type, features.ANGLE_PLUS, featureConditions.CROSS, featureTypes.ANGLE, 'BFG', 'GIA'),
                         ],
                         '当GH与AD不相交时：': [
                             new FoldingFeature(this.selectedFoldingRectangle.type, features.ANGLE_EQUALITY, featureConditions.UNCROSS, featureTypes.ANGLE, 'BFG', 'AIG'),
@@ -139,10 +139,10 @@
                 case rectTypes.TYPE_E:
                     return {
                         '通用：': [
-                            new FoldingFeature(this.selectedFoldingRectangle.type, features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABE', 'AFE'),
+                            new FoldingFeature(this.selectedFoldingRectangle.type, features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'HBE', 'HFE'),
                             new FoldingFeature(this.selectedFoldingRectangle.type, features.CONGRUENCE, featureConditions.NORMAL, featureTypes.TRIANGLE, 'CEI', 'GEI'),
                             new FoldingFeature(this.selectedFoldingRectangle.type, features.SIMILARITY, featureConditions.NORMAL, featureTypes.TRIANGLE, 'HEF', 'EIG'),
-                            new FoldingFeature(this.selectedFoldingRectangle.type, features.SIMILARITY, featureConditions.NORMAL, featureTypes.TRIANGLE, 'ABE', 'ECI'),
+                            new FoldingFeature(this.selectedFoldingRectangle.type, features.SIMILARITY, featureConditions.NORMAL, featureTypes.TRIANGLE, 'HBE', 'ECI'),
                         ],
                         '当连线为矩形中线时：': [
                             new FoldingFeature(this.selectedFoldingRectangle.type, features.CONGRUENCE, featureConditions.UNSELECTABLE, featureTypes.TRIANGLE, 'HEF', 'EIG'),

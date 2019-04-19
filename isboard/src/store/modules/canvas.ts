@@ -10,7 +10,7 @@ export interface State {
 }
 
 const initState: State = {
-    color: '#759FD2',
+    color: '#666666',
     thick: 5,
     tool: 'pen',
     clear: false,

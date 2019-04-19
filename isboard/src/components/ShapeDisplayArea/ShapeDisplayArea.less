@@ -22,7 +22,7 @@
       display: inline-block;
       //background-image: url("../../assets/cursor.png");
       //background-size: cover;
-      background-color: #333333;
+      background-color: @themeColor;
       border-radius: 100px;
       cursor: pointer;
       z-index: 2;
@@ -40,6 +40,22 @@
 
     #animation-canvas {
       background-color: #FFFFFF;
+    }
+
+    .feature-data-wrapper {
+      border-radius: 10px;
+      position: absolute;
+      width: 150px;
+      //height: 100px;
+      border: 2px solid #eeeeee;
+      right: -2px;
+      top: -2px;
+
+      p {
+        span {
+          font-weight: 600;
+        }
+      }
     }
   }
 

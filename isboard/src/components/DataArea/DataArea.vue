@@ -25,29 +25,9 @@
 <script lang="ts">
     import {Component, Vue, Watch} from 'vue-property-decorator';
     import {Getter, Mutation} from 'vuex-class';
-    import {FoldingRectangle, Node, Point} from "../../store";
+    import {Border, FoldingRectangle, Node, Point} from "../../store";
     import * as rectTypes from '../../base/rectangle-folding'
     import * as mutations from '../../store/mutation-types'
-
-    interface Border {
-        name: string;
-        length: number;
-        lengthModel: number;
-    }
-
-    class Border implements Border {
-        name: string;
-        length: number;
-        lengthModel: number;
-
-        constructor(node1: Node, node2: Node) {
-            this.name = node1.name + node2.name;
-            const x = Math.abs(node1.point.x - node2.point.x);
-            const y = Math.abs(node1.point.y - node2.point.y);
-            this.length = Math.pow(x * x + y * y, 0.5);
-            this.lengthModel = Math.pow(x * x + y * y, 0.5);
-        }
-    }
 
     @Component({})
     export default class DataArea extends Vue {
