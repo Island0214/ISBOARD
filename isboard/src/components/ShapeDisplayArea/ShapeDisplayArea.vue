@@ -130,8 +130,6 @@
 
         get showFeatureData() {
             if (this.showFeature) {
-                console.log(this.selectedFeature.feature)
-                console.log(this.selectedFeature.feature in [features.ANGLE_MINUS, features.ANGLE_PLUS, features.TWO_ANGLE_MINUS, features.TWO_ANGLE_PLUS, features.ANGLE_EQUALITY, features.BORDER_EQUALITY])
                 if (this.selectedFeature.feature === features.ANGLE_MINUS
                     || this.selectedFeature.feature === features.ANGLE_PLUS
                     || this.selectedFeature.feature === features.TWO_ANGLE_MINUS
@@ -894,7 +892,7 @@
 
         private drawPolygon(points: Point[], dash: number[], context: CanvasRenderingContext2D = this.ctx, color: string = this.color, thickness: number = this.thickness) {
             const ctx = context;
-            if (points.length < 2) {
+            if (points.length < 3) {
                 return;
             }
             ctx.beginPath();
@@ -902,20 +900,14 @@
             ctx.lineWidth = thickness;
             ctx.setLineDash(dash);
             let start = points[0];
-            let cur = points[1];
             let next = points[1];
 
             ctx.moveTo(start.x, start.y);
-            ctx.lineTo(cur.x, cur.y);
-            ctx.stroke();
-            for (let i = 2; i < points.length; i++) {
+            for (let i = 1; i < points.length; i++) {
                 next = points[i];
-                // ctx.moveTo(cur.x, cur.y);
                 ctx.lineTo(next.x, next.y);
                 ctx.stroke();
-                cur = next;
             }
-            // ctx.moveTo(cur.x, cur.y);
             ctx.lineTo(start.x, start.y);
             ctx.stroke();
             ctx.lineTo(points[1].x, points[1].y);
@@ -933,18 +925,13 @@
             ctx.lineWidth = thickness;
             ctx.setLineDash(dash);
             let start = points[0];
-            let cur = points[1];
             let next = points[1];
 
             ctx.moveTo(start.x, start.y);
-            ctx.lineTo(cur.x, cur.y);
-            ctx.stroke();
-            for (let i = 2; i < points.length; i++) {
+            for (let i = 1; i < points.length; i++) {
                 next = points[i];
-                // ctx.moveTo(cur.x, cur.y);
                 ctx.lineTo(next.x, next.y);
                 ctx.stroke();
-                cur = next;
             }
             ctx.closePath();
         }
@@ -1466,6 +1453,13 @@
             return (cross.x > this.minX && cross.x < this.maxX) || (cross.y > this.minY && cross.y < this.maxY);
         }
 
+        /**
+         *
+         * @param {number} k
+         * @param {Point} point
+         * @param {Point} origin
+         * @returns {number[]}
+         */
         private findSymmetricPoint(k: number, point: Point, origin: Point) {
             const a = k;
             const b = -1;
@@ -1675,7 +1669,9 @@
         }
 
         private invalidateTypeB() {
-            let [pointD, pointG] = this.getNodesByName(['D', 'G']);
+            let [pointA, pointD, pointG] = this.getNodesByName(['A', 'D', 'G']);
+            let width = this.selectedFoldingRectangle.width;
+            let height = this.selectedFoldingRectangle.height;
             let cross = false;
             if (pointG.x === pointD.x) {
                 cross = true;
@@ -1686,7 +1682,15 @@
                 case featureConditions.UNCROSS:
                     return !cross;
                 case featureConditions.COINCIDENCE:
-                    this.setTypeBSpecialCase();
+                    if (this.spot1.x.toFixed(2) !== (pointA.x + Math.pow(width * width - height * height, 0.5)).toFixed(2)) {
+                        this.setTypeBSpecialCase();
+
+                        let feature = this.selectedFeature;
+                        this.setFoldingFeature(undefined);
+                        setTimeout(() => {
+                            this.setFoldingFeature(feature);
+                        }, 50);
+                    }
                     return true;
             }
             return true;
@@ -1714,9 +1718,17 @@
         private invalidateTypeE() {
             switch (this.selectedFeature.condition) {
                 case featureConditions.UNSELECTABLE:
-                    this.spot1.x = this.canvasWidth / 2;
-                    this.spot2.x = this.canvasWidth / 2;
-                    this.updateCurrentFolding();
+                    if (this.spot1.x.toFixed(2) !== (this.canvasWidth / 2).toFixed(2) || this.spot2.x.toFixed(2) !== (this.canvasWidth / 2).toFixed(2)) {
+                        this.spot1.x = this.canvasWidth / 2;
+                        this.spot2.x = this.canvasWidth / 2;
+                        this.updateCurrentFolding();
+
+                        let feature = this.selectedFeature;
+                        this.setFoldingFeature(undefined);
+                        setTimeout(() => {
+                            this.setFoldingFeature(feature);
+                        }, 50);
+                    }
                     break;
             }
             return true;
@@ -1737,6 +1749,11 @@
             return true;
         }
 
+        /**
+         * 根据直线上的两个点获得直线与x轴的夹角
+         * @param {Point[]} points
+         * @returns {number}
+         */
         private getBeginAndEndAngle(points: Point[]) {
             let [point1, point2] = points;
             return Math.atan2((point1.y - point2.y), (point2.x - point1.x)) * (180 / Math.PI);
@@ -1782,15 +1799,12 @@
             if (paramCount < 2) {
                 return;
             }
-            const angle1 = this.getNodesByName(this.selectedFeature.param1.split(''));
             this.showAngleNumber(this.selectedFeature.param1, this.borderColor1);
 
 
-            const angle2 = this.getNodesByName(this.selectedFeature.param2.split(''));
             this.showAngleNumber(this.selectedFeature.param2, this.borderColor2);
 
             if (paramCount > 2) {
-                const angle3 = this.getNodesByName(this.selectedFeature.param3.split(''));
                 this.showAngleNumber(this.selectedFeature.param3, this.borderColor3);
             }
         }
@@ -1835,6 +1849,9 @@
                     title: '错误',
                     message: '当前折叠图形不符合所选特点需要满足的前提条件。'
                 });
+                return;
+            }
+            if (this.selectedFeature === undefined) {
                 return;
             }
             this.featureCanvas.height = this.canvasHeight;
@@ -1882,6 +1899,11 @@
             return new Point(x, y);
         }
 
+        /**
+         * 根据构成角的三个点获得角的角度，中间的端点为角的顶点
+         * @param {Point[]} points
+         * @returns {any}
+         */
         private getAngle(points: Point[]) {
             const [point1, point2, point3] = points;
             const x1 = point1.x - point2.x;

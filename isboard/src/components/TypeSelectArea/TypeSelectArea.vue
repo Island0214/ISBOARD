@@ -15,11 +15,9 @@
 
     @Component({})
     export default class TypeSelectArea extends Vue {
-        private rectangleFoldings: string[] = [rectTypes.TYPE_A, rectTypes.TYPE_B, rectTypes.TYPE_C, rectTypes.TYPE_D, rectTypes.TYPE_E];
-
         @Getter('selectedFoldingType') private selectedFoldingType!: string;
-        @Getter('foldingRectangles') private foldingRectangles!: string;
-        @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: string;
+        @Getter('foldingRectangles') private foldingRectangles!: FoldingRectangle[];
+        @Getter('selectedFoldingRectangle') private selectedFoldingRectangle!: FoldingRectangle;
         @Mutation(mutations.SET_FOLDING_TYPE) private setFoldingTypeMutation!: any;
 
 
